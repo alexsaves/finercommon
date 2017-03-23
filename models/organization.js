@@ -1,4 +1,4 @@
-var dbcmd = require('../../app/utils/dbcommand'),
+var dbcmd = require('../utils/dbcommand'),
 md5 = require('md5'),
 extend = require('extend'),
 tablename = 'organizations';

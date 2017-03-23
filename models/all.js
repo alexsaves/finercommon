@@ -1,9 +1,9 @@
 var All = {
-  Account: require('../../app/models/account'),
-  Organization: require('../../app/models/organization'),
-  OrganizationAssociation: require('../../app/models/organizationassociations'),
-  Prospect: require('../../app/models/prospect'),
-  Survey: require('../../app/models/survey')
+  Account: require('../models/account'),
+  Organization: require('../models/organization'),
+  OrganizationAssociation: require('../models/organizationassociations'),
+  Prospect: require('../models/prospect'),
+  Survey: require('../models/survey')
 };
 
 // Expose it
