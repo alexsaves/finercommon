@@ -1,0 +1,66 @@
+{
+  "pages": [
+    {
+      "name": "page1",
+      "questions": [
+        {
+          "type": "html",
+          "html": "We work with companies to help understand the needs of customers, and to help refine sales and product strategy. You recently met with team members from X. Please help us by taking a few moments to comment on your experience. Please be as forthcoming as you can.",
+          "name": "intro1"
+        },
+        {
+          "type": "html",
+          "html": "<b>Your responses can not be connected back to you individually!</b>",
+          "name": "intro2"
+        }
+      ]
+    },
+    {
+      "name": "page2",
+      "questions": [
+        {
+          "type": "radiogroup",
+          "choices": [
+            {
+              "value": "1",
+              "text": "Yes"
+            },
+            {
+              "value": "2",
+              "text": "No"
+            }
+          ],
+          "hasOther": true,
+          "isRequired": true,
+          "name": "busyesno",
+          "title": "Did you ultimately decide to do business with X?"
+        },
+        {
+          "type": "checkbox",
+          "choices": [
+            {
+              "value": "1",
+              "text": "We'll choose another vendor that better meets our needs"
+            },
+            {
+              "value": "2",
+              "text": "We don't have a need for their solution at this time"
+            },
+            {
+              "value": "3",
+              "text": "We have a need but don't think X can meet it"
+            },
+            {
+              "value": "4",
+              "text": "We have a need but don't have the budget"
+            }
+          ],
+          "hasOther": true,
+          "name": "whynobus",
+          "title": "Which statement(s) apply your decision with respect to X?",
+          "visibleIf": "{busyesno} = 2 or {busyesno} = 'other'"
+        }
+      ]
+    }
+  ]
+}

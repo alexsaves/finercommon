@@ -2,13 +2,51 @@ var dbcmd = require('../utils/dbcommand'),
 md5 = require('md5'),
 extend = require('extend'),
 tablename = 'surveys',
-shortid = require('shortid');
+shortid = require('shortid'),
+check = require('check-types'),
+utf8 = require('utf8'),
+fs = require('fs');
+
+// Fixtures
+var survey_fixture = JSON.parse(fs.readFileSync(__dirname + '/../fixtures/surveys/questionnaire.json').toString('utf-8'));
 
 /**
 * The survey class
 */
 var Survey = function(details) {
   extend(this, details || {});
+};
+
+/**
+ * Save this instance of a survey to the DB
+ */
+Survey.prototype.commit = function(cfg, cb) {
+  cb = cb || function() {};
+  if (check.string(this.survey_model)) {
+    this.survey_model = new Buffer(this.survey_model);
+  }
+  var update = dbcmd.constructUpdate(this, tablename, cfg.db.db, "guid", this.guid);
+  dbcmd.cmd(cfg.pool, update.query, update.params, function (result) {
+    cb(null, this);
+  }, function(err) {
+    cb(err);
+  });
+};
+
+/**
+ * Create a new respondent with the data
+ */
+Survey.prototype.saveRespondent = function(cfg, data, cb) {
+  process.nextTick(function() {
+    cb(null, {});
+  });
+};
+
+/**
+ * Apply the default fixture (you still need to commit this)
+ */
+Survey.prototype.applyDefaultSurveyFixture = function() {
+  this.survey_model = JSON.stringify(survey_fixture);
 };
 
 /**

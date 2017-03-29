@@ -85,5 +85,35 @@ var cmd = function (pool, dbcmd, args, callback, errorcallback) {
   });
 };
 
+/**
+ * Build an update statement
+ * @param {*} obj 
+ * @param {*} table 
+ * @param {*} dbname 
+ */
+var constructUpdate = function(obj, table, dbname, wherecol, whereval) {
+  var query = "UPDATE " + dbname + "." + table + " SET ";
+  var keys = Object.keys(obj);
+  var params = [];
+  for (var i = 0; i < keys.length; i++) {
+    if (keys[i] == wherecol) {
+      keys.splice(i--, 1);
+    }
+  }
+  for (var i = 0; i < keys.length; i++) {
+    if (i > 0) {
+      query += ", ";
+    }
+    query += keys[i] + " = ?";
+    params.push(obj[keys[i]]);
+  }
+  query += " WHERE " + wherecol + " = ?";
+  params.push(whereval);
+  return {
+    query: query,
+    params: params
+  };
+};
+
 // Tell the world
-module.exports = {cmd: cmd};
+module.exports = {cmd: cmd, constructUpdate: constructUpdate};

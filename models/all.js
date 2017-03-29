@@ -3,7 +3,8 @@ var All = {
   Organization: require('../models/organization'),
   OrganizationAssociation: require('../models/organizationassociations'),
   Prospect: require('../models/prospect'),
-  Survey: require('../models/survey')
+  Survey: require('../models/survey'),
+  Respondent: require('../models/respondent')
 };
 
 // Expose it
