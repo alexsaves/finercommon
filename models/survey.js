@@ -135,5 +135,12 @@ Survey.Create = function(cfg, details, cb) {
   });
 };
 
+/**
+ * Get the default survey model
+ */
+Survey.GetDefaultSurveyModel = function() {
+  return survey_fixture;
+};
+
 // Expose it
 module.exports = Survey;
