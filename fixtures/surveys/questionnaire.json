@@ -50,25 +50,27 @@
           "choices": [
             {
               "value": "external",
-              "text": " External Factors (e.g. budget, org restructuring)"
+              "text": "External Factors (e.g. budget, org restructuring)"
             },
             {
               "value": "price",
-              "text": " Price"
+              "text": "Price"
             },
             {
               "value": "product",
-              "text": " Product / Service Features"
+              "text": "Product / Service Features"
             },
             {
               "value": "value",
-              "text": " Lacks Business Value"
+              "text": "Lacks Business Value"
             }
           ],
           "choicesOrder": "random",
           "hasOther": true,
+          "colCount": 2,
           "name": "mainReasons",
-          "title": "What were the main reasons why you did not purchase from X?"
+          "title": "What were the main reasons why you did not purchase from X?",
+          "instructions": "Choose more than one:"
         },
         {
           "type": "text",
