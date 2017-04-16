@@ -1,93 +1,87 @@
 {
-  "pages": [
-    {
-      "name": "page1",
-      "questions": [
+    "pages": [{
+            "name": "page1",
+            "questions": [{
+                "type": "html",
+                "html": "<h1>Help us improve</h1>\n\n<p>We work with companies to measure their buying experience, and to help refine sales, marketing, and product strategy. You recently met with team members from X. Please help us by taking a few moments to comment on your experience. Please be as forthcoming as you can.</p>\n\n<p><b>All responses are anonymous and can not be connected back to you individually!</b></p>",
+                "name": "intro1"
+            }]
+        },
         {
-          "type": "html",
-          "html": "<h1>Help us improve</h1>\n\n<p>We work with companies to measure their buying experience, and to help refine sales, marketing, and product strategy. You recently met with team members from X. Please help us by taking a few moments to comment on your experience. Please be as forthcoming as you can.</p>\n\n<p><b>All responses are anonymous and can not be connected back to you individually!</b></p>",
-          "name": "intro1"
+            "name": "page2",
+            "questions": [{
+                    "type": "radiogroup",
+                    "choices": [{
+                            "value": "Yes",
+                            "text": "Yes"
+                        },
+                        {
+                            "value": "No",
+                            "text": "No"
+                        }
+                    ],
+                    "colCount": 2,
+                    "name": "outcome",
+                    "title": "Do you agree with the purchasing decision?"
+                },
+                {
+                    "type": "rating",
+                    "maxRateDescription": "- Good",
+                    "minRateDescription": "Poor -",
+                    "name": "overall",
+                    "rateValues": [
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7"
+                    ],
+                    "title": "How would you rate your overall experience with X?"
+                },
+                {
+                    "type": "checkbox",
+                    "choices": [{
+                            "value": "external",
+                            "text": "External Factors (e.g. budget, org restructuring)"
+                        },
+                        {
+                            "value": "price",
+                            "text": "Price"
+                        },
+                        {
+                            "value": "product",
+                            "text": "Product / Service Features"
+                        },
+                        {
+                            "value": "value",
+                            "text": "Lacks Business Value"
+                        }
+                    ],
+                    "choicesOrder": "random",
+                    "hasOther": true,
+                    "colCount": 2,
+                    "name": "mainReasons",
+                    "title": "What were the main reasons why you did not purchase from X?",
+                    "instructions": "Choose more than one:"
+                },
+                {
+                    "type": "text",
+                    "name": "externalFactors",
+                    "placeHolder": "Eg: budget, org restructuring",
+                    "title": "What external factors influenced your decision?",
+                    "visible": false,
+                    "visibleIf": "{mainReasons} contains 'external'"
+                },
+                {
+                    "type": "text",
+                    "name": "pricePoint",
+                    "placeHolder": "Price point or range",
+                    "title": "What was the ideal price point for you?",
+                    "visibleIf": "{mainReasons} contains 'price'"
+                }
+            ]
         }
-      ]
-    },
-    {
-      "name": "page2",
-      "questions": [
-        {
-          "type": "radiogroup",
-          "choices": [
-            {
-              "value": "1",
-              "text": "Yes"
-            },
-            {
-              "value": "2",
-              "text": "No"
-            }
-          ],
-          "colCount": 2,
-          "name": "outcome",
-          "title": "Do you agree with the purchasing decision?"
-        },
-        {
-          "type": "rating",
-          "maxRateDescription": "- Good",
-          "minRateDescription": "Poor -",
-          "name": "overall",
-          "rateValues": [
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7"
-          ],
-          "title": "How would you rate your overall experience with X?"
-        },
-        {
-          "type": "checkbox",
-          "choices": [
-            {
-              "value": "external",
-              "text": "External Factors (e.g. budget, org restructuring)"
-            },
-            {
-              "value": "price",
-              "text": "Price"
-            },
-            {
-              "value": "product",
-              "text": "Product / Service Features"
-            },
-            {
-              "value": "value",
-              "text": "Lacks Business Value"
-            }
-          ],
-          "choicesOrder": "random",
-          "hasOther": true,
-          "colCount": 2,
-          "name": "mainReasons",
-          "title": "What were the main reasons why you did not purchase from X?",
-          "instructions": "Choose more than one:"
-        },
-        {
-          "type": "text",
-          "name": "externalFactors",
-          "placeHolder": "Eg: budget, org restructuring",
-          "title": "What external factors influenced your decision?",
-          "visible": false,
-          "visibleIf": "{mainReasons} contains 'external'"
-        },
-        {
-          "type": "text",
-          "name": "pricePoint",
-          "placeHolder": "Price point or range",
-          "title": "What was the ideal price point for you?",
-          "visibleIf": "{mainReasons} contains 'price'"
-        }
-      ]
-    }
-  ]
+    ]
 }
