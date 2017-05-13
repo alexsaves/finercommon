@@ -1,0 +1,3 @@
+Hi <%= account.name %>
+
+Reset your password at <%= reseturl %>

@@ -8,7 +8,9 @@ var All = {
     Respondent: require('../models/respondent'),
     Response: require('../models/response'),
     ResponseCollection: require('../models/responsecollection'),
-    FileUploads: require('../models/fileuploads')
+    FileUploads: require('../models/fileuploads'),
+    ResetPWInvitations: require('../models/resetpwinvitations'),
+    Email: require('../models/email')
 };
 
 // Expose it
