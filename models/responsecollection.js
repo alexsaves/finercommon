@@ -1,4 +1,4 @@
-var utils = require('../utils/utils');
+const utils = require('../utils/utils');
 
 /**
  * Holds a bunch of responses

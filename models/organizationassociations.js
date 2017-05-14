@@ -1,33 +1,38 @@
-var dbcmd = require('../utils/dbcommand'),
-md5 = require('md5'),
-extend = require('extend'),
-tablename = 'org_account_associations';
+const dbcmd = require('../utils/dbcommand'),
+  md5 = require('md5'),
+  extend = require('extend'),
+  tablename = 'org_account_associations';
 
 /**
 * The organizations class
 */
-var OrganizationAssociations = function(details) {
+var OrganizationAssociations = function (details) {
   extend(this, details || {});
 };
 
 /**
 * Get an org by its id
 */
-OrganizationAssociations.GetById = function(cfg, id, cb) {
-  cb = cb || function() {};
+OrganizationAssociations.GetById = function (cfg, id, cb) {
+  cb = cb || function () {};
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [id], function (result) {
-    cb(result.length === 0 ? {message: "No user found."} : null, result.length > 0 ? new OrganizationAssociations(result[0]) : null);
-  }, function(err) {
+    cb(result.length === 0
+      ? {
+        message: "No user found."
+      }
+      : null, result.length > 0
+      ? new OrganizationAssociations(result[0])
+      : null);
+  }, function (err) {
     cb(err);
   });
 };
 
-
 /**
 * Create an association
 */
-OrganizationAssociations.Create = function(cfg, details, cb) {
-  cb = cb || function() {};
+OrganizationAssociations.Create = function (cfg, details, cb) {
+  cb = cb || function () {};
   details = details || {};
   var _Defaults = {
     created_at: new Date(),
@@ -38,9 +43,9 @@ OrganizationAssociations.Create = function(cfg, details, cb) {
   };
   extend(_Defaults, details);
   var valKeys = Object.keys(_Defaults),
-  query = 'INSERT INTO ' + cfg.db.db + '.' + tablename + ' SET ',
-  params = [],
-  count = 0;
+    query = 'INSERT INTO ' + cfg.db.db + '.' + tablename + ' SET ',
+    params = [],
+    count = 0;
   for (var elm in valKeys) {
     if (count > 0) {
       query += ', ';
@@ -49,17 +54,19 @@ OrganizationAssociations.Create = function(cfg, details, cb) {
     params.push(_Defaults[valKeys[elm]]);
     count++;
   }
-  dbcmd.cmd(cfg.pool, query, params, function(result) {    
-    OrganizationAssociations.GetById(cfg, result.insertId, function(err, org) {
-      if (err) {
-        cb(err);
-      } else {
-        cb(null, org);
-      }
+  dbcmd
+    .cmd(cfg.pool, query, params, function (result) {
+      OrganizationAssociations
+        .GetById(cfg, result.insertId, function (err, org) {
+          if (err) {
+            cb(err);
+          } else {
+            cb(null, org);
+          }
+        });
+    }, function (err) {
+      cb(err);
     });
-  }, function(err) {
-    cb(err);
-  });
 };
 
 // Expose it

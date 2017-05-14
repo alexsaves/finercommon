@@ -1,4 +1,4 @@
-var dbcmd = require('../utils/dbcommand'),
+const dbcmd = require('../utils/dbcommand'),
     utils = require('../utils/utils'),
     md5 = require('md5'),
     extend = require('extend'),
