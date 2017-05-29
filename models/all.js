@@ -10,6 +10,7 @@ var All = {
     ResponseCollection: require('../models/responsecollection'),
     FileUploads: require('../models/fileuploads'),
     ResetPWInvitations: require('../models/resetpwinvitations'),
+    CRMIntegrations: require('../models/crmintegrations'),
     Email: require('../models/email')
 };
 

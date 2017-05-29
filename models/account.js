@@ -1,7 +1,9 @@
 const dbcmd = require('../utils/dbcommand'),
     md5 = require('md5'),
     extend = require('extend'),
-    tablename = 'accounts';
+    tablename = 'accounts',
+    Organization = require('../models/organization'),
+    CRMIntegrations = require('../models/crmintegrations');
 
 /**
  * The account class
@@ -21,6 +23,27 @@ Account.prototype.setNewPassword = function (cfg, pw, cb) {
             cb(null, this);
         }.bind(this), function (err) {
             cb(err);
+        });
+};
+
+/**
+ * Get a list of the organizations for this user
+ */
+Account.prototype.getOrganizations = function (cfg, cb) {
+    Organization.GetForAccount(cfg, this.id, cb);
+};
+
+/**
+ * Get the complete list of eligible integrations for this user
+ */
+Account.prototype.getIntegrations = function (cfg, cb) {
+    this
+        .getOrganizations(cfg, function (err, orgs) {
+            if (err) {
+                cb(err);
+            } else {
+                CRMIntegrations.GetForOrgs(cfg, orgs, cb);
+            }
         });
 };
 

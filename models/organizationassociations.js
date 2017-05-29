@@ -18,7 +18,7 @@ OrganizationAssociations.GetById = function (cfg, id, cb) {
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [id], function (result) {
     cb(result.length === 0
       ? {
-        message: "No user found."
+        message: "No org associations found."
       }
       : null, result.length > 0
       ? new OrganizationAssociations(result[0])
