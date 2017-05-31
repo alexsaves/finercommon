@@ -1,6 +1,7 @@
 const dbcmd = require('../utils/dbcommand'),
   md5 = require('md5'),
   extend = require('extend'),
+  uuidV4 = require('uuid/v4'),
   tablename = 'crm_integrations';
 
 /**
@@ -53,6 +54,19 @@ CRMIntegrations.GetForOrgIds = function (cfg, organization_ids, cb) {
 };
 
 /**
+* Delete a specific CRM integration by its UQ
+*/
+CRMIntegrations.DeleteForUQ = function (cfg, orgid, uq, cb) {
+  cb = cb || function () {};
+  dbcmd
+    .cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND uq = ?', [orgid, uq], function (result) {
+      cb(null);
+    }, function (err) {
+      cb(err);
+    });
+};
+
+/**
 * Get the integrations for a particular organization
 */
 CRMIntegrations.GetForOrg = function (cfg, organization_id, cb) {
@@ -77,9 +91,9 @@ CRMIntegrations.GetForOrg = function (cfg, organization_id, cb) {
 /**
 * Get an org by its id
 */
-CRMIntegrations.GetById = function (cfg, id, cb) {
+CRMIntegrations.GetByUId = function (cfg, id, cb) {
   cb = cb || function () {};
-  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ? LIMIT 1', [id], function (result) {
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid = ? LIMIT 1', [id], function (result) {
     cb(result.length === 0
       ? {
         message: "No user found."
@@ -99,6 +113,7 @@ CRMIntegrations.Create = function (cfg, details, cb) {
   cb = cb || function () {};
   details = details || {};
   var _Defaults = {
+    uid: uuidV4().toString(),
     created_at: new Date(),
     updated_at: new Date(),
     organization_id: 0,
@@ -120,7 +135,7 @@ CRMIntegrations.Create = function (cfg, details, cb) {
   dbcmd
     .cmd(cfg.pool, query, params, function (result) {
       CRMIntegrations
-        .GetById(cfg, result.insertId, function (err, org) {
+        .GetByUId(cfg, _Defaults.uid, function (err, org) {
           if (err) {
             cb(err);
           } else {
