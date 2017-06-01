@@ -23,13 +23,13 @@ Organization.prototype.getIntegrations = function(cfg, cb) {
 */
 Organization.GetForAccount = function (cfg, id, cb) {
   cb = cb || function () {};
-  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.org_account_associations WHERE account_id = ?', [id], function (result) {
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.org_account_associations WHERE account_id = ?', [id], function (result) {    
     if (result.length == 0) {
       cb(null, []);
     } else {
       let idlist = [];
       for (let t = 0; t < result.length; t++) {
-        idlist.push(result[t].id);
+        idlist.push(result[t].organization_id);
       }
       dbcmd
         .cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id IN (?)', [idlist.join(', ')], function (result) {

@@ -12,6 +12,37 @@ var CRMIntegrations = function (details) {
 };
 
 /**
+ * Save any changes to the DB row
+ */
+CRMIntegrations.prototype.commit = function(cfg, cb) {
+    cb = cb || function() {};
+    var excludes = ['uid', 'created_at'],
+        valKeys = Object.keys(this),
+        query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET ',
+        params = [],
+        count = 0;
+    this.updated_at = new Date();
+    for (var elm in valKeys) {
+        if (excludes.indexOf(valKeys[elm]) == -1) {
+            if (count > 0) {
+                query += ', ';
+            }
+            query += valKeys[elm] + ' = ?';
+            params.push(this[valKeys[elm]]);
+            count++;
+        }
+    }
+    query += ' WHERE uid = ?';
+    params.push(this.id);
+
+    dbcmd.cmd(cfg.pool, query, params, function(result) {
+        cb(null, this);
+    }, function(err) {
+        cb(err);
+    });
+};
+
+/**
  * The various types of integrations
  */
 CRMIntegrations.TYPES = {
@@ -78,10 +109,28 @@ CRMIntegrations.GetForOrg = function (cfg, organization_id, cb) {
     }
     cb(result.length === 0
       ? {
-        message: "No user found."
+        message: "No CRM integration found."
       }
       : null, result.length > 0
       ? ints
+      : null);
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
+* Get an org by its UQ (unique id that connects it to the 3rd party system)
+*/
+CRMIntegrations.GetByUQ = function (cfg, orgid, uq, cb) {
+  cb = cb || function () {};
+  //console.log("GETBYUQ", 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND uq = ? LIMIT 1', orgid, uq);
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND uq = ? LIMIT 1', [orgid, uq], function (result) {
+    /*console.log("got: ", result.length > 0
+      ? new CRMIntegrations(result[0])
+      : null);*/
+    cb(null, result.length > 0
+      ? new CRMIntegrations(result[0])
       : null);
   }, function (err) {
     cb(err);
@@ -94,11 +143,7 @@ CRMIntegrations.GetForOrg = function (cfg, organization_id, cb) {
 CRMIntegrations.GetByUId = function (cfg, id, cb) {
   cb = cb || function () {};
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid = ? LIMIT 1', [id], function (result) {
-    cb(result.length === 0
-      ? {
-        message: "No user found."
-      }
-      : null, result.length > 0
+    cb(null, result.length > 0
       ? new CRMIntegrations(result[0])
       : null);
   }, function (err) {
