@@ -27,6 +27,37 @@ Account.prototype.setNewPassword = function (cfg, pw, cb) {
 };
 
 /**
+ * Save any changes to the DB row
+ */
+Account.prototype.commit = function(cfg, cb) {
+    cb = cb || function() {};
+    var excludes = ['id', 'created_at'],
+        valKeys = Object.keys(this),
+        query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET ',
+        params = [],
+        count = 0;
+    this.updated_at = new Date();
+    for (var elm in valKeys) {
+        if (excludes.indexOf(valKeys[elm]) == -1) {
+            if (count > 0) {
+                query += ', ';
+            }
+            query += valKeys[elm] + ' = ?';
+            params.push(this[valKeys[elm]]);
+            count++;
+        }
+    }
+    query += ' WHERE id = ?';
+    params.push(this.id);
+
+    dbcmd.cmd(cfg.pool, query, params, function(result) {
+        cb(null, this);
+    }, function(err) {
+        cb(err);
+    });
+};
+
+/**
  * Get a list of the organizations for this user
  */
 Account.prototype.getOrganizations = function (cfg, cb) {
