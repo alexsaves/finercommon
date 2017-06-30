@@ -29,6 +29,46 @@ OrganizationAssociations.GetById = function (cfg, id, cb) {
 };
 
 /**
+ * Remove an association by user and org
+ */
+OrganizationAssociations.DeleteForAccountAndOrganization = function (cfg, actid, orgid, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? && account_id = ?', [orgid, actid], function (result) {
+    cb(null);
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
+* Delete for an org
+*/
+OrganizationAssociations.DeleteForOrganization = function (cfg, orgid, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ?', [orgid], function (result) {
+    cb(null);
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
+* Get an org by its id
+*/
+OrganizationAssociations.GetForOrgAndAccount = function (cfg, orgid, accountid, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND account_id = ?', [
+    orgid, accountid
+  ], function (result) {
+    cb(null, result.length > 0
+      ? new OrganizationAssociations(result[0])
+      : null);
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
 * Create an association
 */
 OrganizationAssociations.Create = function (cfg, details, cb) {

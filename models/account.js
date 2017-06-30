@@ -10,6 +10,9 @@ const dbcmd = require('../utils/dbcommand'),
  */
 var Account = function (details) {
     extend(this, details || {});
+    if (!this.profile_image_uid) {
+        this.profile_image_uid = 'blankprofile';
+    }
 };
 
 /**
@@ -29,9 +32,11 @@ Account.prototype.setNewPassword = function (cfg, pw, cb) {
 /**
  * Save any changes to the DB row
  */
-Account.prototype.commit = function(cfg, cb) {
-    cb = cb || function() {};
-    var excludes = ['id', 'created_at'],
+Account.prototype.commit = function (cfg, cb) {
+    cb = cb || function () {};
+    var excludes = [
+            'id', 'created_at'
+        ],
         valKeys = Object.keys(this),
         query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET ',
         params = [],
@@ -50,10 +55,31 @@ Account.prototype.commit = function(cfg, cb) {
     query += ' WHERE id = ?';
     params.push(this.id);
 
-    dbcmd.cmd(cfg.pool, query, params, function(result) {
+    dbcmd.cmd(cfg.pool, query, params, function (result) {
         cb(null, this);
-    }, function(err) {
+    }, function (err) {
         cb(err);
+    });
+};
+
+/**
+ * Get the level of access for this oreg
+ * 0 = owner, 1 = admin, 2 = user, -1 = none
+ */
+Account.prototype.getAccessLevelForOrganization = function (cfg, orgid, cb) {
+    this.getOrganizations(cfg, (err, orgs) => {
+        if (err) {
+            cb(err);
+        } else {
+            var theorg = orgs.find((val) => {
+                return val.id == orgid;
+            });
+            if (theorg) {
+                cb(null, theorg.association.assoc_type);
+            } else {
+                cb(null, -1);
+            }
+        }
     });
 };
 
