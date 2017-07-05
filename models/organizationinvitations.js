@@ -50,10 +50,10 @@ OrganizationInvitation.GetForEmailAndOrg = function (cfg, email, orgid, cb) {
 */
 OrganizationInvitation.GetAllByEmail = function (cfg, email, cb) {
   cb = cb || function () {};
-  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email = ?', [email], function (result) {
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email = ?', [email], function (results) {
     let list = [];
     for (let i = 0; i < results.length; i++) {
-      list.push(new OrganizationInvitation(result[i]));
+      list.push(new OrganizationInvitation(results[i]));
     }
     cb(null, list);
   }, function (err) {
