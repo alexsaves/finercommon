@@ -1,6 +1,7 @@
 const dbcmd = require('../utils/dbcommand'),
   md5 = require('md5'),
   extend = require('extend'),
+  Account = require('../models/account'),
   tablename = 'org_account_associations';
 
 /**
@@ -29,11 +30,34 @@ OrganizationAssociations.GetById = function (cfg, id, cb) {
 };
 
 /**
+* Get all associations by email
+*/
+OrganizationAssociations.GetAllByEmail = function (cfg, email, cb) {
+  cb = cb || function () {};
+  Account.GetByEmail(cfg, email, (err, act) => {
+    if (err) {
+      cb(err);
+    } else {
+      dbcmd
+        .cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE account_id = ?', [act.id], function (result) {
+          cb(null, (result && result.length > 0)
+            ? new OrganizationAssociations(result[0])
+            : null);
+        }, function (err) {
+          cb(err);
+        });
+    }
+  });
+};
+
+/**
  * Remove an association by user and org
  */
 OrganizationAssociations.DeleteForAccountAndOrganization = function (cfg, actid, orgid, cb) {
   cb = cb || function () {};
-  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? && account_id = ?', [orgid, actid], function (result) {
+  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? && account_id = ?', [
+    orgid, actid
+  ], function (result) {
     cb(null);
   }, function (err) {
     cb(err);
