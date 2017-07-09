@@ -34,7 +34,9 @@ OrganizationInvitation.GetByUID = function (cfg, uid, cb) {
 */
 OrganizationInvitation.GetForEmailAndOrg = function (cfg, email, orgid, cb) {
   cb = cb || function () {};
-  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email = ? AND organization_id = ? LIMIT 1', [email, orgid], function (result) {
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email = ? AND organization_id = ? LIMIT 1', [
+    email, orgid
+  ], function (result) {
     let res = null;
     if (result && result.length > 0) {
       res = new OrganizationInvitation(result[0]);
@@ -43,6 +45,32 @@ OrganizationInvitation.GetForEmailAndOrg = function (cfg, email, orgid, cb) {
   }, function (err) {
     cb(err);
   });
+};
+
+/**
+ * Add org information to the invite list
+ */
+OrganizationInvitation.PopulateOrgInformation = function (cfg, inviteList, cb) {
+  cb = cb || function () {};
+  if (!inviteList || inviteList.length == 0) {
+    cb(null, inviteList);
+  } else {
+    let idlist = inviteList.map(function (x) {
+      return x.organization_id;
+    });
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.organizations WHERE id IN (' + idlist.join(',') + ')', function (results) {
+      inviteList.forEach((ivt) => {
+        results.forEach((res) => {
+          if (ivt.organization_id == res.id) {
+            ivt.org = res;
+          }
+        });
+      });
+      cb(null, inviteList);
+    }, function (err) {
+      cb(err);
+    });
+  }
 };
 
 /**
@@ -55,7 +83,7 @@ OrganizationInvitation.GetAllByEmail = function (cfg, email, cb) {
     for (let i = 0; i < results.length; i++) {
       list.push(new OrganizationInvitation(results[i]));
     }
-    cb(null, list);
+    OrganizationInvitation.PopulateOrgInformation(cfg, list, cb);
   }, function (err) {
     cb(err);
   });
@@ -65,33 +93,33 @@ OrganizationInvitation.GetAllByEmail = function (cfg, email, cb) {
  * Save any changes to the DB row
  */
 OrganizationInvitation.prototype.commit = function (cfg, cb) {
-    cb = cb || function () {};
-    var excludes = [
-            'uid', 'created_at'
-        ],
-        valKeys = Object.keys(this),
-        query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET ',
-        params = [],
-        count = 0;
-    this.updated_at = new Date();
-    for (var elm in valKeys) {
-        if (excludes.indexOf(valKeys[elm]) == -1) {
-            if (count > 0) {
-                query += ', ';
-            }
-            query += valKeys[elm] + ' = ?';
-            params.push(this[valKeys[elm]]);
-            count++;
-        }
+  cb = cb || function () {};
+  var excludes = [
+      'uid', 'created_at', 'org'
+    ],
+    valKeys = Object.keys(this),
+    query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET ',
+    params = [],
+    count = 0;
+  this.updated_at = new Date();
+  for (var elm in valKeys) {
+    if (excludes.indexOf(valKeys[elm]) == -1) {
+      if (count > 0) {
+        query += ', ';
+      }
+      query += valKeys[elm] + ' = ?';
+      params.push(this[valKeys[elm]]);
+      count++;
     }
-    query += ' WHERE uid = ?';
-    params.push(this.uid);
+  }
+  query += ' WHERE uid = ?';
+  params.push(this.uid);
 
-    dbcmd.cmd(cfg.pool, query, params, function (result) {
-        cb(null, this);
-    }, function (err) {
-        cb(err);
-    });
+  dbcmd.cmd(cfg.pool, query, params, function (result) {
+    cb(null, this);
+  }, function (err) {
+    cb(err);
+  });
 };
 
 /**
@@ -100,6 +128,7 @@ OrganizationInvitation.prototype.commit = function (cfg, cb) {
 OrganizationInvitation.Create = function (cfg, details, cb) {
   cb = cb || function () {};
   details = details || {};
+  console.log(details);
   var _Defaults = {
     uid: uuidV4().toString(),
     created_at: new Date(),
@@ -107,10 +136,14 @@ OrganizationInvitation.Create = function (cfg, details, cb) {
     organization_id: 0,
     invited_by_account_id: 0,
     email: '',
-    assoc_type: 0
+    assoc_type: 0,
+    perm_level: 0
   };
   extend(_Defaults, details);
-  _Defaults.email = _Defaults.email.trim().toLowerCase();
+  _Defaults.email = _Defaults
+    .email
+    .trim()
+    .toLowerCase();
   var valKeys = Object.keys(_Defaults),
     query = 'INSERT INTO ' + cfg.db.db + '.' + tablename + ' SET ',
     params = [],
