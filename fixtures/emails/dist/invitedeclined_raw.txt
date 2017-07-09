@@ -1,0 +1,1 @@
+<%= account.name %> has declined your invitation to join <%= org.name %> on FinerInk.

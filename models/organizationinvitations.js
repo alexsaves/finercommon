@@ -2,6 +2,11 @@ const dbcmd = require('../utils/dbcommand'),
   md5 = require('md5'),
   extend = require('extend'),
   uuidV4 = require('uuid/v4'),
+  bityProm = require('bity-promise'),
+  Account = require('../models/account'),
+  OrgAssoc = require('../models/organizationassociations'),
+  email = require('../models/email'),
+  Org = require('../models/organization'),
   tablename = 'org_invitations';
 
 /**
@@ -90,6 +95,203 @@ OrganizationInvitation.GetAllByEmail = function (cfg, email, cb) {
 };
 
 /**
+ * Convert an array of UIDS to a list of invites
+ */
+OrganizationInvitation.GetInvitesByUIDs = function (cfg, uids, cb) {
+  cb = cb || function () {};
+  var formattedUIDS = uids.map(function (el) {
+    return "'" + el + "'";
+  });
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid IN (' + formattedUIDS.join(',') + ')', function (results) {
+    let list = [];
+    for (let i = 0; i < results.length; i++) {
+      list.push(new OrganizationInvitation(results[i]));
+    }
+    OrganizationInvitation.PopulateOrgInformation(cfg, list, cb);
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
+ * Delete a list of UIDs
+ */
+OrganizationInvitation.DeleteInvitesByUIDs = function (cfg, uids, cb) {
+  cb = cb || function () {};
+  var formattedUIDS = uids.map(function (el) {
+    return "'" + el + "'";
+  });
+  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid IN (' + formattedUIDS.join(',') + ')', function () {
+    cb(null);
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
+ * Convert the array of UIDs into accepted invitations
+ */
+OrganizationInvitation.ActivateInvitationsByUID = function (cfg, defaultFrom, emailServer, emailPort, emailKey, emailSecret, uids, cb) {
+  cb = cb || function () {};
+  OrganizationInvitation.GetInvitesByUIDs(cfg, uids, (err, list) => {
+    if (err) {
+      cb(err);
+    } else {
+      let p = new bityProm(function () {
+        cb(null);
+      }, function () {
+        cb(new Error("Timed out."));
+      }, 10000);
+      p.make(list.map(function (el) {
+        return el.uid;
+      }));
+      list.forEach(function (ivt) {
+        ivt.AcceptInvite(cfg, defaultFrom, emailServer, emailPort, emailKey, emailSecret, (err) => {
+          if (err) {
+            p.break(ivt.uid);
+          } else {
+            p.resolve(ivt.uid);
+          }
+        });
+      });
+    }
+  });
+};
+
+/**
+ * Convert the array of UIDs into declined invitations
+ */
+OrganizationInvitation.DeclineInvitationsByUID = function (cfg, defaultFrom, emailServer, emailPort, emailKey, emailSecret, uids, cb) {
+  cb = cb || function () {};
+  OrganizationInvitation.GetInvitesByUIDs(cfg, uids, (err, list) => {
+    if (err) {
+      cb(err);
+    } else {
+      let p = new bityProm(function () {
+        cb(null);
+      }, function () {
+        cb(new Error("Timed out."));
+      }, 10000);
+      p.make(list.map(function (el) {
+        return el.uid;
+      }));
+      list.forEach(function (ivt) {
+        ivt.DeclineInvite(cfg, defaultFrom, emailServer, emailPort, emailKey, emailSecret, (err) => {
+          if (err) {
+            p.break(ivt.uid);
+          } else {
+            p.resolve(ivt.uid);
+          }
+        });
+      });
+    }
+  });
+};
+
+/**
+ * Convert an invitation into an accepted invitation
+ */
+OrganizationInvitation.prototype.AcceptInvite = function (cfg, defaultFrom, emailServer, emailPort, emailKey, emailSecret, cb) {
+  cb = cb || function () {};
+  Account.GetByEmail(cfg, this.email, (err, act) => {
+    if (err) {
+      cb(err);
+    } else {
+      Account.GetById(cfg, this.invited_by_account_id, (err, iact) => {
+        if (err) {
+          cb(err);
+        } else {
+          Org.GetById(cfg, this.organization_id, (err, org) => {
+            if (err) {
+              cb(err);
+            } else {
+              OrgAssoc.Create(cfg, {
+                account_id: act.id,
+                organization_id: this.organization_id,
+                assoc_type: this.assoc_type,
+                perm_level: this.perm_level
+              }, (err, assoc) => {
+                if (err) {
+                  cb(err);
+                } else {
+                  // Send an email to the originator
+                  let emailCtrl = new email(emailServer, emailPort, emailKey, emailSecret);
+                  emailCtrl.send(defaultFrom, this.email, 'inviteaccepted', 'User ' + act.name + ' has accepted ' + org.name + ' on FinerInk', {
+                    account: act,
+                    invite: this,
+                    org: org
+                  }, (err) => {
+                    if (err) {
+                      console.log("Error sending email", err);
+                      cb(new Error("Error sending email."));
+                    } else {
+                      // Success
+                      this.Delete(cfg, cb);
+                    }
+                  });
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+  });
+};
+
+/**
+ * Decline an invitation
+ */
+OrganizationInvitation.prototype.DeclineInvite = function (cfg, defaultFrom, emailServer, emailPort, emailKey, emailSecret, cb) {
+  cb = cb || function () {};
+  Account.GetById(cfg, this.invited_by_account_id, (err, iact) => {
+    if (err) {
+      cb(err);
+    } else {
+      Org.GetById(cfg, this.organization_id, (err, org) => {
+        if (err) {
+          cb(err);
+        } else {
+          Account.GetByEmail(cfg, this.email, (err, act) => {
+            if (err) {
+              cb(err);
+            } else {
+              // Send an email to the originator
+              let emailCtrl = new email(emailServer, emailPort, emailKey, emailSecret);
+              emailCtrl.send(defaultFrom, this.email, 'invitedeclined', 'User ' + act.name + ' has declined ' + org.name + ' on FinerInk', {
+                account: act,
+                invite: this,
+                org: org
+              }, (err) => {
+                if (err) {
+                  console.log("Error sending email", err);
+                  cb(new Error("Error sending email."));
+                } else {
+                  // Success
+                  this.Delete(cfg, cb);
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+  });
+};
+
+/**
+ * Delete an invitation
+ */
+OrganizationInvitation.prototype.Delete = function (cfg, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid = ?', this.uid, function (results) {
+    cb(null);
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
  * Save any changes to the DB row
  */
 OrganizationInvitation.prototype.commit = function (cfg, cb) {
@@ -128,7 +330,6 @@ OrganizationInvitation.prototype.commit = function (cfg, cb) {
 OrganizationInvitation.Create = function (cfg, details, cb) {
   cb = cb || function () {};
   details = details || {};
-  console.log(details);
   var _Defaults = {
     uid: uuidV4().toString(),
     created_at: new Date(),
