@@ -216,7 +216,7 @@ OrganizationInvitation.prototype.AcceptInvite = function (cfg, defaultFrom, emai
                 } else {
                   // Send an email to the originator
                   let emailCtrl = new email(emailServer, emailPort, emailKey, emailSecret);
-                  emailCtrl.send(defaultFrom, this.email, 'inviteaccepted', 'User ' + act.name + ' has accepted ' + org.name + ' on FinerInk', {
+                  emailCtrl.send(defaultFrom, iact.email, 'inviteaccepted', 'User ' + act.name + ' has accepted ' + org.name + ' on FinerInk', {
                     account: act,
                     invite: this,
                     org: org
@@ -258,7 +258,7 @@ OrganizationInvitation.prototype.DeclineInvite = function (cfg, defaultFrom, ema
             } else {
               // Send an email to the originator
               let emailCtrl = new email(emailServer, emailPort, emailKey, emailSecret);
-              emailCtrl.send(defaultFrom, this.email, 'invitedeclined', 'User ' + act.name + ' has declined ' + org.name + ' on FinerInk', {
+              emailCtrl.send(defaultFrom, iact.email, 'invitedeclined', 'User ' + act.name + ' has declined ' + org.name + ' on FinerInk', {
                 account: act,
                 invite: this,
                 org: org
