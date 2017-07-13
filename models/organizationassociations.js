@@ -77,7 +77,7 @@ OrganizationAssociations.DeleteForOrganization = function (cfg, orgid, cb) {
 };
 
 /**
-* Get an org by its id
+* Get associations by org id and account
 */
 OrganizationAssociations.GetForOrgAndAccount = function (cfg, orgid, accountid, cb) {
   cb = cb || function () {};
@@ -87,6 +87,35 @@ OrganizationAssociations.GetForOrgAndAccount = function (cfg, orgid, accountid, 
     cb(null, result.length > 0
       ? new OrganizationAssociations(result[0])
       : null);
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
+* Get all associations for an org
+*/
+OrganizationAssociations.GetAllForOrg = function (cfg, id, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ?', [id], function (results) {
+    var res = [];
+    results.forEach((assoc) => {
+      res.push(new OrganizationAssociations(assoc));
+    });
+    let accountids = [];
+    res.forEach(function (asc) {
+      accountids.push(asc.account_id);
+    });
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.accounts WHERE id IN (' + accountids.join(',') + ')', function (accounts) {
+      res.forEach((assc) => {
+        assc.account = accounts.find((act) => {
+          return act.id == assc.account_id;
+        });
+      });
+      cb(null, res);
+    }, function (err) {
+      cb(err);
+    });
   }, function (err) {
     cb(err);
   });

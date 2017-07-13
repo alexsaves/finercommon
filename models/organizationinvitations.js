@@ -95,6 +95,22 @@ OrganizationInvitation.GetAllByEmail = function (cfg, email, cb) {
 };
 
 /**
+* Get all invites by organization id
+*/
+OrganizationInvitation.GetAllByOrg = function (cfg, orgid, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ?', [orgid], function (results) {
+    let list = [];
+    for (let i = 0; i < results.length; i++) {
+      list.push(new OrganizationInvitation(results[i]));
+    }
+    OrganizationInvitation.PopulateOrgInformation(cfg, list, cb);
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
  * Convert an array of UIDS to a list of invites
  */
 OrganizationInvitation.GetInvitesByUIDs = function (cfg, uids, cb) {
