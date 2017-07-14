@@ -20,6 +20,33 @@ Organization.prototype.getIntegrations = function (cfg, cb) {
 };
 
 /**
+ * Get the owner of the organization
+ */
+Organization.prototype.getOwnerAccount = function (cfg, cb) {
+  OrganizationAssociations.GetAllForOrg(cfg, this.id, (err, assocs) => {
+    if (err) {
+      cb(err);
+    } else {
+      var ownerAssoc = assocs.find((sc) => {
+        return sc.assoc_type == 0;
+      });
+      if (ownerAssoc !== null && typeof ownerAssoc != undefined) {
+        Account = require('../models/account');
+        Account.GetById(cfg, ownerAssoc.account_id, (err, act) => {
+          if (err) {
+            cb(err);
+          } else {
+            cb(null, act);
+          }
+        });
+      } else {
+        cb(new Error("Could not find owner"));
+      }
+    }
+  });
+};
+
+/**
  * Get the things about the organization that this user is allowed to know
  * (users who have access, oustanding invitations, etc)
  */

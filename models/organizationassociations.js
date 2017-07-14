@@ -12,6 +12,18 @@ var OrganizationAssociations = function (details) {
 };
 
 /**
+ * Delete an association
+ */
+OrganizationAssociations.prototype.Delete = function(cfg, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [this.id], function (result) {
+    cb(null);
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
 * Get an org by its id
 */
 OrganizationAssociations.GetById = function (cfg, id, cb) {
@@ -34,7 +46,7 @@ OrganizationAssociations.GetById = function (cfg, id, cb) {
 */
 OrganizationAssociations.GetAllByEmail = function (cfg, email, cb) {
   cb = cb || function () {};
-  Account.GetByEmail(cfg, email, (err, act) => {
+  require('../models/account').GetByEmail(cfg, email, (err, act) => {
     if (err) {
       cb(err);
     } else {
