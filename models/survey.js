@@ -47,7 +47,7 @@ Survey.prototype.getQuestionById = function (id) {
         for (let i = 0; i < pgs.length; i++) {
             let pg = pgs[i],
                 qs = pg.elements;
-            if (qs) {
+            if (elements) {
                 for (let k = 0; k < qs.length; k++) {
                     let q = qs[k];
                     if (q.name == _id) {
