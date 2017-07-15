@@ -56,42 +56,48 @@ var cmd = function (pool, dbcmd, args, callback, errorcallback) {
     }, 5000);
 
     // Use the connection
-    connection.query(dbcmd, args, function (err, rows) {
-      var didQueryTime = new Date(),
-        queryTime = didQueryTime - gotConnectionTime;
-      clearTimeout(dbLongTimer);
-      // And done with the connection.
-      connection.release();
+    try {
+      connection
+        .query(dbcmd, args, function (err, rows) {
+          var didQueryTime = new Date(),
+            queryTime = didQueryTime - gotConnectionTime;
+          clearTimeout(dbLongTimer);
+          // And done with the connection.
+          connection.release();
 
-      if (queryTime > 500) {
-        console.log("LONG QUERY TIME: @" + (new Date()).toString(), queryTime);
-      }
+          if (queryTime > 500) {
+            console.log("LONG QUERY TIME: @" + (new Date()).toString(), queryTime);
+          }
 
-      if (err) {
-        console.log(new Date(), connectionAcquisitionTime, "DB DCMD ERROR ON QUERY @" + (new Date()).toString(), cmd, err);
-        if (errorcallback) {
-          errorcallback(err);
-          return;
-        } else {
-          throw err;
-        }
-      }
+          if (err) {
+            console.log(new Date(), connectionAcquisitionTime, "DB DCMD ERROR ON QUERY @" + (new Date()).toString(), cmd, err);
+            if (errorcallback) {
+              errorcallback(err);
+              return;
+            } else {
+              throw err;
+            }
+          }
 
-      // Fire the callback then
-      if (callback) {
-        callback(rows || []);
-      }
-    });
+          // Fire the callback then
+          if (callback) {
+            callback(rows || []);
+          }
+        });
+    } catch (e) {
+      console.log("ERROR WITH SQL", dbcmd, args);
+      throw e;
+    }
   });
 };
 
 /**
  * Build an update statement
- * @param {*} obj 
- * @param {*} table 
- * @param {*} dbname 
+ * @param {*} obj
+ * @param {*} table
+ * @param {*} dbname
  */
-var constructUpdate = function(obj, table, dbname, wherecol, whereval) {
+var constructUpdate = function (obj, table, dbname, wherecol, whereval) {
   var query = "UPDATE " + dbname + "." + table + " SET ";
   var keys = Object.keys(obj);
   var params = [];
@@ -109,11 +115,11 @@ var constructUpdate = function(obj, table, dbname, wherecol, whereval) {
   }
   query += " WHERE " + wherecol + " = ?";
   params.push(whereval);
-  return {
-    query: query,
-    params: params
-  };
+  return {query: query, params: params};
 };
 
 // Tell the world
-module.exports = {cmd: cmd, constructUpdate: constructUpdate};
+module.exports = {
+  cmd: cmd,
+  constructUpdate: constructUpdate
+};
