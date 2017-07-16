@@ -98,6 +98,18 @@ Response.prototype.commit = function(cfg, cb) {
 };
 
 /**
+ * Delete all
+ */
+Response.DeleteAll = function (cfg, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id > 0', function () {
+        cb();
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
  * Get a Response by its id
  */
 Response.GetById = function(cfg, id, cb) {

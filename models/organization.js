@@ -20,6 +20,18 @@ Organization.prototype.getIntegrations = function (cfg, cb) {
 };
 
 /**
+ * Delete all
+ */
+Organization.DeleteAll = function (cfg, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id > 0', function () {
+        cb();
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
  * Get the owner of the organization
  */
 Organization.prototype.getOwnerAccount = function (cfg, cb) {

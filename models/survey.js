@@ -47,7 +47,7 @@ Survey.prototype.getQuestionById = function (id) {
         for (let i = 0; i < pgs.length; i++) {
             let pg = pgs[i],
                 qs = pg.elements;
-            if (elements) {
+            if (qs) {
                 for (let k = 0; k < qs.length; k++) {
                     let q = qs[k];
                     if (q.name == _id) {
@@ -75,7 +75,14 @@ Survey.prototype.saveRespondent = function (cfg, respondent, data, cb) {
  * Apply the default fixture (you still need to commit this)
  */
 Survey.prototype.applyDefaultSurveyFixture = function () {
-    this.survey_model = JSON.stringify(survey_fixture);
+    this.survey_model = JSON.stringify(Survey.getSurveyFixture());
+};
+
+/**
+ * Apply the default fixture (you still need to commit this)
+ */
+Survey.getSurveyFixture = function () {
+    return survey_fixture;
 };
 
 /**
@@ -97,6 +104,18 @@ Survey.GetByGuid = function (cfg, guid, cb) {
 };
 
 /**
+ * Delete all
+ */
+Survey.DeleteAll = function (cfg, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE guid != NULL', function () {
+        cb();
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
  * Create a prospect
  */
 Survey.Create = function (cfg, details, cb) {
@@ -109,37 +128,7 @@ Survey.Create = function (cfg, details, cb) {
         prospect_id: 0,
         created_at: new Date(),
         updated_at: new Date(),
-        survey_model: new Buffer(JSON.stringify({
-            pages: [
-                {
-                    name: "page1",
-                    questions: [
-                        {
-                            type: "comment",
-                            name: "general1",
-                            placeHolder: "right here",
-                            title: "Give us your opinion please!"
-                        }, {
-                            type: "radiogroup",
-                            choices: [
-                                {
-                                    value: "1",
-                                    text: "first item"
-                                }, {
-                                    value: "2",
-                                    text: "second item"
-                                }, {
-                                    value: "3",
-                                    text: "third item"
-                                }
-                            ],
-                            name: "question1",
-                            title: "sdlkjg ldfkjg ldfkjgssldfk gjldkfj glkdfjs glkj d"
-                        }
-                    ]
-                }
-            ]
-        }))
+        survey_model: new Buffer(JSON.stringify(Survey.getSurveyFixture()))
     };
     extend(_Defaults, details);
     var valKeys = Object.keys(_Defaults),

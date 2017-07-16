@@ -105,6 +105,18 @@ OrganizationAssociations.GetForOrgAndAccount = function (cfg, orgid, accountid, 
 };
 
 /**
+ * Delete all
+ */
+OrganizationAssociations.DeleteAll = function (cfg, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id > 0', function () {
+        cb();
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
 * Get all associations for an org
 */
 OrganizationAssociations.GetAllForOrg = function (cfg, id, cb) {

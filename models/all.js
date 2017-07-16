@@ -12,7 +12,110 @@ var All = {
     FileUploads: require('../models/fileuploads'),
     ResetPWInvitations: require('../models/resetpwinvitations'),
     CRMIntegrations: require('../models/crmintegrations'),
-    Email: require('../models/email')
+    Email: require('../models/email'),
+    DeleteAll: function (cfg, cb) {
+        console.log("Deleting all...");
+        this
+            .Account
+            .DeleteAll(cfg, (err) => {
+                if (err) {
+                    cb(err);
+                } else {
+                    console.log("Deleted accounts.");
+                    this
+                        .Organization
+                        .DeleteAll(cfg, (err) => {
+                            if (err) {
+                                cb(err);
+                            } else {
+                                console.log("Deleted organizations.");
+                                this
+                                    .OrganizationAssociation
+                                    .DeleteAll(cfg, (err) => {
+                                        if (err) {
+                                            cb(err);
+                                        } else {
+                                            console.log("Deleted org assocs.");
+                                            this
+                                                .OrganizationInvitation
+                                                .DeleteAll(cfg, (err) => {
+                                                    if (err) {
+                                                        cb(err);
+                                                    } else {
+                                                        console.log("Deleted org invites.");
+                                                        this
+                                                            .Prospect
+                                                            .DeleteAll(cfg, (err) => {
+                                                                if (err) {
+                                                                    cb(err);
+                                                                } else {
+                                                                    console.log("Deleted prospects.");
+                                                                    this
+                                                                        .Survey
+                                                                        .DeleteAll(cfg, (err) => {
+                                                                            if (err) {
+                                                                                cb(err);
+                                                                            } else {
+                                                                                console.log("Deleted surveys.");
+                                                                                this
+                                                                                    .Respondent
+                                                                                    .DeleteAll(cfg, (err) => {
+                                                                                        if (err) {
+                                                                                            cb(err);
+                                                                                        } else {
+                                                                                            console.log("Deleted respondents.");
+                                                                                            this
+                                                                                                .Response
+                                                                                                .DeleteAll(cfg, (err) => {
+                                                                                                    if (err) {
+                                                                                                        cb(err);
+                                                                                                    } else {
+                                                                                                        console.log("Deleted responses.");
+                                                                                                        this
+                                                                                                            .FileUploads
+                                                                                                            .DeleteAll(cfg, (err) => {
+                                                                                                                if (err) {
+                                                                                                                    cb(err);
+                                                                                                                } else {
+                                                                                                                    console.log("Deleted file uploads.");
+                                                                                                                    this
+                                                                                                                        .ResetPWInvitations
+                                                                                                                        .DeleteAll(cfg, (err) => {
+                                                                                                                            if (err) {
+                                                                                                                                cb(err);
+                                                                                                                            } else {
+                                                                                                                                console.log("Deleted reset password invites.");
+                                                                                                                                this
+                                                                                                                                    .CRMIntegrations
+                                                                                                                                    .DeleteAll(cfg, (err) => {
+                                                                                                                                        if (err) {
+                                                                                                                                            cb(err);
+                                                                                                                                        } else {
+                                                                                                                                            console.log("Deleted CRM integrations.");
+                                                                                                                                            cb();
+                                                                                                                                        }
+                                                                                                                                    });
+                                                                                                                            }
+                                                                                                                        });
+                                                                                                                }
+                                                                                                            });
+                                                                                                    }
+                                                                                                });
+                                                                                        }
+                                                                                    })
+                                                                            }
+                                                                        });
+                                                                }
+                                                            })
+                                                    }
+                                                })
+                                        }
+                                    })
+                            }
+                        });
+                }
+            })
+    }
 };
 
 // Expose it
