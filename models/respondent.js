@@ -142,6 +142,18 @@ Respondent.GetById = function (cfg, id, cb) {
 };
 
 /**
+ * Delete all
+ */
+Respondent.DeleteAll = function (cfg, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id > 0', function () {
+        cb();
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
  * Create a Respondent
  */
 Respondent.Create = function (cfg, details, cb) {

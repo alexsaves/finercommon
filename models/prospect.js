@@ -11,6 +11,18 @@ var Prospect = function (details) {
 };
 
 /**
+ * Delete all
+ */
+Prospect.DeleteAll = function (cfg, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id > 0', function () {
+        cb();
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
 * Get a prospect by its id
 */
 Prospect.GetById = function (cfg, id, cb) {
