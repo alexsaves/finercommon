@@ -3,6 +3,23 @@
         {
             "elements": [
                 {
+                    "type": "matrixrating",
+                    "choices": [
+                        "I like red apples",
+                        "I'm a strong swimmer",
+                        "I'm afraid of heights"
+                    ],
+                    "name": "question4219",
+                    "title": "How strongly do you agree with the following statements?",
+                    "instructions": "Indicate how strongly you agree.",
+                    "required": true
+                }
+            ],
+            "name": "page4"
+        },
+        {
+            "elements": [
+                {
                     "type": "dropdown",
                     "choices": [
                         "item1",
