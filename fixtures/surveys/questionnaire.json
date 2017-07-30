@@ -3,6 +3,52 @@
         {
             "elements": [
                 {
+                    "type": "dropdown",
+                    "choices": [
+                        "item1",
+                        "item2",
+                        "item3"
+                    ],
+                    "name": "question4",
+                    "title": "Rank the main reasons why you did not buy from Company X?",
+                    "instructions": "Please choose the thing that is the best thing.",
+                    "required": true,
+                    "placeholder": "Choose your favorite..."
+                }
+            ],
+            "name": "page4"
+        },
+        {
+            "elements": [
+                {
+                    "type": "text",
+                    "name": "question2",
+                    "multiline": false,
+                    "title": "What's your name?",
+                    "instructions": "Required",
+                    "required": true,
+                    "placeholder": "First and last name"
+                }
+            ],
+            "name": "page3"
+        },
+        {
+            "elements": [
+                {
+                    "type": "text",
+                    "name": "question239",
+                    "multiline": true,
+                    "title": "Describe some stuff that happened to you please.",
+                    "instructions": "Required",
+                    "required": true,
+                    "placeholder": "Type your stuff here"
+                }
+            ],
+            "name": "page3"
+        },
+        {
+            "elements": [
+                {
                     "type": "checkbox",
                     "choices": [
                         "Cost",
@@ -23,19 +69,7 @@
                 }
             ],
             "name": "page2"
-        },
-        {
-            "elements": [
-                {
-                    "type": "text",
-                    "name": "question2",
-                    "title": "Rank the main reasons why you did not buy from Company X?",
-                    "instructions": "Please choose the thing that is the best thing.",
-                    "required": true
-                }
-            ],
-            "name": "page3"
-        },
+        },        
         {
             "elements": [
                 {
@@ -117,26 +151,6 @@
                 }
             ],
             "name": "page4"
-        },
-        {
-            "elements": [
-                {
-                    "type": "multipletext",
-                    "items": [
-                        {
-                            "name": "text1"
-                        },
-                        {
-                            "name": "text2"
-                        }
-                    ],
-                    "name": "question5",
-                    "title": "Rank the main reasons why you did not buy from Company X?",
-                    "instructions": "Please choose the thing that is the best thing.",
-                    "required": true
-                }
-            ],
-            "name": "page5"
         }
     ]
 }
