@@ -3,22 +3,23 @@
         {
             "elements": [
                 {
-                    "type": "rating",
-                    "name": "question3"
-                }
-            ],
-            "name": "page1"
-        },
-        {
-            "elements": [
-                {
                     "type": "checkbox",
                     "choices": [
-                        "item1",
-                        "item2",
-                        "item3"
+                        "Cost",
+                        "Basic product / service features",
+                        "Does not deliver business value",
+                        "Timeliness of delivery",
+                        "Customer service",
+                        "Not related to Company X (external factors)"
                     ],
-                    "name": "question1"
+                    "minanswers": 2,
+                    "maxanswers": 3,
+                    "name": "question38",
+                    "title": "Rank the main reasons why you did not buy from Company X?",
+                    "instructions": "Pick at least 2 but no more than 3.",
+                    "required": true,
+                    "other": true,
+                    "otherplaceholder": "Other reason"
                 }
             ],
             "name": "page2"
@@ -27,10 +28,78 @@
             "elements": [
                 {
                     "type": "text",
-                    "name": "question2"
+                    "name": "question2",
+                    "title": "Rank the main reasons why you did not buy from Company X?",
+                    "instructions": "Please choose the thing that is the best thing.",
+                    "required": true
                 }
             ],
             "name": "page3"
+        },
+        {
+            "elements": [
+                {
+                    "type": "rating",
+                    "modifier": "stars",
+                    "name": "question33",
+                    "title": "How good is the place you went with the people?",
+                    "instructions": "Please choose the thing that is the best thing.",
+                    "low": "Bad",
+                    "high": "Good",
+                    "required": true
+                }
+            ],
+            "name": "page1"
+        },
+        {
+            "elements": [
+                {
+                    "type": "rating",
+                    "name": "question3",
+                    "title": "Rank the main reasons why you did not buy from Company X?",
+                    "instructions": "Please choose the thing that is the best thing.",
+                    "low": "Bad",
+                    "high": "Good",
+                    "required": true
+                }
+            ],
+            "name": "page1"
+        },
+        {
+            "elements": [
+                {
+                    "type": "radio",
+                    "choices": [
+                        "Cost",
+                        "Basic product / service features",
+                        "Does not deliver business value",
+                        "Timeliness of delivery",
+                        "Customer service",
+                        "Not related to Company X (external factors)"
+                    ],
+                    "name": "question0",
+                    "title": "Rank the main reasons why you did not buy from Company X?",
+                    "instructions": "Pick one or tell us something else!",
+                    "required": true,
+                    "other": true,
+                    "otherplaceholder": "Other reason"
+                }
+            ],
+            "name": "page2"
+        },              
+        {
+            "elements": [
+                {
+                    "type": "rating",
+                    "name": "question3",
+                    "title": "Rank the main reasons why you did not buy from Company X?",
+                    "instructions": "Please choose the thing that is the best thing.",
+                    "low": "Bad",
+                    "high": "Good",
+                    "required": true
+                }
+            ],
+            "name": "page1"
         },
         {
             "elements": [
@@ -41,7 +110,10 @@
                         "item2",
                         "item3"
                     ],
-                    "name": "question4"
+                    "name": "question4",
+                    "title": "Rank the main reasons why you did not buy from Company X?",
+                    "instructions": "Please choose the thing that is the best thing.",
+                    "required": false
                 }
             ],
             "name": "page4"
@@ -58,7 +130,10 @@
                             "name": "text2"
                         }
                     ],
-                    "name": "question5"
+                    "name": "question5",
+                    "title": "Rank the main reasons why you did not buy from Company X?",
+                    "instructions": "Please choose the thing that is the best thing.",
+                    "required": true
                 }
             ],
             "name": "page5"
