@@ -3,6 +3,21 @@
         {
             "elements": [
                 {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "question3353",
+                    "title": "How good is the place you went with the people?",
+                    "instructions": "Rate it from low to high.",
+                    "low": "Bad",
+                    "high": "Good",
+                    "required": true
+                }
+            ],
+            "name": "page1"
+        },
+        {
+            "elements": [
+                {
                     "type": "matrixrating",
                     "choices": [
                         "I like red apples",
@@ -12,7 +27,9 @@
                     "name": "question4219",
                     "title": "How strongly do you agree with the following statements?",
                     "instructions": "Indicate how strongly you agree.",
-                    "required": true
+                    "required": true,
+                    "low": "Not at all",
+                    "high": "Very strongly"
                 }
             ],
             "name": "page4"
@@ -22,9 +39,9 @@
                 {
                     "type": "dropdown",
                     "choices": [
-                        "item1",
-                        "item2",
-                        "item3"
+                        "I was distracted by a pretty bird.",
+                        "I have no money and live with my mom.",
+                        "I'm not even sure what day this is."
                     ],
                     "name": "question4",
                     "title": "Rank the main reasons why you did not buy from Company X?",
