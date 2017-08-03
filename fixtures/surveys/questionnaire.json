@@ -3,6 +3,28 @@
         {
             "elements": [
                 {
+                    "type": "sort",
+                    "choices": [
+                        "Cost",
+                        "Basic product / service features",
+                        "Does not deliver business value",
+                        "Timeliness of delivery",
+                        "Customer service",
+                        "Widget Compliance"
+                    ],
+                    "name": "question38920",
+                    "title": "Please rank the following attributes in order of importance",
+                    "instructions": "Drag with your mouse or finger",
+                    "required": true,
+                    "other": true,
+                    "otherplaceholder": "Other reason"
+                }
+            ],
+            "name": "page2"
+        },   
+        {
+            "elements": [
+                {
                     "type": "rating",
                     "modifier": "slider",
                     "name": "question3353",
