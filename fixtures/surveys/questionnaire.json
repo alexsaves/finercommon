@@ -46,7 +46,7 @@
                         "I'm a strong swimmer",
                         "I'm afraid of heights"
                     ],
-                    "name": "question4219",
+                    "name": "questdion4219",
                     "title": "How strongly do you agree with the following statements?",
                     "instructions": "Indicate how strongly you agree.",
                     "required": true,
@@ -65,7 +65,7 @@
                         "I have no money and live with my mom.",
                         "I'm not even sure what day this is."
                     ],
-                    "name": "question4",
+                    "name": "questio3n4",
                     "title": "Rank the main reasons why you did not buy from Company X?",
                     "instructions": "Please choose the thing that is the best thing.",
                     "required": true,
@@ -78,7 +78,7 @@
             "elements": [
                 {
                     "type": "text",
-                    "name": "question2",
+                    "name": "quest2ion2",
                     "multiline": false,
                     "title": "What's your name?",
                     "instructions": "Required",
@@ -92,7 +92,7 @@
             "elements": [
                 {
                     "type": "text",
-                    "name": "question239",
+                    "name": "questio1n239",
                     "multiline": true,
                     "title": "Describe some stuff that happened to you please.",
                     "instructions": "Required",
@@ -116,7 +116,7 @@
                     ],
                     "minanswers": 2,
                     "maxanswers": 3,
-                    "name": "question38",
+                    "name": "question338",
                     "title": "Rank the main reasons why you did not buy from Company X?",
                     "instructions": "Pick at least 2 but no more than 3.",
                     "required": true,
@@ -131,7 +131,7 @@
                 {
                     "type": "rating",
                     "modifier": "stars",
-                    "name": "question33",
+                    "name": "question334",
                     "title": "How good is the place you went with the people?",
                     "instructions": "Please choose the thing that is the best thing.",
                     "low": "Bad",
@@ -145,7 +145,7 @@
             "elements": [
                 {
                     "type": "rating",
-                    "name": "question3",
+                    "name": "question53",
                     "title": "Rank the main reasons why you did not buy from Company X?",
                     "instructions": "Please choose the thing that is the best thing.",
                     "low": "Bad",
@@ -167,7 +167,7 @@
                         "Customer service",
                         "Not related to Company X (external factors)"
                     ],
-                    "name": "question0",
+                    "name": "question09",
                     "title": "Rank the main reasons why you did not buy from Company X?",
                     "instructions": "Pick one or tell us something else!",
                     "required": true,
@@ -181,7 +181,7 @@
             "elements": [
                 {
                     "type": "rating",
-                    "name": "question3",
+                    "name": "question3873",
                     "title": "Rank the main reasons why you did not buy from Company X?",
                     "instructions": "Please choose the thing that is the best thing.",
                     "low": "Bad",
@@ -200,7 +200,7 @@
                         "item2",
                         "item3"
                     ],
-                    "name": "question4",
+                    "name": "question4342",
                     "title": "Rank the main reasons why you did not buy from Company X?",
                     "instructions": "Please choose the thing that is the best thing.",
                     "required": false
