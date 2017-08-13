@@ -3,21 +3,33 @@
         {
             "elements": [
                 {
-                    "type": "sort",
+                    "type": "dropdown",
                     "choices": [
-                        "Cost",
-                        "Basic product / service features",
-                        "Does not deliver business value",
-                        "Timeliness of delivery",
-                        "Customer service",
-                        "Widget Compliance"
+                        "I was distracted by a pretty bird.",
+                        "I have no money and live with my mom.",
+                        "I'm not even sure what day this is."
                     ],
-                    "name": "question38920",
-                    "title": "Please rank the following attributes in order of importance",
-                    "instructions": "Drag with your mouse or finger",
+                    "name": "questio8393n4",
+                    "title": "Rank the main reasons why you did not buy from Company X?",
+                    "instructions": "Please choose the thing that is the best thing.",
                     "required": true,
-                    "other": true,
-                    "otherplaceholder": "Other reason"
+                    "placeholder": "Choose your favorite..."
+                }
+            ],
+            "name": "page48"
+        },
+        {
+            "elements": [
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "question335933",
+                    "title": "Pretty Bird. How good is the place you went with the people?",
+                    "instructions": "Rate it from low to high.",
+                    "low": "Bad",
+                    "high": "Good",
+                    "required": true,
+                    "showIf": "questio8393n4=1"
                 }
             ],
             "name": "page2"
