@@ -31,8 +31,7 @@
                     "instructions": "Drag with your mouse or finger",
                     "required": false,
                     "other": true,
-                    "otherplaceholder": "Other reason",
-                    "showIf": "questdion4389219[0]<4"
+                    "otherplaceholder": "Other reason"
                 }
             ],
             "name": "page1"
