@@ -1,25 +1,19 @@
 {
-    "pages": [
-        
+    "pages": [    
         {
             "elements": [
                 {
-                    "type": "matrixrating",
-                    "choices": [
-                        "I like red apples",
-                        "I'm a strong swimmer",
-                        "I'm afraid of heights"
-                    ],
-                    "name": "questdion4389219",
-                    "title": "first How strongly do you agree with the following statements?",
-                    "instructions": "Indicate how strongly you agree.",
+                    "type": "text",
+                    "name": "firstName",
+                    "multiline": false,
+                    "title": "What's your first name?",
+                    "instructions": "Required",
                     "required": true,
-                    "low": "Not at all",
-                    "high": "Very strongly"
+                    "placeholder": "First and last name"
                 }
             ],
-            "name": "page0"
-        }, 
+            "name": "page3"
+        },
         {
             "elements": [
                 {
@@ -33,7 +27,7 @@
                         "Widget Compliance"
                     ],
                     "name": "question38920",
-                    "title": "second Please rank the following attributes in order of importance",
+                    "title": "Hey ${firstName}, Please rank the following attributes in order of importance",
                     "instructions": "Drag with your mouse or finger",
                     "required": false,
                     "other": true,
