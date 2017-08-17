@@ -1,5 +1,63 @@
 {
     "pages": [
+        
+        {
+            "elements": [
+                {
+                    "type": "matrixrating",
+                    "choices": [
+                        "I like red apples",
+                        "I'm a strong swimmer",
+                        "I'm afraid of heights"
+                    ],
+                    "name": "questdion4389219",
+                    "title": "first How strongly do you agree with the following statements?",
+                    "instructions": "Indicate how strongly you agree.",
+                    "required": true,
+                    "low": "Not at all",
+                    "high": "Very strongly"
+                }
+            ],
+            "name": "page0"
+        }, 
+        {
+            "elements": [
+                {
+                    "type": "sort",
+                    "choices": [
+                        "Cost",
+                        "Basic product / service features",
+                        "Does not deliver business value",
+                        "Timeliness of delivery",
+                        "Customer service",
+                        "Widget Compliance"
+                    ],
+                    "name": "question38920",
+                    "title": "second Please rank the following attributes in order of importance",
+                    "instructions": "Drag with your mouse or finger",
+                    "required": false,
+                    "other": true,
+                    "otherplaceholder": "Other reason",
+                    "showIf": "questdion4389219[0]<4"
+                }
+            ],
+            "name": "page1"
+        },    
+        {
+            "elements": [
+                {
+                    "type": "rating",
+                    "modifier": "buttons",
+                    "name": "question3398453",
+                    "title": "third How good is the place you went with the people?",
+                    "instructions": "Rate it from low to high.",
+                    "low": "Bad",
+                    "high": "Good",
+                    "required": true
+                }
+            ],
+            "name": "page2"
+        },     
         {
             "elements": [
                 {
@@ -10,13 +68,13 @@
                         "I'm not even sure what day this is."
                     ],
                     "name": "questio8393n4",
-                    "title": "Rank the main reasons why you did not buy from Company X?",
+                    "title": "fourth Rank the main reasons why you did not buy from Company X?",
                     "instructions": "Please choose the thing that is the best thing.",
                     "required": true,
-                    "placeholder": "Choose your favorite..."
+                    "placeholder": "Choose your favorite..."                    
                 }
             ],
-            "name": "page48"
+            "name": "page3"
         },
         {
             "elements": [
@@ -28,8 +86,7 @@
                     "instructions": "Rate it from low to high.",
                     "low": "Bad",
                     "high": "Good",
-                    "required": true,
-                    "showIf": "questio8393n4=1"
+                    "required": true
                 }
             ],
             "name": "page2"
@@ -193,6 +250,7 @@
             "elements": [
                 {
                     "type": "rating",
+                    "modifier": "buttons",
                     "name": "question3873",
                     "title": "Rank the main reasons why you did not buy from Company X?",
                     "instructions": "Please choose the thing that is the best thing.",
