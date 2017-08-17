@@ -1,19 +1,34 @@
 {
-    "pages": [    
+    "pages": [
         {
             "elements": [
                 {
-                    "type": "text",
-                    "name": "firstName",
-                    "multiline": false,
-                    "title": "What's your first name?",
-                    "instructions": "Required",
-                    "required": true,
-                    "placeholder": "First and last name"
+                    "type": "none",                    
+                    "title": "Welcome to our survey",
+                    "subtitle": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent et leo ligula. Quisque porttitor ullamcorper molestie. Nulla tellus lorem, mollis varius massa eu, vulputate maximus libero."
                 }
             ],
-            "name": "page3"
-        },
+            "name": "page4"
+        }, 
+        {
+            "elements": [
+                {
+                    "type": "matrixrating",
+                    "choices": [
+                        "I like red apples",
+                        "I'm a strong swimmer",
+                        "I'm afraid of heights"
+                    ],
+                    "name": "questdion4832219",
+                    "title": "How strongly do you agree with the following statements?",
+                    "instructions": "Indicate how strongly you agree.",
+                    "required": true,
+                    "low": "Not at all",
+                    "high": "Very strongly"
+                }
+            ],
+            "name": "page4"
+        }, 
         {
             "elements": [
                 {
@@ -27,11 +42,12 @@
                         "Widget Compliance"
                     ],
                     "name": "question38920",
-                    "title": "Hey ${firstName}, Please rank the following attributes in order of importance",
+                    "title": "Hey ${questdion4832219[1]}, Please rank the following attributes in order of importance",
                     "instructions": "Drag with your mouse or finger",
                     "required": false,
                     "other": true,
-                    "otherplaceholder": "Other reason"
+                    "otherplaceholder": "Other reason",
+                    "displayNumber": true
                 }
             ],
             "name": "page1"
@@ -46,7 +62,8 @@
                     "instructions": "Rate it from low to high.",
                     "low": "Bad",
                     "high": "Good",
-                    "required": true
+                    "required": true,
+                    "displayNumber": true
                 }
             ],
             "name": "page2"
@@ -141,7 +158,7 @@
                 {
                     "type": "text",
                     "name": "quest2ion2",
-                    "multiline": false,
+                    "modifier": "multiline",
                     "title": "What's your name?",
                     "instructions": "Required",
                     "required": true,
