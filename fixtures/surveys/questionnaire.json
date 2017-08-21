@@ -1,15 +1,260 @@
 {
     "pages": [
+        
         {
             "elements": [
                 {
-                    "type": "none",                    
-                    "title": "Welcome to our survey",
-                    "subtitle": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent et leo ligula. Quisque porttitor ullamcorper molestie. Nulla tellus lorem, mollis varius massa eu, vulputate maximus libero."
+                    "type": "none",
+                    "name": "logoImg",
+                    "image": {
+                        "url": "/static/assets/logos/finerink.svg",
+                        "modifier": "SMALL"
+                    }
+                },
+                {
+                    "type": "buttons",
+                    "title": "Help us help Company X improve your buying experience. Your feedback is greatly appreciated.",
+                    "subtitle": "Your name will not be associated with your responses.",
+                    "name": "intro",
+                    "choices": [
+                        {
+                            "title": "Get started",
+                            "color": "green"
+                        }
+                    ]
                 }
             ],
-            "name": "page4"
-        }, 
+            "hideLogo": true
+        },
+        {
+            "elements": [
+                {
+                    "type": "rating",
+                    "modifier": "stars",
+                    "name": "overallRating",
+                    "title": "How was overall buying experience?",
+                    "instructions": "Rate on a scale of 1-7",
+                    "low": "Poor",
+                    "high": "Excellent",
+                    "required": true
+                }
+            ],
+            "name": "overallRating"
+        },
+        {
+            "elements": [
+                {
+                    "type": "checkbox",
+                    "choices": [
+                        "Cost",
+                        "Basic product / service features",
+                        "Does not deliver business value",
+                        "Timeliness of delivery",
+                        "Customer service",
+                        "Not related to Company X (external factors)"
+                    ],
+                    "limits": {
+                        "max": 2
+                    },
+                    "name": "whyNotSelected",
+                    "title": "Choose the main reasons why Company X was not selected",
+                    "instructions": "Pick no more than two",
+                    "required": true,
+                    "other": true,
+                    "random": true,
+                    "otherplaceholder": "Other reason"
+                }
+            ],
+            "name": "reasonsWhyNot"
+        },
+        {
+            "elements": [
+                {
+                    "type": "checkbox",
+                    "choices": [
+                        "Budget",
+                        "Organizational restructing / leadership changes",
+                        "Strategic relationships with other vendors"
+                    ],
+                    "name": "externalReasonsWhyNot",
+                    "title": "What were the external factors or reasons you did not buy?",
+                    "instructions": "Pick at least one",
+                    "required": true,
+                    "random": true,
+                    "other": true,
+                    "otherplaceholder": "Other factor"
+                }
+            ],
+            "name": "externalReasonsWhyNot"
+        },
+        {
+            "elements": [
+                {
+                    "type": "radio",
+                    "choices": [
+                        "Less than 2 weeks",
+                        "2 - 4 weeks",
+                        "1 - 3 months",
+                        "3 - 6 months",
+                        "1 - 3 years"
+                    ],
+                    "name": "desiredTimeline",
+                    "title": "What was your ideal maximum timeline for delivery?",
+                    "instructions": "Pick one",
+                    "required": true,
+                    "other": false
+                }
+            ],
+            "name": "desiredTimeline"
+        },
+        {
+            "elements": [
+                {
+                    "type": "radio",
+                    "choices": [
+                        "Reporting & analytics",
+                        "Flexibility & customization",
+                        "Scheduled alerts & notifications",
+                        "Integration with other vendors"
+                    ],
+                    "name": "missingFeature",
+                    "title": "What was the key missing product / service feature?",
+                    "instructions": "Pick one",
+                    "required": true,
+                    "random": true,
+                    "other": true,
+                    "otherplaceholder": "Other feature"
+                }
+            ],
+            "name": "missingFeature"
+        },
+        {
+            "elements": [
+                {
+                    "type": "checkbox",
+                    "choices": [
+                        "Cost",
+                        "Basic product / service features",
+                        "Does not deliver business value",
+                        "Timeliness of delivery",
+                        "Customer service",
+                        "Not related to Company X (external factors)"
+                    ],
+                    "limits": {
+                        "max": 3
+                    },
+                    "name": "topVendorCriteria",
+                    "title": "Select the top 3 criteria that mattered most when choosing a vendor.",
+                    "instructions": "Pick up to three",
+                    "required": true,
+                    "random": true,
+                    "other": true,
+                    "otherplaceholder": "Other criteria"
+                }
+            ],
+            "name": "topVendorCriteria"
+        },
+        {
+            "elements": [
+                {
+                    "type": "matrixrating",
+                    "choices": [
+                        "Understood our needs",
+                        "Communication style",
+                        "Product demo",
+                        "Product / technical knowledge",
+                        "Trusted relationship",
+                        "Delivery timeliness"
+                    ],
+                    "name": "howWellInAreas",
+                    "title": "How well did Company X do in each of these areas?",
+                    "instructions": "Rate how well they did in each area.",
+                    "required": true,
+                    "random": true,
+                    "low": "Poor",
+                    "high": "Excellent"
+                }
+            ],
+            "name": "howWellInAreas"
+        },
+        {
+            "elements": [
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "responsivenessRating",
+                    "title": "How would you rate the responsiveness of our team?",
+                    "subtitle": "Did we turn information around quickly and always respond in a timely manner?",
+                    "instructions": "Click or drag on the rating bar.",
+                    "low": "Not responsive",
+                    "high": "Very responsive",
+                    "required": true
+                }
+            ],
+            "name": "responsivenessRating"
+        },
+
+
+        {
+            "elements": [
+                {
+                    "type": "text",
+                    "name": "que4st4io183n239",
+                    "title": "Describe some stuff that happened to you please.",
+                    "instructions": "Required",
+                    "placeholder": "Type your stuff here"
+                }
+            ],
+            "name": "page2"
+        },
+        {
+            "elements": [
+                {
+                    "type": "text",
+                    "name": "que4st4io1n239",
+                    "modifier": "multiline",
+                    "title": "Describe some stuff that happened to you please.",
+                    "instructions": "Required",
+                    "required": true,
+                    "placeholder": "Type your stuff here",
+                    "wordcountlabel": "Words",
+                    "wordcountmaxlabel": "Words left",
+                    "limits": {
+                        "word": {
+                            "min": 2,
+                            "max": 4
+                        }
+                    }
+                }
+            ],
+            "name": "page3"
+        },
+        {
+            "elements": [
+                {
+                    "type": "checkbox",
+                    "choices": [
+                        "Cost",
+                        "Basic product / service features",
+                        "Does not deliver business value",
+                        "Timeliness of delivery",
+                        "Customer service",
+                        "Not related to Company X (external factors)"
+                    ],
+                    "limits": {
+                        "min": 2,
+                        "max": 3
+                    },
+                    "name": "question391838",
+                    "title": "Rank the main reasons why you did not buy from Company X?",
+                    "instructions": "Pick at least 2 but no more than 3.",
+                    "required": true,
+                    "other": true,
+                    "otherplaceholder": "Other reason"
+                }
+            ],
+            "name": "page2"
+        },
         {
             "elements": [
                 {
@@ -28,7 +273,7 @@
                 }
             ],
             "name": "page4"
-        }, 
+        },
         {
             "elements": [
                 {
@@ -41,17 +286,18 @@
                         "Customer service",
                         "Widget Compliance"
                     ],
-                    "name": "question38920",
+                    "name": "sortQ3838",
                     "title": "Hey ${questdion4832219[1]}, Please rank the following attributes in order of importance",
                     "instructions": "Drag with your mouse or finger",
                     "required": false,
+                    "random": true,
                     "other": true,
                     "otherplaceholder": "Other reason",
                     "displayNumber": true
                 }
             ],
             "name": "page1"
-        },    
+        },
         {
             "elements": [
                 {
@@ -67,25 +313,7 @@
                 }
             ],
             "name": "page2"
-        },     
-        {
-            "elements": [
-                {
-                    "type": "dropdown",
-                    "choices": [
-                        "I was distracted by a pretty bird.",
-                        "I have no money and live with my mom.",
-                        "I'm not even sure what day this is."
-                    ],
-                    "name": "questio8393n4",
-                    "title": "fourth Rank the main reasons why you did not buy from Company X?",
-                    "instructions": "Please choose the thing that is the best thing.",
-                    "required": true,
-                    "placeholder": "Choose your favorite..."                    
-                }
-            ],
-            "name": "page3"
-        },
+        },        
         {
             "elements": [
                 {
@@ -100,7 +328,7 @@
                 }
             ],
             "name": "page2"
-        },   
+        },
         {
             "elements": [
                 {
@@ -193,8 +421,10 @@
                         "Customer service",
                         "Not related to Company X (external factors)"
                     ],
-                    "minanswers": 2,
-                    "maxanswers": 3,
+                    "limits": {
+                        "min": 2,
+                        "max": 3
+                    },
                     "name": "question338",
                     "title": "Rank the main reasons why you did not buy from Company X?",
                     "instructions": "Pick at least 2 but no more than 3.",
@@ -204,21 +434,6 @@
                 }
             ],
             "name": "page2"
-        },        
-        {
-            "elements": [
-                {
-                    "type": "rating",
-                    "modifier": "stars",
-                    "name": "question334",
-                    "title": "How good is the place you went with the people?",
-                    "instructions": "Please choose the thing that is the best thing.",
-                    "low": "Bad",
-                    "high": "Good",
-                    "required": true
-                }
-            ],
-            "name": "page1"
         },
         {
             "elements": [
@@ -255,14 +470,33 @@
                 }
             ],
             "name": "page2"
-        },              
+        },
+        {
+            "elements": [
+                {
+                    "type": "dropdown",
+                    "choices": [
+                        "I was distracted by a pretty bird.",
+                        "I have no money and live with my mom.",
+                        "I'm not even sure what day this is."
+                    ],
+                    "name": "questio8393n4",
+                    "title": "fourth Rank the main reasons why you did not buy from Company X?",
+                    "instructions": "Please choose the thing that is the best thing.",
+                    "required": true,
+                    "random": true,
+                    "placeholder": "Choose your favorite..."
+                }
+            ],
+            "name": "page3"
+        },
         {
             "elements": [
                 {
                     "type": "rating",
                     "modifier": "buttons",
                     "name": "question3873",
-                    "title": "Rank the main reasons why you did not buy from Company X?",
+                    "title": "Rank the main reafsons why you did not buy from Company X?",
                     "instructions": "Please choose the thing that is the best thing.",
                     "low": "Bad",
                     "high": "Good",
