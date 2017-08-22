@@ -1,6 +1,5 @@
 {
     "pages": [
-        
         {
             "elements": [
                 {
@@ -44,7 +43,7 @@
         {
             "elements": [
                 {
-                    "type": "checkbox",
+                    "type": "sort",
                     "choices": [
                         "Cost",
                         "Basic product / service features",
@@ -53,12 +52,9 @@
                         "Customer service",
                         "Not related to Company X (external factors)"
                     ],
-                    "limits": {
-                        "max": 2
-                    },
                     "name": "whyNotSelected",
-                    "title": "Choose the main reasons why Company X was not selected",
-                    "instructions": "Pick no more than two",
+                    "title": "Rank the main reasons why Company X was not selected",
+                    "instructions": "Click and drag to rank from high to low",
                     "required": true,
                     "other": true,
                     "random": true,
@@ -82,7 +78,8 @@
                     "required": true,
                     "random": true,
                     "other": true,
-                    "otherplaceholder": "Other factor"
+                    "otherplaceholder": "Other factor",
+                    "showIf": "whyNotSelected[5]<2"
                 }
             ],
             "name": "externalReasonsWhyNot"
@@ -102,7 +99,8 @@
                     "title": "What was your ideal maximum timeline for delivery?",
                     "instructions": "Pick one",
                     "required": true,
-                    "other": false
+                    "other": false,
+                    "showIf": "whyNotSelected[3]<2"
                 }
             ],
             "name": "desiredTimeline"
@@ -123,10 +121,37 @@
                     "required": true,
                     "random": true,
                     "other": true,
-                    "otherplaceholder": "Other feature"
+                    "otherplaceholder": "Other feature",
+                    "showIf": "whyNotSelected[1]<2"
                 }
             ],
             "name": "missingFeature"
+        },
+        {
+            "elements": [
+                {
+                    "type": "dropdown",
+                    "choices": [
+                        "Flat fee",
+                        "Annual subscription", 
+                        "% rate",
+                        "Price per volume"
+                    ],
+                    "name": "pricingModel",
+                    "title": "What was the ideal pricing for you?  Please share any other details that you're able.",
+                    "instructions": "Choose from the list",
+                    "required": true
+                },
+                {
+                    "type": "text",
+                    "name": "flatFeeAmount",
+                    "subtitle": "Specifically how much (approx)?",
+                    "placeholder": "$0.00",
+                    "showIf": "pricingModel=0"
+                }
+            ],
+            "showIf": "whyNotSelected[0]<2",
+            "name": "pricing"
         },
         {
             "elements": [
@@ -193,6 +218,52 @@
             ],
             "name": "responsivenessRating"
         },
+        {
+            "elements": [
+                {
+                    "type": "multitext",
+                    "name": "vendorRankings",
+                    "title": "List vendors you considered from best to worst where #1 is the winning vendor.",
+                    "instructions": "Required",
+                    "required": false,
+                    "choices": [
+                        "Vendor #1",
+                        "Vendor #2",
+                        "Vendor #3",
+                        "Vendor #4"
+                    ]
+                }
+            ],
+            "name": "vendorRankings"
+        },
+        {
+            "elements": [
+                {
+                    "type": "checkbox",
+                    "choices": [
+                        "Trust & relationship",
+                        "Cost",
+                        "Product / service features",
+                        "Meets business goals",
+                        "Timeliness of delivery",
+                        "Staff & customer service"
+                    ],
+                    "limits": {
+                        "max": 3
+                    },
+                    "name": "whyChoseAlternateVendor",
+                    "title": "Select main reasons why you chose ${^vendorRankings[0]}.",
+                    "instructions": "Pick up to three",
+                    "required": true,
+                    "random": true,
+                    "other": true,
+                    "otherplaceholder": "Other",
+                    "showIf": "vendorRankings[0]*="
+                }
+            ],
+            "name": "whyChoseAlternateVendor"
+        },
+
 
 
         {
@@ -200,7 +271,7 @@
                 {
                     "type": "text",
                     "name": "que4st4io183n239",
-                    "title": "Describe some stuff that happened to you please.",
+                    "title": "Describe some stuff that happened to you please ${vendorRankings[0]}.",
                     "instructions": "Required",
                     "placeholder": "Type your stuff here"
                 }
@@ -313,7 +384,7 @@
                 }
             ],
             "name": "page2"
-        },        
+        },
         {
             "elements": [
                 {
@@ -362,25 +433,7 @@
                 }
             ],
             "name": "page4"
-        },
-        {
-            "elements": [
-                {
-                    "type": "dropdown",
-                    "choices": [
-                        "I was distracted by a pretty bird.",
-                        "I have no money and live with my mom.",
-                        "I'm not even sure what day this is."
-                    ],
-                    "name": "questio3n4",
-                    "title": "Rank the main reasons why you did not buy from Company X?",
-                    "instructions": "Please choose the thing that is the best thing.",
-                    "required": true,
-                    "placeholder": "Choose your favorite..."
-                }
-            ],
-            "name": "page4"
-        },
+        },        
         {
             "elements": [
                 {
