@@ -296,6 +296,18 @@ OrganizationInvitation.prototype.DeclineInvite = function (cfg, defaultFrom, ema
 };
 
 /**
+ * Delete all
+ */
+OrganizationInvitation.DeleteAll = function (cfg, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid != NULL', function () {
+        cb();
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
  * Delete an invitation
  */
 OrganizationInvitation.prototype.Delete = function (cfg, cb) {

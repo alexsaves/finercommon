@@ -54,6 +54,18 @@ ResetPWInvitations.DeleteForAccountId = function (cfg, accountid, cb) {
 };
 
 /**
+ * Delete all
+ */
+ResetPWInvitations.DeleteAll = function (cfg, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid != NULL', function () {
+        cb();
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
 * Create an invitation
 */
 ResetPWInvitations.Create = function (cfg, details, cb) {
