@@ -28,6 +28,30 @@
         {
             "elements": [
                 {
+                    "type": "matrixradio",
+                    "choices": [
+                        "You",
+                        "Sally Smith (VP of Sales)",
+                        "Amy Johnson (Analyst)"
+                    ],
+                    "columns": [
+                        "Don't Know",
+                        "High",
+                        "Medium",
+                        "Low"
+                    ],
+                    "name": "howMuchInfluence",
+                    "title": "How much influence did each person on your team have on buying decision?",
+                    "instructions": "Rate each person on their overall influence.",
+                    "required": true,
+                    "random": true
+                }
+            ],
+            "name": "howWellInAreas"
+        },
+        {
+            "elements": [
+                {
                     "type": "rating",
                     "modifier": "stars",
                     "name": "overallRating",
@@ -45,12 +69,12 @@
                 {
                     "type": "sort",
                     "choices": [
-                        "Cost",
-                        "Basic product / service features",
-                        "Does not deliver business value",
+                        "Price",
+                        "Product / service features",
+                        "Does not meet our business goals / needs",
                         "Timeliness of delivery",
                         "Customer service",
-                        "Not related to Company X (external factors)"
+                        "External factors (nothing to do with Company X)"
                     ],
                     "name": "whyNotSelected",
                     "title": "Rank the main reasons why Company X was not selected",
@@ -68,9 +92,9 @@
                 {
                     "type": "checkbox",
                     "choices": [
-                        "Budget",
+                        "Budget limitations",
                         "Organizational restructing / leadership changes",
-                        "Strategic relationships with other vendors"
+                        "Existing relationships with competing vendors"
                     ],
                     "name": "externalReasonsWhyNot",
                     "title": "What were the external factors or reasons you did not buy?",
@@ -78,11 +102,11 @@
                     "required": true,
                     "random": true,
                     "other": true,
-                    "otherplaceholder": "Other factor",
-                    "showIf": "whyNotSelected[5]<2"
+                    "otherplaceholder": "Other factor"
                 }
             ],
-            "name": "externalReasonsWhyNot"
+            "name": "externalReasonsWhyNot",
+            "showIf": "whyNotSelected[5]<2"
         },
         {
             "elements": [
@@ -99,33 +123,32 @@
                     "title": "What was your ideal maximum timeline for delivery?",
                     "instructions": "Pick one",
                     "required": true,
-                    "other": false,
-                    "showIf": "whyNotSelected[3]<2"
+                    "other": false
                 }
             ],
-            "name": "desiredTimeline"
+            "name": "desiredTimeline",
+            "showIf": "whyNotSelected[3]<2"
         },
         {
             "elements": [
                 {
                     "type": "radio",
                     "choices": [
-                        "Reporting & analytics",
-                        "Flexibility & customization",
-                        "Scheduled alerts & notifications",
-                        "Integration with other vendors"
+                        "Overall quality",
+                        "Integrates to other systems",
+                        "Missing key features"
                     ],
                     "name": "missingFeature",
-                    "title": "What was the key missing product / service feature?",
+                    "title": "What were the primary product / service features that influenced your decision not to buy?",
                     "instructions": "Pick one",
                     "required": true,
                     "random": true,
                     "other": true,
-                    "otherplaceholder": "Other feature",
-                    "showIf": "whyNotSelected[1]<2"
+                    "otherplaceholder": "Other. Please explain"
                 }
             ],
-            "name": "missingFeature"
+            "name": "missingFeature",
+            "showIf": "whyNotSelected[1]<2"
         },
         {
             "elements": [
@@ -133,25 +156,59 @@
                     "type": "dropdown",
                     "choices": [
                         "Flat fee",
-                        "Annual subscription", 
+                        "Annual subscription",
                         "% rate",
                         "Price per volume"
                     ],
                     "name": "pricingModel",
-                    "title": "What was the ideal pricing for you?  Please share any other details that you're able.",
+                    "title": "What was the ideal pricing for you?  Please share any other relevant details about pricing that played a role.",
                     "instructions": "Choose from the list",
                     "required": true
                 },
                 {
                     "type": "text",
-                    "name": "flatFeeAmount",
+                    "modifier": "number",
+                    "name": "flatFeeAmountDetails",
                     "subtitle": "Specifically how much (approx)?",
                     "placeholder": "$0.00",
                     "showIf": "pricingModel=0"
+                },
+                {
+                    "type": "text",
+                    "modifier": "multiline",
+                    "name": "annualSubscriptionDetails",
+                    "subtitle": "What type of annual subscription pricing would you propose?",
+                    "showIf": "pricingModel=1"
+                },
+                {
+                    "type": "text",
+                    "modifier": "multiline",
+                    "name": "percentageRateDetails",
+                    "subtitle": "How would a % pricing model look, ideally?",
+                    "showIf": "pricingModel=2"
+                },
+                {
+                    "type": "text",
+                    "modifier": "multiline",
+                    "name": "pricePerVolumeDetails",
+                    "subtitle": "How would a price-per-volume pricing model look, ideally?",
+                    "showIf": "pricingModel=3"
                 }
             ],
             "showIf": "whyNotSelected[0]<2",
             "name": "pricing"
+        },
+        {
+            "elements": [
+                {
+                    "type": "text",
+                    "modifier": "multiline",
+                    "name": "otherReasonsNoBuy",
+                    "title": "You said there were other reasons you were not able to buy; would you tell us more about those?"
+                }
+            ],
+            "name": "otherReasonsNoBuy",
+            "showIf": "whyNotSelected[OTHER]<2"
         },
         {
             "elements": [
@@ -221,17 +278,20 @@
         {
             "elements": [
                 {
-                    "type": "multitext",
-                    "name": "vendorRankings",
-                    "title": "List vendors you considered from best to worst where #1 is the winning vendor.",
-                    "instructions": "Required",
-                    "required": false,
+                    "type": "sort",
                     "choices": [
-                        "Vendor #1",
-                        "Vendor #2",
-                        "Vendor #3",
-                        "Vendor #4"
-                    ]
+                        "Preloaded Competitor A",
+                        "Preloaded Competitor B",
+                        "Preloaded Competitor C",
+                        "No Vendor Chosen"
+                    ],
+                    "name": "vendorRankings",
+                    "title": "Please list the vendors in order from best to worst starting with the winning vendor as #1",
+                    "instructions": "Click and drag to rank from high to low",
+                    "required": true,
+                    "other": true,
+                    "random": true,
+                    "otherplaceholder": "Other vendor"
                 }
             ],
             "name": "vendorRankings"
@@ -257,15 +317,12 @@
                     "required": true,
                     "random": true,
                     "other": true,
-                    "otherplaceholder": "Other",
-                    "showIf": "vendorRankings[0]*="
+                    "otherplaceholder": "Other"                    
                 }
             ],
-            "name": "whyChoseAlternateVendor"
+            "name": "whyChoseAlternateVendor",
+            "showIf": "vendorRankings[0]!=3"
         },
-
-
-
         {
             "elements": [
                 {
@@ -433,7 +490,7 @@
                 }
             ],
             "name": "page4"
-        },        
+        },
         {
             "elements": [
                 {
