@@ -283,7 +283,7 @@
                         "Preloaded Competitor A",
                         "Preloaded Competitor B",
                         "Preloaded Competitor C",
-                        "No Vendor Chosen"
+                        "_No Vendor Chosen"
                     ],
                     "name": "vendorRankings",
                     "title": "Please list the vendors in order from best to worst starting with the winning vendor as #1",
@@ -317,12 +317,16 @@
                     "required": true,
                     "random": true,
                     "other": true,
-                    "otherplaceholder": "Other"                    
+                    "otherplaceholder": "Other"
                 }
             ],
             "name": "whyChoseAlternateVendor",
-            "showIf": "vendorRankings[0]!=3"
+            "showIf": "vendorRankings[3]!=0"
         },
+
+
+
+
         {
             "elements": [
                 {
