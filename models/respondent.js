@@ -18,20 +18,28 @@ var Respondent = function (details) {
  */
 Respondent.prototype.setTimeZone = function (cfg, tz, cb) {
     cb = cb || function () {};
-    this.time_zone = parseInt(tz);
-    var query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET time_zone = ? WHERE id = ?',
-        params = [this.time_zone, this.id];
-    dbcmd.cmd(cfg.pool, query, params, function (result) {
-        cb(null, this);
-    }.bind(this), function (err) {
-        cb(err);
-    });
+    tz = parseInt(tz);
+    if (!isNaN(tz) && tz != this.time_zone) {
+        this.time_zone = tz;
+        var query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET time_zone = ? WHERE id = ?',
+            params = [this.time_zone, this.id];
+        dbcmd.cmd(cfg.pool, query, params, function (result) {
+            cb(null, this);
+        }.bind(this), function (err) {
+            cb(err);
+        });
+    } else {
+        process.nextTick(() => {
+            cb(null, this);
+        });
+    }
 };
 
 /**
  * Apply and save to the DB the answers for a survey
  */
 Respondent.prototype.applyAnswersForSurvey = function (cfg, survey, data, cb) {
+    console.log("applyAnswers", data);
     cb = cb || function () {};
     if (arguments < 4) {
         throw new Error("applyAnswersForSurvey: missing some arguments.");
