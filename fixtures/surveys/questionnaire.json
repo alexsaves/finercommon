@@ -8,7 +8,17 @@
                     "image": {
                         "url": "/static/assets/logos/finerink.svg",
                         "modifier": "SMALL"
-                    }
+                    },
+                    "showIf": "surveyTheme=bokehlight"
+                },
+                {
+                    "type": "none",
+                    "name": "logoImg",
+                    "image": {
+                        "url": "/static/assets/logos/finerink_w.svg",
+                        "modifier": "SMALL"
+                    },
+                    "showIf": "surveyTheme=bokehdark"
                 },
                 {
                     "type": "buttons",
@@ -76,7 +86,7 @@
                     ],
                     "name": "externalReasonsWhyNot",
                     "title": "What was the primary external factor that influenced your decision?",
-                    "instructions": "Pick at least one.",
+                    "instructions": "Pick one, and any details you are able.",
                     "required": true,
                     "random": true,
                     "other": true,
