@@ -39,13 +39,13 @@ Respondent.prototype.setTimeZone = function (cfg, tz, cb) {
  * Apply and save to the DB the answers for a survey
  */
 Respondent.prototype.applyAnswersForSurvey = function (cfg, survey, data, cb) {
-    console.log("applyAnswers", data);
     cb = cb || function () {};
     if (arguments < 4) {
         throw new Error("applyAnswersForSurvey: missing some arguments.");
     } else {
+        console.log("1");
         var okeys = Object.keys(data),
-            existingResponses = Response.GetByRespondentAndSurvey(cfg, this.id, survey.guid, function (err, responses) {
+            existingResponses = Response.GetByRespondentAndSurvey(cfg, this.id, survey.guid, (err, responses) => {
                 if (err) {
                     cb(err);
                 } else {
@@ -56,14 +56,15 @@ Respondent.prototype.applyAnswersForSurvey = function (cfg, survey, data, cb) {
                     }, 10000);
                     commitProm.make(okeys);
                     for (let i = 0; i < okeys.length; i++) {
-                        var questionkey = okeys[i],
-                            qdef = survey.getQuestionById(questionkey);
+                        var questionname = okeys[i],
+                            qdef = survey.getQuestionByName(questionname);
+                        console.log("Looking for", questionname, qdef);
                         if (!qdef) {
-                            cb(new Error("Could not find question id " + questionkey + " in survey " + survey.guid + "."));
+                            cb(new Error("Could not find question id " + questionname + " in survey " + survey.guid + "."));
                             return;
                         } else {
-                            let existingResponse = responses.getFirstMatching({q_id: questionkey});
-
+                            let existingResponse = responses.getFirstMatching({name: questionname});
+return;
                             if (!existingResponse) {
                                 // New response, let's set it up
                                 Response
@@ -79,7 +80,7 @@ Respondent.prototype.applyAnswersForSurvey = function (cfg, survey, data, cb) {
                                             } else {
                                                 if (utils.isOtherLabel(key)) {
                                                     resp
-                                                        .updateWithOtherResponse(cfg, data[key], qdef, function (err, resp) {
+                                                        .updateWithOtherResponse(cfg, data[key], qdef, (err, resp) => {
                                                             if (err) {
                                                                 commitProm.break(key);
                                                             } else {
@@ -88,7 +89,7 @@ Respondent.prototype.applyAnswersForSurvey = function (cfg, survey, data, cb) {
                                                         });
                                                 } else {
                                                     resp
-                                                        .updateWithResponse(cfg, data[key], qdef, function (err, resp) {
+                                                        .updateWithResponse(cfg, data[key], qdef, (err, resp) => {
                                                             if (err) {
                                                                 commitProm.break(key);
                                                             } else {
@@ -127,7 +128,7 @@ Respondent.prototype.applyAnswersForSurvey = function (cfg, survey, data, cb) {
                         }
                     }
                 }
-            }.bind(this));
+            });
     }
 };
 
