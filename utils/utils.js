@@ -11,17 +11,6 @@ var utils = {
             str = str.substr(0, len);
         }
         return str;
-    },
-
-    /**
-     * Is this question name for an "other"
-     */
-    isOtherLabel: function(label) {
-        if (label.length > ("-Comment".length) && label.indexOf('-Comment') > -1) {
-            return true;
-        } else {
-            return false;
-        }
     }
 };
 

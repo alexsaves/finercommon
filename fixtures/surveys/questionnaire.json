@@ -274,7 +274,7 @@
                 {
                     "type": "rating",
                     "modifier": "slider",
-                    "name": "responsivenessRating",
+                    "name": "frequencyRating",
                     "title": "Please rate the team at ${companyName} on:",
                     "subtitle": "Frequency of contact",
                     "low": "Not enough",

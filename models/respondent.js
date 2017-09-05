@@ -43,29 +43,40 @@ Respondent.prototype.applyAnswersForSurvey = function (cfg, survey, data, cb) {
     if (arguments < 4) {
         throw new Error("applyAnswersForSurvey: missing some arguments.");
     } else {
-        console.log("1");
-        var okeys = Object.keys(data),
-            existingResponses = Response.GetByRespondentAndSurvey(cfg, this.id, survey.guid, (err, responses) => {
-                if (err) {
-                    cb(err);
+        var ctx = this;
+        Response.GetByRespondentAndSurvey(cfg, this.id, survey.guid, (err, responses) => {
+            if (err) {
+                console.log(err);
+                cb(err);
+            } else {
+                // Add the new response collection
+                responses.integrateNewAnswers(cfg, survey, data, ctx);
+                responses.commit(cfg, (err) => {                    
+                    if (err) {
+                        cb(err);
+                    } else {
+                        cb(null, ctx);
+                    }
+                });
+
+                /*var commitProm = new promise(function () {
+                    cb(null, {});
+                }, function () {
+                    cb(new Error("Did not save responses."));
+                }, 10000);
+                commitProm.make(okeys);
+                for (let i = 0; i < okeys.length; i++) {
+                    var questionname = okeys[i],
+                        qdef = survey.getQuestionByName(questionname);
+                    */
+                /*if (!qdef) {
+                    cb(new Error("Could not find question id " + questionname + " in survey " + survey.guid + "."));
+                    return;
                 } else {
-                    var commitProm = new promise(function () {
-                        cb(null, {});
-                    }, function () {
-                        cb(new Error("Did not save responses."));
-                    }, 10000);
-                    commitProm.make(okeys);
-                    for (let i = 0; i < okeys.length; i++) {
-                        var questionname = okeys[i],
-                            qdef = survey.getQuestionByName(questionname);
-                        console.log("Looking for", questionname, qdef);
-                        if (!qdef) {
-                            cb(new Error("Could not find question id " + questionname + " in survey " + survey.guid + "."));
-                            return;
-                        } else {
-                            let existingResponse = responses.getFirstMatching({name: questionname});
-return;
-                            if (!existingResponse) {
+                    let existingResponse = responses.getAllMatching({name: questionname});
+                    console.log("EXISTING:", existingResponse);
+                    return;*/
+                /*if (!existingResponse) {
                                 // New response, let's set it up
                                 Response
                                     .Create(cfg, {
@@ -79,23 +90,21 @@ return;
                                                 commitProm.break(key);
                                             } else {
                                                 if (utils.isOtherLabel(key)) {
-                                                    resp
-                                                        .updateWithOtherResponse(cfg, data[key], qdef, (err, resp) => {
-                                                            if (err) {
-                                                                commitProm.break(key);
-                                                            } else {
-                                                                commitProm.resolve(key);
-                                                            }
-                                                        });
+                                                    resp.updateWithOtherResponse(cfg, data[key], qdef, (err, resp) => {
+                                                        if (err) {
+                                                            commitProm.break(key);
+                                                        } else {
+                                                            commitProm.resolve(key);
+                                                        }
+                                                    });
                                                 } else {
-                                                    resp
-                                                        .updateWithResponse(cfg, data[key], qdef, (err, resp) => {
-                                                            if (err) {
-                                                                commitProm.break(key);
-                                                            } else {
-                                                                commitProm.resolve(key);
-                                                            }
-                                                        });
+                                                    resp.updateWithResponse(cfg, data[key], qdef, (err, resp) => {
+                                                        if (err) {
+                                                            commitProm.break(key);
+                                                        } else {
+                                                            commitProm.resolve(key);
+                                                        }
+                                                    });
                                                 }
                                             }
                                         };
@@ -124,11 +133,10 @@ return;
                                             };
                                         }(questionkey));
                                 }
-                            }
-                        }
-                    }
-                }
-            });
+                            }*/
+                //} }
+            }
+        });
     }
 };
 
