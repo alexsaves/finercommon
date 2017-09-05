@@ -313,6 +313,35 @@
                 }
             ],
             "name": "vendorRankings"
+        },
+        {
+            "elements": [
+                {
+                    "name": "thanks",
+                    "type": "none",
+                    "title": "Thanks for assisting!",
+                    "subtitle": "Interested in win / loss analysis?"
+                },
+                {
+                    "type": "none",
+                    "name": "logoImg",
+                    "image": {
+                        "url": "/static/assets/logos/finerink.svg",
+                        "modifier": "SMALL"
+                    },
+                    "showIf": "surveyTheme=bokehlight"
+                },
+                {
+                    "type": "none",
+                    "name": "logoImg",
+                    "image": {
+                        "url": "/static/assets/logos/finerink_w.svg",
+                        "modifier": "SMALL"
+                    },
+                    "showIf": "surveyTheme=bokehdark"
+                }
+            ],
+            "hideLogo": true
         }
     ]
 }
