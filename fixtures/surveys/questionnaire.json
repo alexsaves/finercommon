@@ -33,7 +33,8 @@
                     ]
                 }
             ],
-            "hideLogo": true
+            "hideLogo": true,
+            "hidePagination": true
         },
         {
             "elements": [
@@ -317,9 +318,26 @@
         {
             "elements": [
                 {
-                    "name": "thanks",
                     "type": "none",
-                    "title": "Thanks for assisting!",
+                    "name": "thanksImg",
+                    "image": {
+                        "url": "/static/assets/other/thanks.svg",
+                        "modifier": "MEDIUM"
+                    },
+                    "showIf": "surveyTheme=bokehlight"
+                },
+                {
+                    "type": "none",
+                    "name": "thanksImg",
+                    "image": {
+                        "url": "/static/assets/other/thanks_w.svg",
+                        "modifier": "MEDIUM"
+                    },
+                    "showIf": "surveyTheme=bokehdark"
+                },
+                {
+                    "name": "interest",
+                    "type": "none",
                     "subtitle": "Interested in win / loss analysis?"
                 },
                 {
@@ -327,7 +345,9 @@
                     "name": "logoImg",
                     "image": {
                         "url": "/static/assets/logos/finerink.svg",
-                        "modifier": "SMALL"
+                        "modifier": "SMALL",
+                        "link": "https://www.finer.ink",
+                        "title": "Automated win / loss analysis with FinerInk"
                     },
                     "showIf": "surveyTheme=bokehlight"
                 },
@@ -336,7 +356,9 @@
                     "name": "logoImg",
                     "image": {
                         "url": "/static/assets/logos/finerink_w.svg",
-                        "modifier": "SMALL"
+                        "modifier": "SMALL",
+                        "link": "https://www.finer.ink",
+                        "title": "Automated win / loss analysis with FinerInk"
                     },
                     "showIf": "surveyTheme=bokehdark"
                 }
