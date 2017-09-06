@@ -37,13 +37,10 @@ Survey.prototype.commit = function (cfg, cb) {
 /**
  * Get a question object by its id
  */
-Survey.prototype.getQuestionById = function (id) {
+Survey.prototype.getQuestionByName = function (name) {
     if (this.survey_model) {
         var pgs = this.survey_model.pages;
-        var _id = id + '';
-        if (utils.isOtherLabel(_id)) {
-            _id = _id.split('-Comment')[0];
-        }
+        var _id = name + '';
         for (let i = 0; i < pgs.length; i++) {
             let pg = pgs[i],
                 qs = pg.elements;

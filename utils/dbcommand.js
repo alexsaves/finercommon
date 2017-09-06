@@ -65,11 +65,12 @@ var cmd = function (pool, dbcmd, args, callback, errorcallback) {
           // And done with the connection.
           connection.release();
 
-          if (queryTime > 500) {
+          if (queryTime > 750) {
             console.log("LONG QUERY TIME: @" + (new Date()).toString(), queryTime);
           }
 
           if (err) {
+            console.log("ERROR ON", dbcmd, args);
             console.log(new Date(), connectionAcquisitionTime, "DB DCMD ERROR ON QUERY @" + (new Date()).toString(), cmd, err);
             if (errorcallback) {
               errorcallback(err);
