@@ -95,6 +95,11 @@ Response.prototype.updateWithResponse = function (details, qdef) {
                     this.other_openend = details.other || ""
                 }
                 break;
+            case "dropdown":
+                this.intval = isNaN(parseInt(details))
+                    ? null
+                    : parseInt(details);
+                break;
             case "text":
                 this.openend = details;
                 break;
@@ -110,6 +115,13 @@ Response.prototype.updateWithResponse = function (details, qdef) {
                 }
                 break;
             case "matrixrating":
+                for (let k = 0; k < details.length; k++) {
+                    this["_int" + k] = isNaN(parseInt(details[k]))
+                        ? null
+                        : parseInt(details[k]);
+                }
+                break;
+            case "matrixradio":
                 for (let k = 0; k < details.length; k++) {
                     this["_int" + k] = isNaN(parseInt(details[k]))
                         ? null

@@ -322,7 +322,8 @@
                     "name": "thanksImg",
                     "image": {
                         "url": "/static/assets/other/thanks.svg",
-                        "modifier": "MEDIUM"
+                        "modifier": "MEDIUM",
+                        "title": "Thanks for your assistance!"
                     },
                     "showIf": "surveyTheme=bokehlight"
                 },
@@ -331,7 +332,8 @@
                     "name": "thanksImg",
                     "image": {
                         "url": "/static/assets/other/thanks_w.svg",
-                        "modifier": "MEDIUM"
+                        "modifier": "MEDIUM",
+                        "title": "Thanks for your assistance!"
                     },
                     "showIf": "surveyTheme=bokehdark"
                 },
