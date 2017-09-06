@@ -6,15 +6,11 @@ const utils = require('../utils/utils'),
  * @param {Array[Response]} resps (Optional)
  */
 var ResponseCollection = function (resps) {
+    this.responses = [];
     if (resps) {
         this.addResponses(resps);
     }
 };
-
-/**
- * Holds the actual responses
- */
-ResponseCollection.prototype.responses = [];
 
 /**
  * Add one or more responses
