@@ -1,14 +1,14 @@
 const dbcmd = require('../utils/dbcommand'),
     md5 = require('md5'),
-    extend = require('extend'),
-    ResponseCollection = require('../models/responsecollection'),
+    extend = require('extend'),    
     utils = require('../utils/utils'),
     tablename = 'responses',
     RESPONSE_STATES = {
         NEW: 0,
         COMMITTED: 1,
         UPDATED: 2
-    };
+    },
+    ResponseCollection = require('../models/responsecollection');
 
 /**
  * The Response class
@@ -247,7 +247,7 @@ Response.GetByRespondentAndSurvey = function (cfg, rid, sid, cb) {
         ], function (result) {
             var results = new ResponseCollection();
             for (let i = 0; i < result.length; i++) {
-                results.addResponses(new Response(result[i], RESPONSE_STATES.COMMITTED));
+                results.addResponses(new Response(Object.assign({}, result[i]), RESPONSE_STATES.COMMITTED));
             }
             cb(null, results);
         }, function (err) {
