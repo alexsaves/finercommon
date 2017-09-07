@@ -74,7 +74,8 @@
                     "otherplaceholder": "Type other reason"
                 }
             ],
-            "name": "reasonsWhyNot"
+            "name": "reasonsWhyNot",
+            "isStartable": true
         },
         {
             "elements": [
