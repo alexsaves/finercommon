@@ -23,7 +23,6 @@
                 {
                     "type": "buttons",
                     "title": "Help us help ${companyName} improve your buying experience. Your feedback is greatly appreciated.",
-                    "subtitle": "Your name will not be associated with your responses.",
                     "name": "intro",
                     "choices": [
                         {
@@ -95,10 +94,15 @@
                     "otherplaceholder": "Type other factor"
                 },
                 {
+                    "type": "hr",
+                    "showIf": "externalReasonsWhyNot*="
+                },
+                {
                     "type": "text",
                     "modifier": "multiline",
                     "name": "externalReasonsDetails",
                     "placeholder": "Any additional details? Enter them here.",
+                    "background": true,
                     "showIf": "externalReasonsWhyNot*="
                 }
             ],
@@ -168,7 +172,7 @@
                         "Reporting and analytics"
                     ],
                     "name": "missingFeature",
-                    "title": "What were the key missing product / service feature?",
+                    "title": "What was the key missing product / service feature?",
                     "instructions": "Pick one.",
                     "required": true,
                     "random": true,
@@ -303,10 +307,11 @@
                         "Preloaded Competitor A",
                         "Preloaded Competitor B",
                         "Preloaded Competitor C",
+                        "${companyName}",
                         "_No Vendor Chosen"
                     ],
                     "name": "vendorRankings",
-                    "title": "Please list the vendors in order from best to worst starting with the winning vendor as #1",
+                    "title": "Rank the vendors from best to worst starting with the winning vendor as #1",
                     "instructions": "Click and drag to rank from high to low",
                     "required": true,
                     "other": true,
@@ -315,6 +320,238 @@
                 }
             ],
             "name": "vendorRankings"
+        },
+        {
+            "elements": [
+                {
+                    "type": "checkbox",
+                    "choices": [
+                        "Trusted relationship",
+                        "Cost",
+                        "Product / service features",
+                        "Meets business needs",
+                        "Timeliness",
+                        "Customer service"
+                    ],
+                    "name": "reasonsWhyWinnerChosen",
+                    "title": "Select the main reasons why you chose ${vendorRankings[0]}",
+                    "instructions": "Pick all that apply.",
+                    "required": true,
+                    "other": true,
+                    "random": true,
+                    "otherplaceholder": "Type other reason"
+                },
+                {
+                    "type": "hr"
+                },
+                {
+                    "type": "text",
+                    "modifier": "multiline",
+                    "name": "reasonsWhyWinnerChosenMore",
+                    "background": true,
+                    "placeholder": "Any additional details? Enter them here."
+                }
+            ],
+            "name": "reasonsWhyWinnerChosen",
+            "showIf": [
+                "vendorRankings[3]>0",
+                "vendorRankings[4]>0"
+            ]
+        },
+        {
+            "elements": [
+                {
+                    "type": "matrixrating",
+                    "choices": [
+                        "Ease of doing business",
+                        "Product / service quality",
+                        "Industry leadership",
+                        "Meet commitments and promises",
+                        "Act as a valued partner"
+                    ],
+                    "name": "rateWinningVendor",
+                    "title": "Compares to your ideal vendor, rate ${companyName} on the following areas.",
+                    "instructions": "Rate how well they did in each area.",
+                    "required": true,
+                    "random": true,
+                    "low": "Poor",
+                    "high": "Excellent"
+                }
+            ],
+            "name": "rateWinningVendor",
+            "showIf": [
+                "vendorRankings[3]>0",
+                "vendorRankings[4]>0"
+            ]
+        },
+        {
+            "elements": [
+                {
+                    "type": "multitext",
+                    "choices": [
+                        "Name and title",
+                        "Name and title",
+                        "Name and title",
+                        "Name and title"
+                    ],
+                    "name": "majorPlayersList",
+                    "title": "In addition to these people: ${decisionMakerList}; who else played a role in the buying decision?",
+                    "required": false
+                }
+            ],
+            "name": "majorPlayersList"
+        },
+        {
+            "elements": [
+                {
+                    "type": "none",
+                    "name": "decisionMaker1InfluenceTitle",
+                    "title": "How much influence did these team members have on the buying decision?",
+                    "instructions": "Rate low to high"                    
+                },
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "decisionMaker1Influence",
+                    "subtitle": "${decisionMaker1}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "decisionMaker1*="
+                },
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "decisionMaker2Influence",
+                    "subtitle": "${decisionMaker2}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "decisionMaker2*="
+                },
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "decisionMaker3Influence",
+                    "subtitle": "${decisionMaker3}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "decisionMaker3*="
+                },
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "decisionMaker4Influence",
+                    "subtitle": "${decisionMaker4}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "decisionMaker4*="
+                },
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "decisionMaker5Influence",
+                    "subtitle": "${decisionMaker5}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "decisionMaker5*="
+                },
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "decisionMakerCustom1Influence",
+                    "subtitle": "${majorPlayersList[0]}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "majorPlayersList[0]*="
+                },
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "decisionMakerCustom2Influence",
+                    "subtitle": "${majorPlayersList[1]}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "majorPlayersList[1]*="
+                },
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "decisionMakerCustom2Influence",
+                    "subtitle": "${majorPlayersList[2]}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "majorPlayersList[2]*="
+                },
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "decisionMakerCustom3Influence",
+                    "subtitle": "${majorPlayersList[3]}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "majorPlayersList[3]*="
+                }
+            ],
+            "name": "majorPlayerRanking",
+            "hideLogo": true
+        },
+        {
+            "elements": [
+                {
+                    "type": "rating",
+                    "modifier": "buttons",
+                    "name": "reconnect",
+                    "title": "How likely are you consider ${companyName} in the future?",
+                    "low": "Not likely",
+                    "high": "Very likely",
+                    "required": true
+                }
+            ],
+            "name": "reconnect"
+        },
+        {
+            "elements": [
+                {
+                    "type": "text",
+                    "modifier": "multiline",
+                    "name": "onePieceAdvice",
+                    "title": "What is one piece of advice you have for ${companyName} to win more customers?",
+                    "placeholder": "Type here."
+                }
+            ],
+            "name": "onePieceAdvice"
+        },
+        {
+            "elements": [
+                {
+                    "type": "radio",
+                    "choices": [
+                        "No",
+                        "Yes"
+                    ],
+                    "name": "anonymity",
+                    "title": "Would you like us to keep your identity a secret?",
+                    "required": true
+                }
+            ],
+            "name": "anonymity"
         },
         {
             "elements": [
