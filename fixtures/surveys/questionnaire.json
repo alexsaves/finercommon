@@ -370,7 +370,7 @@
                         "Act as a valued partner"
                     ],
                     "name": "rateWinningVendor",
-                    "title": "Compares to your ideal vendor, rate ${companyName} on the following areas.",
+                    "title": "Compared to your ideal vendor, rate ${companyName} on the following areas.",
                     "instructions": "Rate how well they did in each area.",
                     "required": true,
                     "random": true,
@@ -603,7 +603,8 @@
                     "showIf": "surveyTheme=bokehdark"
                 }
             ],
-            "hideLogo": true
+            "hideLogo": true,
+            "hidePagination": true
         }
     ]
 }
