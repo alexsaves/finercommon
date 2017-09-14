@@ -87,7 +87,7 @@
                     ],
                     "name": "externalReasonsWhyNot",
                     "title": "What was the primary external factor that influenced your decision?",
-                    "instructions": "Pick one, and any details you are able.",
+                    "instructions": "Pick one.",
                     "required": true,
                     "random": true,
                     "other": true,
@@ -407,7 +407,7 @@
                     "type": "none",
                     "name": "decisionMaker1InfluenceTitle",
                     "title": "How much influence did these team members have on the buying decision?",
-                    "instructions": "Rate low to high"                    
+                    "instructions": "Rate low to high"
                 },
                 {
                     "type": "rating",
@@ -547,7 +547,7 @@
                         "Yes"
                     ],
                     "name": "anonymity",
-                    "title": "Would you like us to keep your identity a secret?",
+                    "title": "Would you like us to keep you anonymous?",
                     "required": true
                 }
             ],
@@ -576,9 +576,13 @@
                     "showIf": "surveyTheme=bokehdark"
                 },
                 {
-                    "name": "interest",
-                    "type": "none",
-                    "subtitle": "Interested in win / loss analysis?"
+                    "type": "link",
+                    "name": "interested",
+                    "link": {
+                        "url": "https://www.finer.ink",
+                        "modifier": "self",
+                        "title": "Interested in automated win/loss analysis?"
+                    }
                 },
                 {
                     "type": "none",
