@@ -12,6 +12,10 @@ var All = {
     FileUploads: require('../models/fileuploads'),
     ResetPWInvitations: require('../models/resetpwinvitations'),
     CRMIntegrations: require('../models/crmintegrations'),
+    CRMAccounts: require('../models/crmaccounts'),
+    CRMUsers: require('../models/crmusers'),
+    CRMOrganizations: require('../models/crmorganizations'),
+    CRMRoles: require('../models/crmroles'),
     Email: require('../models/email')
 };
 
