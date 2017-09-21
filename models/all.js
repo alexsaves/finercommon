@@ -12,13 +12,10 @@ var All = {
     FileUploads: require('../models/fileuploads'),
     ResetPWInvitations: require('../models/resetpwinvitations'),
     CRMIntegrations: require('../models/crmintegrations'),
-<<<<<<< HEAD
     CRMAccounts: require('../models/crmaccounts'),
     CRMUsers: require('../models/crmusers'),
     CRMOrganizations: require('../models/crmorganizations'),
     CRMRoles: require('../models/crmroles'),
-    Email: require('../models/email')
-=======
     Email: require('../models/email'),
     DeleteAll: function (cfg, cb) {
         console.log("Deleting all...");
@@ -123,7 +120,6 @@ var All = {
                 }
             })
     }
->>>>>>> origin/master
 };
 
 // Expose it
