@@ -126,6 +126,31 @@ Account.GetByEmailAndPassword = function (cfg, e, p, cb) {
     });
 };
 
+Account.GetAccountByFbid = (cfg, fbId, cb) => {
+    cb = cb || function () {};
+
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE fbid = ? LIMIT 1', [fbId], function (result) {
+        cb(result.length === 0
+            ? {
+                message: "No user found."
+            }
+            : null, result.length > 0
+            ? new Account(result[0])
+            : null);
+    }, function (err) {
+        cb(err);
+    });
+}
+
+/**
+ * Either return the account or create one if one does not exist
+ */
+Account.FindOrCreate = (cfg, opts) => {
+    if(opts.fbId) {
+        
+    }
+}
+
 /**
  * Get an account by its email
  */
