@@ -152,6 +152,18 @@ CRMIntegrations.GetByUId = function (cfg, id, cb) {
 };
 
 /**
+ * Delete all
+ */
+CRMIntegrations.DeleteAll = function (cfg, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid != NULL', function () {
+        cb();
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
 * Create an integration
 */
 CRMIntegrations.Create = function (cfg, details, cb) {

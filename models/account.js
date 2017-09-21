@@ -189,6 +189,18 @@ Account.GetById = function (cfg, id, cb) {
 };
 
 /**
+ * Delete all
+ */
+Account.DeleteAll = function (cfg, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id > 0', function () {
+        cb();
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
  * Create a user
  */
 Account.Create = function (cfg, details, cb) {

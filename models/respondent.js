@@ -18,14 +18,21 @@ var Respondent = function (details) {
  */
 Respondent.prototype.setTimeZone = function (cfg, tz, cb) {
     cb = cb || function () {};
-    this.time_zone = parseInt(tz);
-    var query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET time_zone = ? WHERE id = ?',
-        params = [this.time_zone, this.id];
-    dbcmd.cmd(cfg.pool, query, params, function (result) {
-        cb(null, this);
-    }.bind(this), function (err) {
-        cb(err);
-    });
+    tz = parseInt(tz);
+    if (!isNaN(tz) && tz != this.time_zone) {
+        this.time_zone = tz;
+        var query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET time_zone = ? WHERE id = ?',
+            params = [this.time_zone, this.id];
+        dbcmd.cmd(cfg.pool, query, params, function (result) {
+            cb(null, this);
+        }.bind(this), function (err) {
+            cb(err);
+        });
+    } else {
+        process.nextTick(() => {
+            cb(null, this);
+        });
+    }
 };
 
 /**
@@ -36,27 +43,40 @@ Respondent.prototype.applyAnswersForSurvey = function (cfg, survey, data, cb) {
     if (arguments < 4) {
         throw new Error("applyAnswersForSurvey: missing some arguments.");
     } else {
-        var okeys = Object.keys(data),
-            existingResponses = Response.GetByRespondentAndSurvey(cfg, this.id, survey.guid, function (err, responses) {
-                if (err) {
-                    cb(err);
-                } else {
-                    var commitProm = new promise(function () {
-                        cb(null, {});
-                    }, function () {
-                        cb(new Error("Did not save responses."));
-                    }, 10000);
-                    commitProm.make(okeys);
-                    for (let i = 0; i < okeys.length; i++) {
-                        var questionkey = okeys[i],
-                            qdef = survey.getQuestionById(questionkey);
-                        if (!qdef) {
-                            cb(new Error("Could not find question id " + questionkey + " in survey " + survey.guid + "."));
-                            return;
-                        } else {
-                            let existingResponse = responses.getFirstMatching({q_id: questionkey});
+        var ctx = this;
+        Response.GetByRespondentAndSurvey(cfg, this.id, survey.guid, (err, responses) => {
+            if (err) {
+                console.log(err);
+                cb(err);
+            } else {
+                // Add the new response collection
+                responses.integrateNewAnswers(cfg, survey, data, ctx);
+                responses.commit(cfg, (err) => {                    
+                    if (err) {
+                        cb(err);
+                    } else {
+                        cb(null, ctx);
+                    }
+                });
 
-                            if (!existingResponse) {
+                /*var commitProm = new promise(function () {
+                    cb(null, {});
+                }, function () {
+                    cb(new Error("Did not save responses."));
+                }, 10000);
+                commitProm.make(okeys);
+                for (let i = 0; i < okeys.length; i++) {
+                    var questionname = okeys[i],
+                        qdef = survey.getQuestionByName(questionname);
+                    */
+                /*if (!qdef) {
+                    cb(new Error("Could not find question id " + questionname + " in survey " + survey.guid + "."));
+                    return;
+                } else {
+                    let existingResponse = responses.getAllMatching({name: questionname});
+                    console.log("EXISTING:", existingResponse);
+                    return;*/
+                /*if (!existingResponse) {
                                 // New response, let's set it up
                                 Response
                                     .Create(cfg, {
@@ -70,23 +90,21 @@ Respondent.prototype.applyAnswersForSurvey = function (cfg, survey, data, cb) {
                                                 commitProm.break(key);
                                             } else {
                                                 if (utils.isOtherLabel(key)) {
-                                                    resp
-                                                        .updateWithOtherResponse(cfg, data[key], qdef, function (err, resp) {
-                                                            if (err) {
-                                                                commitProm.break(key);
-                                                            } else {
-                                                                commitProm.resolve(key);
-                                                            }
-                                                        });
+                                                    resp.updateWithOtherResponse(cfg, data[key], qdef, (err, resp) => {
+                                                        if (err) {
+                                                            commitProm.break(key);
+                                                        } else {
+                                                            commitProm.resolve(key);
+                                                        }
+                                                    });
                                                 } else {
-                                                    resp
-                                                        .updateWithResponse(cfg, data[key], qdef, function (err, resp) {
-                                                            if (err) {
-                                                                commitProm.break(key);
-                                                            } else {
-                                                                commitProm.resolve(key);
-                                                            }
-                                                        });
+                                                    resp.updateWithResponse(cfg, data[key], qdef, (err, resp) => {
+                                                        if (err) {
+                                                            commitProm.break(key);
+                                                        } else {
+                                                            commitProm.resolve(key);
+                                                        }
+                                                    });
                                                 }
                                             }
                                         };
@@ -115,11 +133,10 @@ Respondent.prototype.applyAnswersForSurvey = function (cfg, survey, data, cb) {
                                             };
                                         }(questionkey));
                                 }
-                            }
-                        }
-                    }
-                }
-            }.bind(this));
+                            }*/
+                //} }
+            }
+        });
     }
 };
 
@@ -136,6 +153,18 @@ Respondent.GetById = function (cfg, id, cb) {
             : null, result.length > 0
             ? new Respondent(result[0])
             : null);
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
+ * Delete all
+ */
+Respondent.DeleteAll = function (cfg, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id > 0', function () {
+        cb();
     }, function (err) {
         cb(err);
     });

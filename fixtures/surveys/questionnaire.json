@@ -1,362 +1,614 @@
 {
-    "pages": [{
-            "elements": [{
-                    "type": "rating",
-                    "name": "How involved were you on this conversation?",
-                    "rateValues": [{
-                            "value": "1",
-                            "text": "1 = Not Involved"
-                        },
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        {
-                            "value": "7",
-                            "text": "7 = Very Involved"
-                        }
-                    ]
+    "pages": [
+        {
+            "elements": [
+                {
+                    "type": "none",
+                    "name": "logoImg",
+                    "image": {
+                        "url": "/static/assets/logos/finerink.svg",
+                        "modifier": "SMALL"
+                    },
+                    "showIf": "surveyTheme=bokehlight"
                 },
                 {
-                    "type": "rating",
-                    "name": "How would you rate your overall experience with the product / service offering of X?",
-                    "rateValues": [{
-                            "value": "1",
-                            "text": "1 = Poor"
-                        },
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        {
-                            "value": "7",
-                            "text": "7 = Excellent"
-                        }
-                    ]
+                    "type": "none",
+                    "name": "logoImg",
+                    "image": {
+                        "url": "/static/assets/logos/finerink_w.svg",
+                        "modifier": "SMALL"
+                    },
+                    "showIf": "surveyTheme=bokehdark"
                 },
                 {
-                    "type": "matrix",
-                    "columns": [
-                        "Zero",
-                        "Low",
-                        "Med",
-                        "High"
-                    ],
-                    "name": "Who were the key people on your team that had influence on buying decision?",
-                    "rows": [
-                        "Contact 1",
-                        "Contact 2",
-                        "Other"
+                    "type": "buttons",
+                    "title": "Help us help ${companyName} improve your buying experience. Your feedback is greatly appreciated.",
+                    "name": "intro",
+                    "choices": [
+                        {
+                            "title": "Get started",
+                            "color": "green"
+                        }
                     ]
                 }
             ],
-            "name": "page1"
+            "hideLogo": true,
+            "hidePagination": true
         },
         {
-            "elements": [{
+            "elements": [
+                {
+                    "type": "rating",
+                    "modifier": "buttons",
+                    "name": "buyXRating",
+                    "title": "How was your overall buying experience with ${companyName}?",
+                    "low": "Poor",
+                    "high": "Excellent",
+                    "required": true
+                }
+            ],
+            "name": "buyXRating"
+        },
+        {
+            "elements": [
+                {
                     "type": "checkbox",
                     "choices": [
-                        "Understood our needs",
-                        "Communication skills",
-                        "Demo materials",
-                        "Product knowledge ",
-                        "Trusted relationship",
-                        "Frequency of contact  ",
-                        "Timeliness"
-                    ],
-                    "name": "Choose top 3 criteria that mattered most in your decision process"
-                },
-                {
-                    "type": "matrix",
-                    "columns": [
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        {
-                            "value": "0",
-                            "text": "Don't Know"
-                        }
-                    ],
-                    "name": "Rate how X did across your top 3 criteria.  (1 = Poor and 7 = Excellent)",
-                    "rows": [{
-                            "value": "1",
-                            "text": "Criteria 1"
-                        },
-                        {
-                            "value": "2",
-                            "text": "Criteria 2"
-                        },
-                        {
-                            "value": "3",
-                            "text": "Criteria 3"
-                        }
-                    ]
-                },
-                {
-                    "type": "radiogroup",
-                    "choices": [{
-                            "value": "1",
-                            "text": "Too Much"
-                        },
-                        {
-                            "value": "2",
-                            "text": "Just Right"
-                        },
-                        {
-                            "value": "3",
-                            "text": "Too Little"
-                        }
-                    ],
-                    "name": "You selected frequency of contact, how did you feel about this level of contact?"
-                }
-            ],
-            "name": "page2"
-        },
-        {
-            "elements": [{
-                    "type": "matrix",
-                    "columns": [{
-                            "value": "1",
-                            "text": "Rank 1"
-                        },
-                        {
-                            "value": "2",
-                            "text": "Rank 2"
-                        },
-                        {
-                            "value": "3",
-                            "text": "Rank 3"
-                        },
-                        {
-                            "value": "0",
-                            "text": "Not Applicable"
-                        }
-                    ],
-                    "name": "LossRank ",
-                    "rows": [
-                        "External Factors (e.g. budget cuts)",
                         "Price",
-                        "Product / Service Features",
-                        "Does not meet our business goals / needs",
+                        "Product / service features",
+                        "Does not meet our business needs",
+                        "Timeliness of delivery",
+                        "Customer service",
+                        "External factors (nothing to do with ${companyName})"
+                    ],
+                    "name": "whyNotSelected",
+                    "title": "Select the main reasons why ${companyName} was not chosen.",
+                    "instructions": "Pick up to three.",
+                    "limits": {
+                        "max": 3
+                    },
+                    "required": true,
+                    "other": true,
+                    "random": true,
+                    "otherplaceholder": "Type other reason"
+                }
+            ],
+            "name": "reasonsWhyNot",
+            "isStartable": true
+        },
+        {
+            "elements": [
+                {
+                    "type": "radio",
+                    "choices": [
+                        "Budget constraints",
+                        "Organizational restructuring / leadership changes",
+                        "Strategic relationships / partnerships"
+                    ],
+                    "name": "externalReasonsWhyNot",
+                    "title": "What was the primary external factor that influenced your decision?",
+                    "instructions": "Pick one.",
+                    "required": true,
+                    "random": true,
+                    "other": true,
+                    "otherplaceholder": "Type other factor"
+                },
+                {
+                    "type": "hr",
+                    "showIf": "externalReasonsWhyNot*="
+                },
+                {
+                    "type": "text",
+                    "modifier": "multiline",
+                    "name": "externalReasonsDetails",
+                    "placeholder": "Any additional details? Enter them here.",
+                    "background": true,
+                    "showIf": "externalReasonsWhyNot*="
+                }
+            ],
+            "name": "externalReasonsWhyNot",
+            "showIf": "whyNotSelected=5"
+        },
+        {
+            "elements": [
+                {
+                    "type": "dropdown",
+                    "choices": [
+                        "Flat fee",
+                        "Annual subscription",
+                        "% rate",
+                        "Price per volume"
+                    ],
+                    "name": "pricingModel",
+                    "title": "What was the ideal pricing structure for you?",
+                    "instructions": "Choose from the list.",
+                    "required": true
+                },
+                {
+                    "type": "text",
+                    "modifier": "number",
+                    "name": "flatFeeAmountDetails",
+                    "subtitle": "Specifically how much (approx)?",
+                    "placeholder": "$0.00",
+                    "showIf": "pricingModel=0"
+                },
+                {
+                    "type": "text",
+                    "modifier": "number",
+                    "name": "annualSubscriptionDetails",
+                    "subtitle": "What is the recommended annual fee?",
+                    "placeholder": "$0.00",
+                    "showIf": "pricingModel=1"
+                },
+                {
+                    "type": "text",
+                    "modifier": "multiline",
+                    "name": "percentageRateDetails",
+                    "subtitle": "How would a % pricing model look, ideally?",
+                    "placeholder": "Type here.",
+                    "showIf": "pricingModel=2"
+                },
+                {
+                    "type": "text",
+                    "modifier": "multiline",
+                    "name": "pricePerVolumeDetails",
+                    "subtitle": "How would a price-per-volume pricing model look, ideally?",
+                    "placeholder": "Type here.",
+                    "showIf": "pricingModel=3"
+                }
+            ],
+            "name": "pricing",
+            "showIf": "whyNotSelected=0"
+        },
+        {
+            "elements": [
+                {
+                    "type": "radio",
+                    "choices": [
+                        "Flexibility & customization",
+                        "Quality & performance",
+                        "Security & trust concerns",
+                        "Integration with other vendors",
+                        "Reporting and analytics"
+                    ],
+                    "name": "missingFeature",
+                    "title": "What was the key missing product / service feature?",
+                    "instructions": "Pick one.",
+                    "required": true,
+                    "random": true,
+                    "other": true,
+                    "otherplaceholder": "Other"
+                }
+            ],
+            "name": "missingFeature",
+            "showIf": "whyNotSelected=1"
+        },
+        {
+            "elements": [
+                {
+                    "type": "text",
+                    "modifier": "multiline",
+                    "name": "valueReasons",
+                    "title": "What was the business problem you were hoping to address?",
+                    "placeholder": "Type here."
+                }
+            ],
+            "name": "valueReasons",
+            "showIf": "whyNotSelected=2"
+        },
+        {
+            "elements": [
+                {
+                    "type": "radio",
+                    "choices": [
+                        "Less than 2 weeks",
+                        "2 - 4 weeks",
+                        "1 - 3 months",
+                        "3 - 6 months",
+                        "6 - 12 months",
+                        "1 - 3 years"
+                    ],
+                    "name": "desiredTimeline",
+                    "title": "What was your ideal timeline for delivery?",
+                    "instructions": "Pick one.",
+                    "required": true,
+                    "other": false
+                }
+            ],
+            "name": "desiredTimeline",
+            "showIf": "whyNotSelected=3"
+        },
+        {
+            "elements": [
+                {
+                    "type": "text",
+                    "modifier": "multiline",
+                    "name": "serviceReasons",
+                    "title": "Can you share more details around your expectation with customer service?",
+                    "placeholder": "Type here."
+                }
+            ],
+            "name": "serviceReasons",
+            "showIf": "whyNotSelected=4"
+        },
+        {
+            "elements": [
+                {
+                    "type": "sort",
+                    "choices": [
+                        "Understood business needs",
+                        "Communication skills",
+                        "Product demo & marketing materials",
+                        "Product / technical knowledge",
+                        "Trusted relationship",
+                        "Delivery timeliness"
+                    ],
+                    "name": "mostImportantVendorCriteria",
+                    "title": "Rank the criteria that mattered most when choosing a vendor.",
+                    "instructions": "Click and drag to rank in order of importance.",
+                    "required": true,
+                    "random": true,
+                    "other": true,
+                    "otherplaceholder": "Other criteria"
+                }
+            ],
+            "name": "mostImportantVendorCriteria"
+        },
+        {
+            "elements": [
+                {
+                    "type": "matrixrating",
+                    "choices": [
+                        "${mostImportantVendorCriteria[0]}",
+                        "${mostImportantVendorCriteria[1]}",
+                        "${mostImportantVendorCriteria[2]}"
+                    ],
+                    "name": "howWellInAreas",
+                    "title": "How well did ${companyName} do in each of these areas?",
+                    "instructions": "Rate how well they did in each area.",
+                    "required": true,
+                    "random": true,
+                    "low": "Poor",
+                    "high": "Excellent"
+                }
+            ],
+            "name": "howWellInAreas",
+            "showIf": "mostImportantVendorCriteria*="
+        },
+        {
+            "elements": [
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "frequencyRating",
+                    "title": "Please rate the team at ${companyName} on:",
+                    "subtitle": "Frequency of contact",
+                    "low": "Not enough",
+                    "high": "Too often",
+                    "required": true
+                },
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "responsivenessRating",
+                    "subtitle": "Responsiveness",
+                    "low": "Not responsive",
+                    "high": "Very responsive",
+                    "required": true
+                }
+            ],
+            "name": "responsivenessRating"
+        },
+        {
+            "elements": [
+                {
+                    "type": "sort",
+                    "choices": [
+                        "Preloaded Competitor A",
+                        "Preloaded Competitor B",
+                        "Preloaded Competitor C",
+                        "${companyName}",
+                        "_No Vendor Chosen"
+                    ],
+                    "name": "vendorRankings",
+                    "title": "Rank the vendors from best to worst starting with the winning vendor as #1",
+                    "instructions": "Click and drag to rank from high to low",
+                    "required": true,
+                    "other": true,
+                    "random": true,
+                    "otherplaceholder": "Type other vendor"
+                }
+            ],
+            "name": "vendorRankings"
+        },
+        {
+            "elements": [
+                {
+                    "type": "checkbox",
+                    "choices": [
+                        "Trusted relationship",
+                        "Cost",
+                        "Product / service features",
+                        "Meets business needs",
                         "Timeliness",
-                        "Other"
+                        "Customer service"
                     ],
-                    "title": "Rank top 3 main reasons why you did not buy from X"
+                    "name": "reasonsWhyWinnerChosen",
+                    "title": "Select the main reasons why you chose ${vendorRankings[0]}",
+                    "instructions": "Pick all that apply.",
+                    "required": true,
+                    "other": true,
+                    "random": true,
+                    "otherplaceholder": "Type other reason"
                 },
                 {
-                    "type": "checkbox",
-                    "choices": [{
-                            "value": "1 ",
-                            "text": " Budget cuts"
-                        },
-                        {
-                            "value": "2 ",
-                            "text": " Organizational Changes / Restructure"
-                        },
-                        {
-                            "value": "3 ",
-                            "text": " Strategic Relationships"
-                        },
-                        {
-                            "value": "4 ",
-                            "text": " Other.  Please explain"
-                        }
-                    ],
-                    "name": "Select all the external factors that influenced your decision"
+                    "type": "hr"
                 },
                 {
-                    "type": "multipletext",
-                    "items": [{
-                            "name": "Amount",
-                            "title": "Amount"
-                        },
-                        {
-                            "name": "Type",
-                            "title": "Type (fixed / % / per unit)"
-                        }
-                    ],
-                    "name": "What was the ideal price point for you?"
-                },
-                {
-                    "type": "checkbox",
-                    "choices": [{
-                            "value": "1",
-                            "text": "Security"
-                        },
-                        {
-                            "value": "2",
-                            "text": "Integration"
-                        },
-                        {
-                            "value": "3",
-                            "text": "Dashboards & Reports"
-                        },
-                        {
-                            "value": "4",
-                            "text": "Alerts & Notification"
-                        },
-                        {
-                            "value": "5",
-                            "text": "Other"
-                        }
-                    ],
-                    "name": "What were the primary product / service features that influenced your decision not to buy?"
-                },
-                {
-                    "type": "comment",
-                    "name": "Can you share what was the business problem you were hoping to address?"
-                },
-                {
-                    "type": "radiogroup",
-                    "choices": [{
-                            "value": "1",
-                            "text": "1 - 2 weeks"
-                        },
-                        {
-                            "value": "2",
-                            "text": "2 - 4 weeks"
-                        },
-                        {
-                            "value": "3",
-                            "text": "1 - 3 months"
-                        },
-                        {
-                            "value": "4",
-                            "text": "3 - 6 months"
-                        },
-                        {
-                            "value": "5",
-                            "text": "6 - 12 months"
-                        },
-                        {
-                            "value": "7",
-                            "text": "12 - 36 months"
-                        }
-                    ],
-                    "name": "Can you share what timeline you were hoping to have a solution?"
-                },
-                {
-                    "type": "comment",
-                    "name": "You said there were other reasons you were not able to buy.  What were they?"
+                    "type": "text",
+                    "modifier": "multiline",
+                    "name": "reasonsWhyWinnerChosenMore",
+                    "background": true,
+                    "placeholder": "Any additional details? Enter them here."
                 }
             ],
-            "name": "page3"
+            "name": "reasonsWhyWinnerChosen",
+            "showIf": [
+                "vendorRankings[3]>0",
+                "vendorRankings[4]>0"
+            ]
         },
         {
-            "elements": [{
-                    "type": "matrix",
-                    "columns": [
-                        "Rank 1",
-                        "Rank 2",
-                        "Rank 3",
-                        "Not Applicable"
+            "elements": [
+                {
+                    "type": "matrixrating",
+                    "choices": [
+                        "Ease of doing business",
+                        "Product / service quality",
+                        "Industry leadership",
+                        "Meet commitments and promises",
+                        "Act as a valued partner"
                     ],
-                    "name": "Rank the list the vendors starting with the #1 vendor you selected",
-                    "rows": [
-                        "No Vendor Chosen",
-                        "Company X",
-                        "Company Y",
-                        "Company Z"
-                    ]
+                    "name": "rateWinningVendor",
+                    "title": "Compared to your ideal vendor, rate ${companyName} on the following areas.",
+                    "instructions": "Rate how well they did in each area.",
+                    "required": true,
+                    "random": true,
+                    "low": "Poor",
+                    "high": "Excellent"
+                }
+            ],
+            "name": "rateWinningVendor",
+            "showIf": [
+                "vendorRankings[3]>0",
+                "vendorRankings[4]>0"
+            ]
+        },
+        {
+            "elements": [
+                {
+                    "type": "multitext",
+                    "choices": [
+                        "Name and title",
+                        "Name and title",
+                        "Name and title",
+                        "Name and title"
+                    ],
+                    "name": "majorPlayersList",
+                    "title": "In addition to these people: ${decisionMakerList}; who else played a role in the buying decision?",
+                    "required": false
+                }
+            ],
+            "name": "majorPlayersList"
+        },
+        {
+            "elements": [
+                {
+                    "type": "none",
+                    "name": "decisionMaker1InfluenceTitle",
+                    "title": "How much influence did these team members have on the buying decision?",
+                    "instructions": "Rate low to high"
                 },
                 {
                     "type": "rating",
-                    "name": "How close was your #1 and 2 vendor?",
-                    "rateValues": [{
-                            "value": "1",
-                            "text": "1 = Not Close"
-                        },
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        {
-                            "value": "7",
-                            "text": "7 = Very Close"
-                        }
-                    ]
-                }
-            ],
-            "name": "page4"
-        },
-        {
-            "elements": [{
-                "type": "matrix",
-                "columns": [
-                    "Rank 1",
-                    "Rank 2",
-                    "Rank 3",
-                    "Not Applicable"
-                ],
-                "name": "Rank the main reasons why you chose Y",
-                "rows": [
-                    "Trust and Relationship",
-                    "Price",
-                    "Product / Service",
-                    "Meets business goals / needs",
-                    "Timeliness",
-                    "Customer Service",
-                    "Other"
-                ]
-            }],
-            "name": "page5"
-        },
-        {
-            "elements": [{
-                "type": "matrix",
-                "columns": [
-                    "1",
-                    "2",
-                    "3",
-                    "4",
-                    "5",
-                    "6",
-                    "7",
-                    "Don't Know"
-                ],
-                "name": "Rate how you felt about X’s general product / service offering (1 = Poor and 7 = Excellent)",
-                "rows": [
-                    "Ease of doing business",
-                    "Quality, product / service, and value",
-                    "Industry leadership",
-                    "Meet commitments and promises",
-                    "Act as a valued partner"
-                ]
-            }],
-            "name": "page6"
-        },
-        {
-            "elements": [{
-                    "type": "rating",
-                    "name": "How likely are you to connect with X again in the future?",
-                    "rateValues": [{
-                            "value": "1",
-                            "text": "1 = Not Likely"
-                        },
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        {
-                            "value": "7",
-                            "text": "7 = Very Likely"
-                        }
-                    ]
+                    "modifier": "slider",
+                    "name": "decisionMaker1Influence",
+                    "subtitle": "${decisionMaker1}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "decisionMaker1*="
                 },
                 {
-                    "type": "comment",
-                    "name": "How could X improve your overall buying experience?"
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "decisionMaker2Influence",
+                    "subtitle": "${decisionMaker2}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "decisionMaker2*="
+                },
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "decisionMaker3Influence",
+                    "subtitle": "${decisionMaker3}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "decisionMaker3*="
+                },
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "decisionMaker4Influence",
+                    "subtitle": "${decisionMaker4}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "decisionMaker4*="
+                },
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "decisionMaker5Influence",
+                    "subtitle": "${decisionMaker5}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "decisionMaker5*="
+                },
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "decisionMakerCustom1Influence",
+                    "subtitle": "${majorPlayersList[0]}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "majorPlayersList[0]*="
+                },
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "decisionMakerCustom2Influence",
+                    "subtitle": "${majorPlayersList[1]}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "majorPlayersList[1]*="
+                },
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "decisionMakerCustom2Influence",
+                    "subtitle": "${majorPlayersList[2]}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "majorPlayersList[2]*="
+                },
+                {
+                    "type": "rating",
+                    "modifier": "slider",
+                    "name": "decisionMakerCustom3Influence",
+                    "subtitle": "${majorPlayersList[3]}",
+                    "low": "None",
+                    "high": "High",
+                    "required": true,
+                    "initialValue": 50,
+                    "showIf": "majorPlayersList[3]*="
                 }
             ],
-            "name": "page7"
+            "name": "majorPlayerRanking",
+            "hideLogo": true
+        },
+        {
+            "elements": [
+                {
+                    "type": "rating",
+                    "modifier": "buttons",
+                    "name": "reconnect",
+                    "title": "How likely are you consider ${companyName} in the future?",
+                    "low": "Not likely",
+                    "high": "Very likely",
+                    "required": true
+                }
+            ],
+            "name": "reconnect"
+        },
+        {
+            "elements": [
+                {
+                    "type": "text",
+                    "modifier": "multiline",
+                    "name": "onePieceAdvice",
+                    "title": "What is one piece of advice you have for ${companyName} to win more customers?",
+                    "placeholder": "Type here."
+                }
+            ],
+            "name": "onePieceAdvice"
+        },
+        {
+            "elements": [
+                {
+                    "type": "radio",
+                    "choices": [
+                        "No",
+                        "Yes"
+                    ],
+                    "name": "anonymity",
+                    "title": "Would you like us to keep you anonymous?",
+                    "required": true
+                }
+            ],
+            "name": "anonymity"
+        },
+        {
+            "elements": [
+                {
+                    "type": "none",
+                    "name": "thanksImg",
+                    "image": {
+                        "url": "/static/assets/other/thanks.svg",
+                        "modifier": "MEDIUM",
+                        "title": "Thanks for your assistance!"
+                    },
+                    "showIf": "surveyTheme=bokehlight"
+                },
+                {
+                    "type": "none",
+                    "name": "thanksImg",
+                    "image": {
+                        "url": "/static/assets/other/thanks_w.svg",
+                        "modifier": "MEDIUM",
+                        "title": "Thanks for your assistance!"
+                    },
+                    "showIf": "surveyTheme=bokehdark"
+                },
+                {
+                    "type": "link",
+                    "name": "interested",
+                    "link": {
+                        "url": "https://www.finer.ink",
+                        "modifier": "self",
+                        "title": "Interested in automated win/loss analysis?"
+                    }
+                },
+                {
+                    "type": "none",
+                    "name": "logoImg",
+                    "image": {
+                        "url": "/static/assets/logos/finerink.svg",
+                        "modifier": "SMALL",
+                        "link": "https://www.finer.ink",
+                        "title": "Automated win / loss analysis with FinerInk"
+                    },
+                    "showIf": "surveyTheme=bokehlight"
+                },
+                {
+                    "type": "none",
+                    "name": "logoImg",
+                    "image": {
+                        "url": "/static/assets/logos/finerink_w.svg",
+                        "modifier": "SMALL",
+                        "link": "https://www.finer.ink",
+                        "title": "Automated win / loss analysis with FinerInk"
+                    },
+                    "showIf": "surveyTheme=bokehdark"
+                }
+            ],
+            "hideLogo": true,
+            "hidePagination": true
         }
     ]
 }

@@ -11,6 +11,7 @@ var utils = {
             str = str.substr(0, len);
         }
         return str;
+<<<<<<< HEAD
     },
 
     /**
@@ -53,6 +54,8 @@ var utils = {
             query = query + '(' + valueSet.join(', ') + (extraFields.length > 0 ? ', ' + extraValues.join(', ') + ')' : '') + (index === dataArr.length-1 ? ';' : ',');
         });
         return query;
+=======
+>>>>>>> origin/master
     }
 };
 
