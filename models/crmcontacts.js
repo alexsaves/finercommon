@@ -1,53 +1,45 @@
 const dbcmd = require('../utils/dbcommand'),
   md5 = require('md5'),
   extend = require('extend'),
-  tablename = 'prospects';
+  uuidV4 = require('uuid/v4'),
+  utils = require('../utils/utils'),
+  tablename = 'crm_contacts';
 
 /**
-* The prospect class
+* The crm accounts class
 */
-var Prospect = function (details) {
+var CRMContacts = function (details) {
   extend(this, details || {});
 };
 
-/**
- * Delete all
- */
-Prospect.DeleteAll = function (cfg, cb) {
-    cb = cb || function () {};
-    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id > 0', function () {
-        cb();
-    }, function (err) {
-        cb(err);
-    });
-};
 
 /**
-* Get a prospect by its id
+* Get an Contact by its id
 */
-Prospect.GetById = function (cfg, id, cb) {
+CRMContacts.GetById = function (cfg, guid, cb) {
   cb = cb || function () {};
-  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [id], function (result) {
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [guid], function (result) {
     cb(result.length === 0
       ? {
-        message: "No user found."
+        message: "No approval found."
       }
       : null, result.length > 0
-      ? new Prospect(result[0])
+      ? new CRMContacts(result[0])
       : null);
   }, function (err) {
     cb(err);
   });
 };
 
+
 /**
-* Create a account
+* Create a CRM contact
 */
-Prospect.Create = function (cfg, details, cb) {
+CRMContacts.Create = function (cfg, details, cb) {
   cb = cb || function () {};
   details = details || {};
   var _Defaults = {
-    name: "",
+    id: shortid.generate(),
     created_at: new Date(),
     updated_at: new Date()
   };
@@ -66,12 +58,12 @@ Prospect.Create = function (cfg, details, cb) {
   }
   dbcmd
     .cmd(cfg.pool, query, params, function (result) {
-      Prospect
-        .GetById(cfg, result.insertId, function (err, org) {
+      CRMContacts
+        .GetById(cfg, _Defaults.id, function (err, user) {
           if (err) {
             cb(err);
           } else {
-            cb(null, org);
+            cb(null, user);
           }
         });
     }, function (err) {
@@ -80,4 +72,4 @@ Prospect.Create = function (cfg, details, cb) {
 };
 
 // Expose it
-module.exports = Prospect;
+module.exports = CRMContacts;
