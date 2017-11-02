@@ -47,7 +47,6 @@ const rowDict = [{
 }];
 const { query, params } = utils.createInsertOrUpdateStatementGivenData(cfg.db.db, 'crm_opportunities', data, rowDict, extraFields, 'Id');
 
-console.log(query);
 dbcmd
   .cmd(cfg.pool, query, params, function (result) {
     console.log(result);

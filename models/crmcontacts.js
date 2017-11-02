@@ -35,37 +35,46 @@ CRMContacts.GetById = function (cfg, guid, cb) {
 /**
 * Create a CRM contact
 */
-CRMContacts.Create = function (cfg, details, cb) {
+CRMContacts.Create = function (cfg, data, extraFields, cb) {
   cb = cb || function () {};
-  details = details || {};
-  var _Defaults = {
-    id: shortid.generate(),
-    created_at: new Date(),
-    updated_at: new Date()
-  };
-  extend(_Defaults, details);
-  var valKeys = Object.keys(_Defaults),
-    query = 'INSERT INTO ' + cfg.db.db + '.' + tablename + ' SET ',
-    params = [],
-    count = 0;
-  for (var elm in valKeys) {
-    if (count > 0) {
-      query += ', ';
-    }
-    query += valKeys[elm] + ' = ?';
-    params.push(_Defaults[valKeys[elm]]);
-    count++;
-  }
+  const rowDict = [
+  {
+    name: "Id",
+    row_name: "Id"
+  },
+  {
+    name: "AccountId",
+    row_name: "AccountId"
+  },
+  {
+    name: "OwnerId",
+    row_name: "OwnerId"
+  },
+  {
+    name: "Title",
+    row_name: "Title"
+  },
+  {
+    name: "FirstName",
+    row_name: "FirstName"
+  },
+  {
+    name: "LastName",
+    row_name: "LastName"
+  },
+  {
+    name: "Email",
+    row_name: "Email"
+  },
+  {
+    name: "Department",
+    row_name: "Department"
+  }];
+  const { query, params } = utils.createInsertOrUpdateStatementGivenData(cfg.db.db, 'crm_contacts', data, rowDict, extraFields, 'Id');
+  
   dbcmd
     .cmd(cfg.pool, query, params, function (result) {
-      CRMContacts
-        .GetById(cfg, _Defaults.id, function (err, user) {
-          if (err) {
-            cb(err);
-          } else {
-            cb(null, user);
-          }
-        });
+      console.log(result);
     }, function (err) {
       cb(err);
     });
