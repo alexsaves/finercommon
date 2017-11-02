@@ -6,16 +6,35 @@ const dbcmd = require('../utils/dbcommand'),
     shortid = require('shortid'),
     check = require('check-types'),
     utf8 = require('utf8'),
-    fs = require('fs');
+    fs = require('fs'),
+    Org = require('../models/organization');
 
 // Fixtures
-var survey_fixture = JSON.parse(fs.readFileSync(__dirname + '/../fixtures/surveys/questionnaire.json').toString('utf-8'));
+var prospect_survey_fixture = JSON.parse(fs.readFileSync(__dirname + '/../fixtures/surveys/questionnaire.json').toString('utf-8'));
 
 /**
  * The survey class
  */
 var Survey = function (details) {
     extend(this, details || {});
+    if (this.survey_model && this.survey_model instanceof Buffer) {
+        this.survey_model = JSON.parse(this.survey_model.toString());
+    }
+};
+
+/**
+ * The types of surveys
+ */
+Survey.SURVEY_TYPES = {
+    PROSPECT: 0
+};
+
+/**
+ * Styles and themes
+ */
+Survey.SURVEY_THEMES = {
+    LIGHT: "bokehlight",
+    DARK: "bokehdark"
 };
 
 /**
@@ -78,8 +97,14 @@ Survey.prototype.applyDefaultSurveyFixture = function () {
 /**
  * Apply the default fixture (you still need to commit this)
  */
-Survey.getSurveyFixture = function () {
-    return survey_fixture;
+Survey.getSurveyFixture = function (SURVEY_TYPE) {
+    console.log("GET SURV FIX", SURVEY_TYPE);
+    switch (SURVEY_TYPE) {
+        case Survey.SURVEY_TYPES.PROSPECT:
+            return JSON.parse(JSON.stringify(prospect_survey_fixture));
+        default:
+            throw new Error("Missing Survey Fixture Type");            
+    }
 };
 
 /**
@@ -90,11 +115,28 @@ Survey.GetByGuid = function (cfg, guid, cb) {
     dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE guid = ?', [guid], function (result) {
         cb(result.length === 0
             ? {
-                message: "No user found."
+                message: "No survey found."
             }
             : null, result.length > 0
             ? new Survey(result[0])
             : null);
+    }, function (err) {
+        cb(err);
+    });
+};
+
+
+/**
+ * Get a survey by its opportunity ID and type
+ */
+Survey.GetForOpportunityAndType = function (cfg, opportunity_id, survey_type, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE opportunity_id = ? AND survey_type = ?', [opportunity_id, survey_type], function (result) {
+        var svs = [];
+        for (var i = 0; i < result.length; i++) {
+            svs.push(new Survey(result[i]));
+        }
+        cb(null, svs);
     }, function (err) {
         cb(err);
     });
@@ -113,6 +155,41 @@ Survey.DeleteAll = function (cfg, cb) {
 };
 
 /**
+ * Make sure a survey exists for a particular opportunity and type
+ */
+Survey.EnforceSurveyExistsForOpportunityAndType = function(cfg, opportunity_id, survey_type, organization_id, cb) {
+    Survey.GetForOpportunityAndType(cfg, opportunity_id, survey_type, (err, svs) => {
+        if (err) {
+            cb(err);
+        } else {
+            if (svs.length == 0) {
+                Org.GetById(cfg, organization_id, (err, org) => {
+                    if (err) {
+                        cb(err);
+                    } else {
+                        Survey.Create(cfg, {
+                            opportunity_id: opportunity_id,
+                            organization_id: organization_id,
+                            survey_type: survey_type,
+                            name: org.name + " Feedback",
+                            survey_model: new Buffer(JSON.stringify(Survey.getSurveyFixture(survey_type)))
+                        }, (err, sv) => {
+                            if (err) {
+                                cb(err);
+                            } else {
+                                cb(null, sv);
+                            }
+                        });
+                    }
+                });                
+            } else {
+                cb(null, svs[0]);
+            }
+        }
+    });
+};
+
+/**
  * Create a prospect
  */
 Survey.Create = function (cfg, details, cb) {
@@ -122,11 +199,15 @@ Survey.Create = function (cfg, details, cb) {
         guid: shortid.generate(),
         name: "",
         organization_id: 0,
-        prospect_id: 0,
+        theme: Survey.SURVEY_THEMES.LIGHT,
         created_at: new Date(),
         updated_at: new Date(),
-        survey_model: new Buffer(JSON.stringify(Survey.getSurveyFixture()))
+        survey_type: Survey.SURVEY_TYPES.PROSPECT,
+        survey_model: new Buffer(JSON.stringify(Survey.getSurveyFixture(Survey.SURVEY_TYPES.PROSPECT)))
     };
+    if (!(_Defaults.survey_model instanceof Buffer)) {
+        _Defaults.survey_model = new Buffer(JSON.stringify(_Defaults.survey_model));
+    }
     extend(_Defaults, details);
     var valKeys = Object.keys(_Defaults),
         query = 'INSERT INTO ' + cfg.db.db + '.' + tablename + ' SET ',
@@ -159,7 +240,7 @@ Survey.Create = function (cfg, details, cb) {
  * Get the default survey model
  */
 Survey.GetDefaultSurveyModel = function () {
-    return survey_fixture;
+    return Survey.getSurveyFixture(Survey.SURVEY_TYPES.PROSPECT);
 };
 
 // Expose it
