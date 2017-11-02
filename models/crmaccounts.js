@@ -19,40 +19,25 @@ CRMAccounts.Create = function (cfg, data, extraFields, cb) {
   cb = cb || function () {};
   const rowDict = [{
     name: "AccountNumber",
-    row_name: "account_number"
+    row_name: "AccountNumber"
   },
   {
     name: "OwnerId",
-    row_name: "owner_id"
+    row_name: "OwnerId"
   },
   {
     name: "Name",
-    row_name: "name"
+    row_name: "Name"
   },
   {
-    name: "Type",
-    row_name: "type"
-  },
-  {
-    name: "Industry",
-    row_name: "industry"
-  },
-  {
-    name: "BillingCountry",
-    row_name: "billing_country"
-  },
-  {
-    name: "BillingCity",
-    row_name: "billing_city"
-  },
-  {
-    name: "Phone",
-    row_name: "phone"
+    name: "Id",
+    row_name: "Id"
   }];
-  const query = utils.createInsertStatementGivenData(cfg.db.db, 'crm_accounts', data, rowDict, extraFields);
+  const { query, params } = utils.createInsertOrUpdateStatementGivenData(cfg.db.db, 'crm_accounts', data, rowDict, extraFields, 'Id');
+
   console.log(query);
   dbcmd
-    .cmd(cfg.pool, query, [], function (result) {
+    .cmd(cfg.pool, query, params, function (result) {
       console.log(result);
     }, function (err) {
       cb(err);
