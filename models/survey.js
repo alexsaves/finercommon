@@ -98,7 +98,6 @@ Survey.prototype.applyDefaultSurveyFixture = function () {
  * Apply the default fixture (you still need to commit this)
  */
 Survey.getSurveyFixture = function (SURVEY_TYPE) {
-    console.log("GET SURV FIX", SURVEY_TYPE);
     switch (SURVEY_TYPE) {
         case Survey.SURVEY_TYPES.PROSPECT:
             return JSON.parse(JSON.stringify(prospect_survey_fixture));
