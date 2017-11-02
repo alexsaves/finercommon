@@ -1,6 +1,7 @@
 // Roll them all into one collection
 var All = {
     Account: require('../models/account'),
+    Approval: require('../models/approval'),
     Organization: require('../models/organization'),
     OrganizationAssociation: require('../models/organizationassociations'),
     OrganizationInvitation: require('../models/organizationinvitations'),
@@ -12,6 +13,7 @@ var All = {
     ResetPWInvitations: require('../models/resetpwinvitations'),
     CRMIntegrations: require('../models/crmintegrations'),
     CRMAccounts: require('../models/crmaccounts'),
+    CRMContacts: require('../models/crmcontacts'),
     CRMUsers: require('../models/crmusers'),
     CRMOrganizations: require('../models/crmorganizations'),
     CRMRoles: require('../models/crmroles'),

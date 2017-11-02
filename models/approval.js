@@ -4,6 +4,7 @@ const dbcmd = require('../utils/dbcommand'),
   tablename = 'approvals',
   shortid = require('shortid'),
   Organization = require('../models/organization'),
+  Email = require('../models/email'),
   CRMIntegrations = require('../models/crmintegrations');
 
 /**
@@ -11,6 +12,44 @@ const dbcmd = require('../utils/dbcommand'),
 */
 var Approval = function (details) {
   extend(this, details || {});
+};
+
+/**
+ * States
+ */
+Approval.SEND_STATES = {
+  UNSENT: 0,
+  SENT: 1
+};
+
+/**
+ * Send SMS or Email if necessary
+ */
+Approval.prototype.execute = function (cfg, cb) {
+  if (this.sendState == Approval.SEND_STATES.UNSENT) {
+    this.sendState = Approval.SEND_STATES.SENT;
+
+    // Invite updated! Send an updated email
+    let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
+    /*emailCtrl.send(cfg.email.defaultFrom, email, 'invitetoorg', 'Your invitation to join ' + org.name + ' on FinerInk has been updated.', {
+      account: act,
+      invite: ivt,
+      org: org,
+      ivturl: pjson.config.portalUrl + "/account/finish/?ivt=" + encodeURIComponent(ivt.uid)
+    }, function (err) {
+      if (err) {
+        console.log("Error sending invitation email", err);
+        callback("Error sending invitation email");
+      } else {
+        // Success
+        callback(null, ivt);
+      }
+    });*/
+
+    //this.commit(cfg, cb);
+  } else {
+    process.nextTick(cb);
+  }
 };
 
 /**
@@ -36,8 +75,8 @@ Approval.prototype.commit = function (cfg, cb) {
       count++;
     }
   }
-  query += ' WHERE id = ?';
-  params.push(this.id);
+  query += ' WHERE guid = ?';
+  params.push(this.guid);
 
   dbcmd.cmd(cfg.pool, query, params, function (result) {
     cb(null, this);
@@ -49,9 +88,9 @@ Approval.prototype.commit = function (cfg, cb) {
 /**
 * Get an approval by its id
 */
-Approval.GetById = function (cfg, id, cb) {
+Approval.GetByGuid = function (cfg, guid, cb) {
   cb = cb || function () {};
-  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [id], function (result) {
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE guid = ?', [guid], function (result) {
     cb(result.length === 0
       ? {
         message: "No approval found."
@@ -65,11 +104,29 @@ Approval.GetById = function (cfg, id, cb) {
 };
 
 /**
+* Get an approval by its oppportunity ID and contact
+*/
+Approval.GetByOppAndContact = function (cfg, opportunity_id, crm_contact_id, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE opportunity_id = ? AND crm_contact_id = ? LIMIT 1', [
+    opportunity_id, crm_contact_id
+  ], function (result) {
+    if (result && result.length > 0) {
+      cb(null, new Approval(result[0]));
+    } else {
+      cb();
+    }
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
 * Delete all
 */
 Approval.DeleteAll = function (cfg, cb) {
   cb = cb || function () {};
-  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id > 0', function () {
+  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE guid NOT NULL', function () {
     cb();
   }, function (err) {
     cb(err);
@@ -85,7 +142,14 @@ Approval.Create = function (cfg, details, cb) {
   var _Defaults = {
     guid: shortid.generate(),
     created_at: new Date(),
-    updated_at: new Date()
+    updated_at: new Date(),
+    sendState: Approval.SEND_STATES.UNSENT,
+    sendEmail: 0,
+    sendSMS: 0,
+    created_by_account_id: 0,
+    organization_id: 0,
+    opportunity_id: "",
+    crm_contact_id: 0
   };
   extend(_Defaults, details);
   var valKeys = Object.keys(_Defaults),
@@ -103,7 +167,7 @@ Approval.Create = function (cfg, details, cb) {
   dbcmd
     .cmd(cfg.pool, query, params, function (result) {
       Approval
-        .GetById(cfg, result.insertId, function (err, user) {
+        .GetByGuid(cfg, _Defaults.guid, function (err, user) {
           if (err) {
             cb(err);
           } else {
