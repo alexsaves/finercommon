@@ -5,7 +5,8 @@ const dbcmd = require('../utils/dbcommand'),
   shortid = require('shortid'),
   Organization = require('../models/organization'),
   Email = require('../models/email'),
-  CRMIntegrations = require('../models/crmintegrations');
+  CRMIntegrations = require('../models/crmintegrations'),
+  CRMContacts = require('../models/crmcontacts');
 
 /**
 * The account class
@@ -28,25 +29,34 @@ Approval.SEND_STATES = {
 Approval.prototype.execute = function (cfg, cb) {
   if (this.sendState == Approval.SEND_STATES.UNSENT) {
     this.sendState = Approval.SEND_STATES.SENT;
-
-    // Invite updated! Send an updated email
-    let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
-    /*emailCtrl.send(cfg.email.defaultFrom, email, 'invitetoorg', 'Your invitation to join ' + org.name + ' on FinerInk has been updated.', {
-      account: act,
-      invite: ivt,
-      org: org,
-      ivturl: pjson.config.portalUrl + "/account/finish/?ivt=" + encodeURIComponent(ivt.uid)
-    }, function (err) {
+    CRMContacts.GetById(cfg, this.crm_contact_id, (err, cntc) => {
       if (err) {
-        console.log("Error sending invitation email", err);
-        callback("Error sending invitation email");
+        cb(err);
       } else {
-        // Success
-        callback(null, ivt);
+        Organization.GetById(cfg, this.organization_id, (err, org) => {
+          if (err) {
+            cb(err);
+          } else {
+            // Invite updated! Send an updated email
+            let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
+            emailCtrl.send(cfg.email.defaultFrom, cntc.Email, 'inviteprospectsurvey', cntc.FirstName + ', help ' + org.name + ' do better in the future!', {
+              contact: cntc,
+              org: org,
+              surveyurl: cfg.surveyUrl + "/s/" + encodeURIComponent(this.guid) + "?p=" + encodeURIComponent(this.guid)
+            }, (err) => {
+              if (err) {
+                console.log("Error sending invitation email", err);
+                cb("Error sending invitation email");
+              } else {
+                // Success
+                this.commit(cfg, cb);
+                cb(null);
+              }
+            });          
+          }
+        });        
       }
-    });*/
-
-    //this.commit(cfg, cb);
+    });
   } else {
     process.nextTick(cb);
   }
@@ -139,6 +149,9 @@ Approval.DeleteAll = function (cfg, cb) {
 Approval.Create = function (cfg, details, cb) {
   cb = cb || function () {};
   details = details || {};
+  if (typeof details.survey_guid == 'undefined') {
+    throw new Error("Missing survey GUID from approval");
+  }
   var _Defaults = {
     guid: shortid.generate(),
     created_at: new Date(),

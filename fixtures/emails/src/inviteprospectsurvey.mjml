@@ -1,0 +1,11 @@
+<mjml>
+  <mj-body>
+    <mj-container>
+      <mj-section>
+        <mj-column>
+          <mj-text>Please do our survey, <%= contact.FirstName %>. Start it here: <%= surveyurl %></mj-text>
+        </mj-column>
+      </mj-section>
+    </mj-container>
+  </mj-body>
+</mjml>

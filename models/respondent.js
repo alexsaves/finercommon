@@ -176,6 +176,9 @@ Respondent.DeleteAll = function (cfg, cb) {
 Respondent.Create = function (cfg, details, cb) {
     cb = cb || function () {};
     details = details || {};
+    if (typeof details.approval_guid == 'undefined') {
+        throw new Error("Missing approval GUID");
+    }
     var _Defaults = {
         created_at: new Date(),
         updated_at: new Date()
