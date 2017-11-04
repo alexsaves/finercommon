@@ -58,86 +58,76 @@ Respondent.prototype.applyAnswersForSurvey = function (cfg, survey, data, cb) {
                         cb(null, ctx);
                     }
                 });
-
-                /*var commitProm = new promise(function () {
-                    cb(null, {});
-                }, function () {
-                    cb(new Error("Did not save responses."));
-                }, 10000);
-                commitProm.make(okeys);
-                for (let i = 0; i < okeys.length; i++) {
-                    var questionname = okeys[i],
-                        qdef = survey.getQuestionByName(questionname);
-                    */
-                /*if (!qdef) {
-                    cb(new Error("Could not find question id " + questionname + " in survey " + survey.guid + "."));
-                    return;
-                } else {
-                    let existingResponse = responses.getAllMatching({name: questionname});
-                    console.log("EXISTING:", existingResponse);
-                    return;*/
-                /*if (!existingResponse) {
-                                // New response, let's set it up
-                                Response
-                                    .Create(cfg, {
-                                        respondent_id: this.id,
-                                        survey_guid: survey.guid,
-                                        q_id: qdef.name
-                                    }, function (key) {
-                                        return function (err, resp) {
-                                            if (err) {
-                                                console.log(err);
-                                                commitProm.break(key);
-                                            } else {
-                                                if (utils.isOtherLabel(key)) {
-                                                    resp.updateWithOtherResponse(cfg, data[key], qdef, (err, resp) => {
-                                                        if (err) {
-                                                            commitProm.break(key);
-                                                        } else {
-                                                            commitProm.resolve(key);
-                                                        }
-                                                    });
-                                                } else {
-                                                    resp.updateWithResponse(cfg, data[key], qdef, (err, resp) => {
-                                                        if (err) {
-                                                            commitProm.break(key);
-                                                        } else {
-                                                            commitProm.resolve(key);
-                                                        }
-                                                    });
-                                                }
-                                            }
-                                        };
-                                    }(questionkey));
-                            } else {
-                                if (utils.isOtherLabel(questionkey)) {
-                                    existingResponse
-                                        .updateWithOtherResponse(cfg, data[questionkey], qdef, function (key) {
-                                            return function (err, resp) {
-                                                if (err) {
-                                                    commitProm.break(key);
-                                                } else {
-                                                    commitProm.resolve(key);
-                                                }
-                                            };
-                                        }(questionkey));
-                                } else {
-                                    existingResponse
-                                        .updateWithResponse(cfg, data[questionkey], qdef, function (key) {
-                                            return function (err, resp) {
-                                                if (err) {
-                                                    commitProm.break(key);
-                                                } else {
-                                                    commitProm.resolve(key);
-                                                }
-                                            };
-                                        }(questionkey));
-                                }
-                            }*/
-                //} }
             }
         });
     }
+};
+
+/**
+ * Get a list of respondents for a survey guid
+ */
+Respondent.GetBySurvey = function (cfg, guid, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE guid = ?', [guid], function (result) {
+        var res = [];
+        for (var i = 0; i < result.length; i++) {
+            res.push(new Respondent(result[i]));
+        }
+        cb(null, res);        
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
+ * Get a list of respondents for a survey guid
+ */
+Respondent.GetBySurveyAndTimeRange = function (cfg, guid, startDate, endDate, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE guid = ? AND created_at > ? AND created_at < ?', [guid, startDate, endDate], function (result) {
+        var res = [];
+        for (var i = 0; i < result.length; i++) {
+            res.push(new Respondent(result[i]));
+        }
+        cb(null, res);        
+    }, function (err) {
+        cb(err);
+    });
+};
+
+
+/**
+ * Get a list of respondents for a survey guid
+ */
+Respondent.GetByOrgAndTimeRange = function (cfg, organization_id, startDate, endDate, cb) {
+    let Survey = require('../models/survey');
+    cb = cb || function () {};
+    Survey.GetForOrganization(cfg, organization_id, (err, svs) => {
+        if (err) {
+            cb(err);
+        } else {
+            let svuids = svs.map((item) => {
+                return item.guid;
+            });
+            var finalStr = "(";
+            for (var k = 0; k < svuids.length; k++) {
+                if (k > 0) {
+                    finalStr += ", ";
+                }
+                finalStr += "'" + svuids[k] + "'";
+            }
+            finalStr += ")";
+            dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE survey_guid IN ' + finalStr + ' AND created_at > ? AND created_at < ?', [startDate, endDate], function (result) {
+                var res = [];
+                for (var i = 0; i < result.length; i++) {
+                    res.push(new Respondent(result[i]));
+                }
+                cb(null, res);        
+            }, function (err) {
+                cb(err);
+            });
+        }
+    });
 };
 
 /**

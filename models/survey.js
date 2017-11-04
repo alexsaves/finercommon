@@ -126,6 +126,22 @@ Survey.GetByGuid = function (cfg, guid, cb) {
 
 
 /**
+ * Get surveys by the organization
+ */
+Survey.GetForOrganization = function (cfg, organization_id, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ?', [organization_id], function (result) {
+        var res = [];
+        for (var i = 0; i < result.length; i++) {
+            res.push(new Survey(result[i]));
+        }
+        cb(null, res);
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
  * Get a survey by its opportunity ID and type
  */
 Survey.GetForOpportunityAndType = function (cfg, opportunity_id, survey_type, cb) {
