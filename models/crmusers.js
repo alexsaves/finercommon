@@ -3,13 +3,41 @@ const dbcmd = require('../utils/dbcommand'),
   extend = require('extend'),
   uuidV4 = require('uuid/v4'),
   utils = require('../utils/utils'),
-  tablename = 'crm_integrations';
+  tablename = 'crm_users';
 
 /**
 * The crm accounts class
 */
 var CRMUsers = function (details) {
   extend(this, details || {});
+};
+
+/**
+ * Get users by an array of ids
+ */
+CRMUsers.GetByIds = function (cfg, oids, cb) {
+  cb = cb || function () {};
+  if (oids && oids.length > 0) {
+    var finalStr = "(";
+    for (var k = 0; k < oids.length; k++) {
+      if (k > 0) {
+        finalStr += ", ";
+      }
+      finalStr += "'" + oids[k] + "'";
+    }
+    finalStr += ")";
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id IN ' + finalStr, function (result) {
+      var res = [];
+      for (var i = 0; i < result.length; i++) {
+        res.push(new CRMUsers(result[i]));
+      }
+      cb(null, res);
+    }, function (err) {
+      cb(err);
+    });
+  } else {
+    cb(null, []);
+  }
 };
 
 /**

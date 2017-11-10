@@ -3,7 +3,7 @@ const dbcmd = require('../utils/dbcommand'),
   extend = require('extend'),
   uuidV4 = require('uuid/v4'),
   utils = require('../utils/utils'),
-  tablename = 'crm_integrations';
+  tablename = 'crm_organizations';
 
 /**
 * The crm organizations class

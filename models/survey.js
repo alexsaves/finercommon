@@ -102,7 +102,7 @@ Survey.getSurveyFixture = function (SURVEY_TYPE) {
         case Survey.SURVEY_TYPES.PROSPECT:
             return JSON.parse(JSON.stringify(prospect_survey_fixture));
         default:
-            throw new Error("Missing Survey Fixture Type");            
+            throw new Error("Missing Survey Fixture Type");
     }
 };
 
@@ -124,7 +124,6 @@ Survey.GetByGuid = function (cfg, guid, cb) {
     });
 };
 
-
 /**
  * Get surveys by the organization
  */
@@ -142,11 +141,41 @@ Survey.GetForOrganization = function (cfg, organization_id, cb) {
 };
 
 /**
+ * Get surveys by an array of ids
+ */
+Survey.GetByGuids = function (cfg, svuids, cb) {
+    cb = cb || function () {};
+    if (svuids && svuids.length > 0) {
+        var finalStr = "(";
+        for (var k = 0; k < svuids.length; k++) {
+            if (k > 0) {
+                finalStr += ", ";
+            }
+            finalStr += "'" + svuids[k] + "'";
+        }
+        finalStr += ")";
+        dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE guid IN ' + finalStr, function (result) {
+            var res = [];
+            for (var i = 0; i < result.length; i++) {
+                res.push(new Survey(result[i]));
+            }
+            cb(null, res);
+        }, function (err) {
+            cb(err);
+        });
+    } else {
+        cb(null, []);
+    }
+};
+
+/**
  * Get a survey by its opportunity ID and type
  */
 Survey.GetForOpportunityAndType = function (cfg, opportunity_id, survey_type, cb) {
     cb = cb || function () {};
-    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE opportunity_id = ? AND survey_type = ?', [opportunity_id, survey_type], function (result) {
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE opportunity_id = ? AND survey_type = ?', [
+        opportunity_id, survey_type
+    ], function (result) {
         var svs = [];
         for (var i = 0; i < result.length; i++) {
             svs.push(new Survey(result[i]));
@@ -172,7 +201,7 @@ Survey.DeleteAll = function (cfg, cb) {
 /**
  * Make sure a survey exists for a particular opportunity and type
  */
-Survey.EnforceSurveyExistsForOpportunityAndType = function(cfg, opportunity_id, survey_type, organization_id, cb) {
+Survey.EnforceSurveyExistsForOpportunityAndType = function (cfg, opportunity_id, survey_type, organization_id, cb) {
     Survey.GetForOpportunityAndType(cfg, opportunity_id, survey_type, (err, svs) => {
         if (err) {
             cb(err);
@@ -196,7 +225,7 @@ Survey.EnforceSurveyExistsForOpportunityAndType = function(cfg, opportunity_id, 
                             }
                         });
                     }
-                });                
+                });
             } else {
                 cb(null, svs[0]);
             }
