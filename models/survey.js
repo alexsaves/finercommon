@@ -141,6 +141,34 @@ Survey.GetForOrganization = function (cfg, organization_id, cb) {
 };
 
 /**
+ * Get surveys by the organizations
+ */
+Survey.GetForOrganizations = function (cfg, orgs, cb) {
+    cb = cb || function () {};
+    if (!orgs || orgs.length == 0) {
+        cb(null, []);
+    } else {
+        var finalStr = "(";
+        for (var k = 0; k < orgs.length; k++) {
+            if (k > 0) {
+                finalStr += ", ";
+            }
+            finalStr += "" + orgs[k].id + "";
+        }
+        finalStr += ")";
+        dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id IN ' + finalStr, function (result) {
+            var res = [];
+            for (var i = 0; i < result.length; i++) {
+                res.push(new Survey(result[i]));
+            }
+            cb(null, res);
+        }, function (err) {
+            cb(err);
+        });
+    }
+};
+
+/**
  * Get surveys by an array of ids
  */
 Survey.GetByGuids = function (cfg, svuids, cb) {
