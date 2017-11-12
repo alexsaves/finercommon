@@ -51,7 +51,7 @@ Respondent.prototype.applyAnswersForSurvey = function (cfg, survey, data, cb) {
             } else {
                 // Add the new response collection
                 responses.integrateNewAnswers(cfg, survey, data, ctx);
-                responses.commit(cfg, (err) => {                    
+                responses.commit(cfg, (err) => {
                     if (err) {
                         cb(err);
                     } else {
@@ -73,7 +73,7 @@ Respondent.GetBySurvey = function (cfg, guid, cb) {
         for (var i = 0; i < result.length; i++) {
             res.push(new Respondent(result[i]));
         }
-        cb(null, res);        
+        cb(null, res);
     }, function (err) {
         cb(err);
     });
@@ -84,17 +84,18 @@ Respondent.GetBySurvey = function (cfg, guid, cb) {
  */
 Respondent.GetBySurveyAndTimeRange = function (cfg, guid, startDate, endDate, cb) {
     cb = cb || function () {};
-    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE guid = ? AND created_at > ? AND created_at < ?', [guid, startDate, endDate], function (result) {
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE guid = ? AND created_at > ? AND created_at < ?', [
+        guid, startDate, endDate
+    ], function (result) {
         var res = [];
         for (var i = 0; i < result.length; i++) {
             res.push(new Respondent(result[i]));
         }
-        cb(null, res);        
+        cb(null, res);
     }, function (err) {
         cb(err);
     });
 };
-
 
 /**
  * Get a list of respondents for a survey guid
@@ -109,23 +110,29 @@ Respondent.GetByOrgAndTimeRange = function (cfg, organization_id, startDate, end
             let svuids = svs.map((item) => {
                 return item.guid;
             });
-            var finalStr = "(";
-            for (var k = 0; k < svuids.length; k++) {
-                if (k > 0) {
-                    finalStr += ", ";
+            if (svuids.length == 0) {
+                cb(null, []);
+            } else {
+                var finalStr = "(";
+                for (var k = 0; k < svuids.length; k++) {
+                    if (k > 0) {
+                        finalStr += ", ";
+                    }
+                    finalStr += "'" + svuids[k] + "'";
                 }
-                finalStr += "'" + svuids[k] + "'";
+                finalStr += ")";
+                dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE survey_guid IN ' + finalStr + ' AND created_at > ? AND created_at < ?', [
+                    startDate, endDate
+                ], function (result) {
+                    var res = [];
+                    for (var i = 0; i < result.length; i++) {
+                        res.push(new Respondent(result[i]));
+                    }
+                    cb(null, res);
+                }, function (err) {
+                    cb(err);
+                });
             }
-            finalStr += ")";
-            dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE survey_guid IN ' + finalStr + ' AND created_at > ? AND created_at < ?', [startDate, endDate], function (result) {
-                var res = [];
-                for (var i = 0; i < result.length; i++) {
-                    res.push(new Respondent(result[i]));
-                }
-                cb(null, res);        
-            }, function (err) {
-                cb(err);
-            });
         }
     });
 };
