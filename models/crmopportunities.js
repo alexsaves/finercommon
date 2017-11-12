@@ -40,7 +40,6 @@ CRMOpportunities.GetByIds = function (cfg, oids, cb) {
   }
 };
 
-
 /**
 * Get an opportunity by its id
 */

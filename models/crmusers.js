@@ -41,6 +41,24 @@ CRMUsers.GetByIds = function (cfg, oids, cb) {
 };
 
 /**
+* Get a user by their id
+*/
+CRMUsers.GetById = function (cfg, guid, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [guid], function (result) {
+    cb(result.length === 0
+      ? {
+        message: "No opportunity found."
+      }
+      : null, result.length > 0
+      ? new CRMUsers(result[0])
+      : null);
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
 * Create an integration
 */
 CRMUsers.Create = function (cfg, data, extraFields, cb) {
