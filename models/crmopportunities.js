@@ -40,6 +40,25 @@ CRMOpportunities.GetByIds = function (cfg, oids, cb) {
   }
 };
 
+
+/**
+* Get an opportunity by its id
+*/
+CRMOpportunities.GetById = function (cfg, guid, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [guid], function (result) {
+    cb(result.length === 0
+      ? {
+        message: "No opportunity found."
+      }
+      : null, result.length > 0
+      ? new CRMOpportunities(result[0])
+      : null);
+  }, function (err) {
+    cb(err);
+  });
+};
+
 /**
  * Get the accounts for all these opportunities
  */
