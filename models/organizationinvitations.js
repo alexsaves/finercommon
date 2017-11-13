@@ -153,23 +153,27 @@ OrganizationInvitation.ActivateInvitationsByUID = function (cfg, defaultFrom, em
     if (err) {
       cb(err);
     } else {
-      let p = new bityProm(function () {
+      if (!list || list.length == 0) {
         cb(null);
-      }, function () {
-        cb(new Error("Timed out."));
-      }, 10000);
-      p.make(list.map(function (el) {
-        return el.uid;
-      }));
-      list.forEach(function (ivt) {
-        ivt.AcceptInvite(cfg, defaultFrom, emailServer, emailPort, emailKey, emailSecret, (err) => {
-          if (err) {
-            p.break(ivt.uid);
-          } else {
-            p.resolve(ivt.uid);
-          }
+      } else {
+        let p = new bityProm(function () {
+          cb(null);
+        }, function () {
+          cb(new Error("Timed out."));
+        }, 10000);
+        p.make(list.map(function (el) {
+          return el.uid;
+        }));
+        list.forEach(function (ivt) {
+          ivt.AcceptInvite(cfg, defaultFrom, emailServer, emailPort, emailKey, emailSecret, (err) => {
+            if (err) {
+              p.break(ivt.uid);
+            } else {
+              p.resolve(ivt.uid);
+            }
+          });
         });
-      });
+      }
     }
   });
 };
@@ -183,23 +187,27 @@ OrganizationInvitation.DeclineInvitationsByUID = function (cfg, defaultFrom, ema
     if (err) {
       cb(err);
     } else {
-      let p = new bityProm(function () {
+      if (!list || list.length == 0) {
         cb(null);
-      }, function () {
-        cb(new Error("Timed out."));
-      }, 10000);
-      p.make(list.map(function (el) {
-        return el.uid;
-      }));
-      list.forEach(function (ivt) {
-        ivt.DeclineInvite(cfg, defaultFrom, emailServer, emailPort, emailKey, emailSecret, (err) => {
-          if (err) {
-            p.break(ivt.uid);
-          } else {
-            p.resolve(ivt.uid);
-          }
+      } else {
+        let p = new bityProm(function () {
+          cb(null);
+        }, function () {
+          cb(new Error("Timed out."));
+        }, 10000);
+        p.make(list.map(function (el) {
+          return el.uid;
+        }));
+        list.forEach(function (ivt) {
+          ivt.DeclineInvite(cfg, defaultFrom, emailServer, emailPort, emailKey, emailSecret, (err) => {
+            if (err) {
+              p.break(ivt.uid);
+            } else {
+              p.resolve(ivt.uid);
+            }
+          });
         });
-      });
+      }
     }
   });
 };
@@ -299,12 +307,12 @@ OrganizationInvitation.prototype.DeclineInvite = function (cfg, defaultFrom, ema
  * Delete all
  */
 OrganizationInvitation.DeleteAll = function (cfg, cb) {
-    cb = cb || function () {};
-    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid != NULL', function () {
-        cb();
-    }, function (err) {
-        cb(err);
-    });
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid != NULL', function () {
+    cb();
+  }, function (err) {
+    cb(err);
+  });
 };
 
 /**

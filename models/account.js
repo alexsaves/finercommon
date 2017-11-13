@@ -3,6 +3,7 @@ const dbcmd = require('../utils/dbcommand'),
     extend = require('extend'),
     tablename = 'accounts',
     Organization = require('../models/organization'),
+    Survey = require('../models/survey'),
     CRMIntegrations = require('../models/crmintegrations');
 
 /**
@@ -86,6 +87,31 @@ Account.prototype.getAccessLevelForOrganization = function (cfg, orgid, cb) {
 /**
  * Get a list of the organizations for this user
  */
+Account.prototype.hasAccessToSurvey = function (cfg, guid, cb) {
+    Organization.GetForAccount(cfg, this.id, (err, orgs) => {
+        if (err) {
+            cb(err);
+        } else {
+            Survey.GetForOrganizations(cfg, orgs, (err2, svs) => {
+                if (err2) {
+                    cb(err2);
+                } else {
+                    if (svs.find((val) => {
+                        return val.guid === guid;
+                    })) {
+                        cb(null, true);
+                    } else {
+                        cb(null, false);
+                    }
+                }
+            });
+        }
+    });
+};
+
+/**
+ * Get a list of the organizations for this user
+ */
 Account.prototype.getOrganizations = function (cfg, cb) {
     Organization.GetForAccount(cfg, this.id, cb);
 };
@@ -126,6 +152,12 @@ Account.GetByEmailAndPassword = function (cfg, e, p, cb) {
     });
 };
 
+/**
+ * Retrieve an account by its Facebook ID
+ * @param {*} cfg 
+ * @param {*} fbId 
+ * @param {*} cb 
+ */
 Account.GetAccountByFbid = (cfg, fbId, cb) => {
     cb = cb || function () {};
 

@@ -53,7 +53,7 @@ OrganizationAssociations.GetAllByEmail = function (cfg, email, cb) {
       dbcmd
         .cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE account_id = ?', [act.id], function (result) {
           cb(null, (result && result.length > 0)
-            ? new OrganizationAssociations(result[0])
+            ? [new OrganizationAssociations(result[0])]
             : null);
         }, function (err) {
           cb(err);

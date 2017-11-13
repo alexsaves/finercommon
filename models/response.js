@@ -157,7 +157,7 @@ Response.prototype.commit = function (cfg, cb) {
             params = [],
             count = 0;
         this.updated_at = new Date();
-        this.name = utils.enforceStringLength(this.name, 25);
+        this.name = utils.enforceStringLength(this.name, 50);
         for (var elm in valKeys) {
             if (excludes.indexOf(valKeys[elm]) == -1 && typeof this[valKeys[elm]] != "function") {
                 if (count > 0) {
@@ -270,7 +270,7 @@ Response.Create = function (cfg, details, cb) {
         other_selected: 0
     };
     extend(_Defaults, details);
-    _Defaults.name = utils.enforceStringLength(_Defaults.name, 25);
+    _Defaults.name = utils.enforceStringLength(_Defaults.name, 50);
     var valKeys = Object.keys(_Defaults),
         excludes = [
             'id', '_state'

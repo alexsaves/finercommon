@@ -33,7 +33,7 @@ CRMIntegrations.prototype.commit = function(cfg, cb) {
         }
     }
     query += ' WHERE uid = ?';
-    params.push(this.id);
+    params.push(this.id || this.uid);
 
     dbcmd.cmd(cfg.pool, query, params, function(result) {
         cb(null, this);

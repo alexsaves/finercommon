@@ -1,10 +1,10 @@
 // Roll them all into one collection
 var All = {
     Account: require('../models/account'),
+    Approval: require('../models/approval'),
     Organization: require('../models/organization'),
     OrganizationAssociation: require('../models/organizationassociations'),
     OrganizationInvitation: require('../models/organizationinvitations'),
-    Prospect: require('../models/prospect'),
     Survey: require('../models/survey'),
     Respondent: require('../models/respondent'),
     Response: require('../models/response'),
@@ -13,10 +13,13 @@ var All = {
     ResetPWInvitations: require('../models/resetpwinvitations'),
     CRMIntegrations: require('../models/crmintegrations'),
     CRMAccounts: require('../models/crmaccounts'),
+    CRMContacts: require('../models/crmcontacts'),
     CRMUsers: require('../models/crmusers'),
     CRMOrganizations: require('../models/crmorganizations'),
+    CRMOpportunities: require('../models/crmopportunities'),
     CRMRoles: require('../models/crmroles'),
     Email: require('../models/email'),
+    // TODO: update delete to include CRM entities
     DeleteAll: function (cfg, cb) {
         console.log("Deleting all...");
         this
