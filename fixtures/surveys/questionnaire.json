@@ -395,7 +395,7 @@
                         "Name and title"
                     ],
                     "name": "majorPlayersList",
-                    "title": "In addition to these people: ${decisionMakerList}; who else played a role in the buying decision?",
+                    "title": "In addition to these people: (${decisionMakerList}); who else played a role in the buying decision?",
                     "required": false
                 }
             ],
