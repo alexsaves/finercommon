@@ -416,8 +416,7 @@
                     "subtitle": "${decisionMaker1}",
                     "low": "None",
                     "high": "High",
-                    "required": true,
-                    "initialValue": 50,
+                    "required": false,
                     "showIf": "decisionMaker1*="
                 },
                 {
@@ -427,8 +426,7 @@
                     "subtitle": "${decisionMaker2}",
                     "low": "None",
                     "high": "High",
-                    "required": true,
-                    "initialValue": 50,
+                    "required": false,
                     "showIf": "decisionMaker2*="
                 },
                 {
@@ -438,8 +436,7 @@
                     "subtitle": "${decisionMaker3}",
                     "low": "None",
                     "high": "High",
-                    "required": true,
-                    "initialValue": 50,
+                    "required": false,
                     "showIf": "decisionMaker3*="
                 },
                 {
@@ -449,8 +446,7 @@
                     "subtitle": "${decisionMaker4}",
                     "low": "None",
                     "high": "High",
-                    "required": true,
-                    "initialValue": 50,
+                    "required": false,
                     "showIf": "decisionMaker4*="
                 },
                 {
@@ -460,8 +456,7 @@
                     "subtitle": "${decisionMaker5}",
                     "low": "None",
                     "high": "High",
-                    "required": true,
-                    "initialValue": 50,
+                    "required": false,
                     "showIf": "decisionMaker5*="
                 },
                 {
@@ -471,8 +466,7 @@
                     "subtitle": "${majorPlayersList[0]}",
                     "low": "None",
                     "high": "High",
-                    "required": true,
-                    "initialValue": 50,
+                    "required": false,
                     "showIf": "majorPlayersList[0]*="
                 },
                 {
@@ -482,8 +476,7 @@
                     "subtitle": "${majorPlayersList[1]}",
                     "low": "None",
                     "high": "High",
-                    "required": true,
-                    "initialValue": 50,
+                    "required": false,
                     "showIf": "majorPlayersList[1]*="
                 },
                 {
@@ -493,8 +486,7 @@
                     "subtitle": "${majorPlayersList[2]}",
                     "low": "None",
                     "high": "High",
-                    "required": true,
-                    "initialValue": 50,
+                    "required": false,
                     "showIf": "majorPlayersList[2]*="
                 },
                 {
@@ -504,8 +496,7 @@
                     "subtitle": "${majorPlayersList[3]}",
                     "low": "None",
                     "high": "High",
-                    "required": true,
-                    "initialValue": 50,
+                    "required": false,
                     "showIf": "majorPlayersList[3]*="
                 }
             ],
@@ -518,7 +509,7 @@
                     "type": "rating",
                     "modifier": "buttons",
                     "name": "reconnect",
-                    "title": "How likely are you consider ${companyName} in the future?",
+                    "title": "How likely are you to consider ${companyName} in the future?",
                     "low": "Not likely",
                     "high": "Very likely",
                     "required": true

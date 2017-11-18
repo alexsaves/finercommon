@@ -11,6 +11,9 @@ const dbcmd = require('../utils/dbcommand'),
  */
 var Respondent = function (details) {
     extend(this, details || {});
+    if (this.variables && this.variables instanceof Buffer) {
+        this.variables = JSON.parse(this.variables.toString());
+    }
 };
 
 /**
@@ -188,6 +191,9 @@ Respondent.Create = function (cfg, details, cb) {
         }
     }
     extend(_Defaults, details);
+    if (typeof _Defaults.variables == "Object") {
+        _Defaults.variables = new Buffer(JSON.stringify(_Defaults.variables));
+    }
     var valKeys = Object.keys(_Defaults),
         query = 'INSERT INTO ' + cfg.db.db + '.' + tablename + ' SET ',
         params = [],

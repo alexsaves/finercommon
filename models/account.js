@@ -192,6 +192,7 @@ Account.GetByEmail = function (cfg, e, cb) {
     dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email = ? LIMIT 1', [e], function (result) {
         cb(result.length === 0
             ? {
+                userMissing: true,
                 message: "No user found."
             }
             : null, result.length > 0
