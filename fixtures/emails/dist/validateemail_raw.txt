@@ -1,0 +1,3 @@
+Hi <%= account.name %>
+
+Validate your FinerInk account at <%= validateurl %>
