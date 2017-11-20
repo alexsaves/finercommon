@@ -73,7 +73,7 @@ CRMIntegrations.GetForOrgIds = function (cfg, organization_ids, cb) {
     organization_ids = [organization_ids];
   }
   dbcmd
-    .cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id IN (?)', [organization_ids.join(', ')], function (result) {
+    .cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE organization_id IN (${organization_ids.map(o => '?').join(', ')})`, organization_ids, function (result) {
       let ints = [];
       for (let i = 0; i < result.length; i++) {
         ints.push(new CRMIntegrations(result[i]));
