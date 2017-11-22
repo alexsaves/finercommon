@@ -1,3 +1,6 @@
 Hi <%= account.name %>
 
 Validate your FinerInk account at <%= validateurl %>
+
+------------------
+To unsubscribe from FinerInk emails, visit <%= unsuburl %>

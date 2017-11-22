@@ -1,3 +1,6 @@
 You've been invited by <%= account.name %> to join their organization <%= org.name %> on FinerInk.
 
 Create your account at <%= ivturl %>
+
+------------------
+To unsubscribe from FinerInk emails, visit <%= unsuburl %>

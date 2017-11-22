@@ -1,1 +1,4 @@
 Please do our survey, <%= contact.FirstName %>. Start it here: <%= surveyurl %>
+
+------------------
+To unsubscribe from FinerInk emails, visit <%= unsuburl %>

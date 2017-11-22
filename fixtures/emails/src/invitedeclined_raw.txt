@@ -1,1 +1,4 @@
 <%= account.name %> has declined your invitation to join <%= org.name %> on FinerInk.
+
+------------------
+To unsubscribe from FinerInk emails, visit <%= unsuburl %>

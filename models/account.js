@@ -42,7 +42,7 @@ Account.prototype.setNewPassword = function (cfg, pw, cb) {
  * @param {String} securetoken 
  */
 Account.prototype.validationSecureIsValid = function(securetoken) {
-    if (securetoken && securetoken == btoa(this.email + this.id + "_f437")) {
+    if (securetoken && securetoken == md5(this.email + this.id + "_f437")) {
         return true;
     }
     return false;
@@ -56,9 +56,9 @@ Account.prototype.validationSecureIsValid = function(securetoken) {
 Account.prototype.sendValidationEmail = function(cfg, cb) {
     // Invite updated! Send an updated email
     let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
-    emailCtrl.send(cfg.email.defaultFrom, this.email, 'validateemail', 'Validate your FinerInk account.', {
+    emailCtrl.send(cfg, 0, cfg.email.defaultFrom, this.email, 'validateemail', 'Validate your FinerInk account.', {
       account: this,
-      validateurl: cfg.portalUrl + "/checkvalidate/?id=" + encodeURIComponent(this.id) + "&secure=" + encodeURIComponent(btoa(this.email + this.id + "_f437"))
+      validateurl: cfg.portalUrl + "/checkvalidate/?id=" + encodeURIComponent(this.id) + "&secure=" + encodeURIComponent(md5(this.email + this.id + "_f437"))
     }, function (err) {
       if (err) {
         console.log("Error sending validation email", err);
