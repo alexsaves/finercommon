@@ -25,7 +25,7 @@ EmailUnsubscriptions.prototype.Delete = function (cfg, cb) {
 };
 
 /**
-* Get an upload by its Id
+* Get an unsubscription by its Id
 */
 EmailUnsubscriptions.GetById = function (cfg, id, cb) {
   cb = cb || function () {};
@@ -42,12 +42,90 @@ EmailUnsubscriptions.GetById = function (cfg, id, cb) {
   });
 };
 
+
+/**
+* Get an unsubscription by its email and org
+*/
+EmailUnsubscriptions.GetByEmailAndOrg = function (cfg, email, org, cb) {
+  cb = cb || function () {};
+  email = email.toLowerCase().trim();
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email_hash = ? AND organization_id = ?', [md5(email), org], function (result) {
+    cb(null, result.length > 0
+      ? new EmailUnsubscriptions(result[0])
+      : null);
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
+* Get all unsubscription by its email 
+*/
+EmailUnsubscriptions.GetAllForEmail = function (cfg, email, cb) {
+  cb = cb || function () {};
+  email = email.toLowerCase().trim();
+  //console.log(email, md5(email));
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email_hash = ? ORDER BY organization_id ASC', [md5(email)], function (result) {
+    var fn = [];
+    for (var i = 0; i < result.length; i++) {
+      fn.push(new EmailUnsubscriptions(result[i]));      
+    }
+    cb(null, fn);
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
+* Is this user allowed to receive an email?
+*/
+EmailUnsubscriptions.EmailCanReceiveMessages = function (cfg, email, org, cb) {
+  cb = cb || function () {};
+  email = email.toLowerCase().trim();
+  //console.log(email, md5(email));
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email_hash = ? AND (organization_id = 0 OR organization_id = ?)', [md5(email), org], function (result) {    
+    cb(null, result.length === 0);
+  }, function (err) {
+    cb(err);
+  });
+};
+
 /**
 * Delete any pending invitations for a particular id
 */
 EmailUnsubscriptions.DeleteForOrgId = function (cfg, orgid, cb) {
   cb = cb || function () {};
   dbcmd.cmd(cfg.pool, "DELETE FROM " + cfg.db.db + "." + tablename + " WHERE organization_id = ?", [orgid], function (result) {
+    cb();
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
+* Delete any pending invitations for a particular id
+*/
+EmailUnsubscriptions.DeleteForOrgAndEmail = function (cfg, orgid, email, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, "DELETE FROM " + cfg.db.db + "." + tablename + " WHERE organization_id = ? AND email_hash = ?", [
+    orgid,
+    md5(email.toLowerCase().trim())
+  ], function (result) {
+    cb();
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
+* Delete any pending invitations for a particular id
+*/
+EmailUnsubscriptions.DeleteForEmail = function (cfg, email, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, "DELETE FROM " + cfg.db.db + "." + tablename + " WHERE email_hash = ?", [
+    orgid,
+    md5(email.toLowerCase().trim())
+  ], function (result) {
     cb();
   }, function (err) {
     cb(err);
@@ -68,25 +146,29 @@ EmailUnsubscriptions.DeleteAll = function (cfg, cb) {
 
 /**
  * Return a link to unsubscribe a user
- * @param {String} email 
+ * @param {String} email
  */
-EmailUnsubscriptions.GenerateValidUnsubscribeLink = function(email, org) {
+EmailUnsubscriptions.GenerateValidUnsubscribeLink = function (email, org) {
   if (arguments.length < 2) {
     throw new Error("Missing email args.");
   }
-  email = email.trim().toLowerCase();
-  return "/unsubscribe?email=" + encodeURIComponent(email) + "&o=" + encodeURIComponent(org) + "&secure=" + encodeURIComponent(md5(email + "_" + org + "_sub1"));  
+  email = email
+    .trim()
+    .toLowerCase();
+  return "/unsubscribe?email=" + encodeURIComponent(email) + "&o=" + encodeURIComponent(org) + "&secure=" + encodeURIComponent(md5(email + "_" + org + "_sub1"));
 };
 
 /**
  * Validate an unsubscribe link
- * @param {String} email 
+ * @param {String} email
  */
-EmailUnsubscriptions.ValidateUnsubscribeLink = function(email, org, secure) {
+EmailUnsubscriptions.ValidateUnsubscribeLink = function (email, org, secure) {
   if (arguments.length < 3) {
     throw new Error("Missing email args.");
   }
-  email = email.trim().toLowerCase();
+  email = email
+    .trim()
+    .toLowerCase();
   var hsh = md5(email + "_" + org + "_sub1");
   return !!email && secure === hsh;
 };
@@ -118,11 +200,11 @@ EmailUnsubscriptions.Create = function (cfg, details, cb) {
   dbcmd
     .cmd(cfg.pool, query, params, function (result) {
       EmailUnsubscriptions
-        .GetById(cfg, _Defaults.uid, function (err, org) {
+        .GetById(cfg, result.insertId, function (err, unsub) {
           if (err) {
             cb(err);
           } else {
-            cb(null, org);
+            cb(null, unsub);
           }
         });
     }, function (err) {

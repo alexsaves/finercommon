@@ -163,7 +163,8 @@ Organization.DeleteById = function (cfg, id, cb) {
   dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [id], function (result) {
     cb(null);
   }, function (err) {
-    cb(err);
+    var EmailUnsubscriptions = require('./emailunsubscription');
+    EmailUnsubscriptions.DeleteForOrgId(cfg, id, cb);
   });
 };
 
