@@ -2,8 +2,10 @@ const dbcmd = require('../utils/dbcommand'),
     md5 = require('md5'),
     extend = require('extend'),
     tablename = 'accounts',
+    btoa = require('btoa'),
     Organization = require('../models/organization'),
     Survey = require('../models/survey'),
+    Email = require('../models/email'),
     CRMIntegrations = require('../models/crmintegrations');
 
 /**
@@ -13,6 +15,11 @@ var Account = function (details) {
     extend(this, details || {});
     if (!this.profile_image_uid) {
         this.profile_image_uid = 'blankprofile';
+    }
+    if (this.emailverified === 0) {
+        this.emailverified = false;
+    } else if (this.emailverified === 1) {
+        this.emailverified = true;
     }
 };
 
@@ -29,6 +36,39 @@ Account.prototype.setNewPassword = function (cfg, pw, cb) {
             cb(err);
         });
 };
+
+/**
+ * Validate a secure token
+ * @param {String} securetoken 
+ */
+Account.prototype.validationSecureIsValid = function(securetoken) {
+    if (securetoken && securetoken == md5(this.email + this.id + "_f437")) {
+        return true;
+    }
+    return false;
+};
+
+/**
+ * Send out a validation email
+ * @param {*} cfg 
+ * @param {*} cb 
+ */
+Account.prototype.sendValidationEmail = function(cfg, cb) {
+    // Invite updated! Send an updated email
+    let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
+    emailCtrl.send(cfg, 0, cfg.email.defaultFrom, this.email, 'validateemail', 'Validate your FinerInk account.', {
+      account: this,
+      validateurl: cfg.portalUrl + "/checkvalidate/?id=" + encodeURIComponent(this.id) + "&secure=" + encodeURIComponent(md5(this.email + this.id + "_f437"))
+    }, function (err) {
+      if (err) {
+        console.log("Error sending validation email", err);
+        cb("Error sending validation email");
+      } else {
+        // Success
+        cb(null);
+      }
+    });
+}
 
 /**
  * Save any changes to the DB row
@@ -49,7 +89,17 @@ Account.prototype.commit = function (cfg, cb) {
                 query += ', ';
             }
             query += valKeys[elm] + ' = ?';
-            params.push(this[valKeys[elm]]);
+            if (valKeys[elm] == "emailverified") {
+                if (this[valKeys[elm]] === true) {
+                    params.push(1);
+                } else if (this[valKeys[elm]] === false) {
+                    params.push(0);
+                } else {
+                    params.push(this[valKeys[elm]]);
+                }
+            } else {
+                params.push(this[valKeys[elm]]);
+            }
             count++;
         }
     }
@@ -154,9 +204,9 @@ Account.GetByEmailAndPassword = function (cfg, e, p, cb) {
 
 /**
  * Retrieve an account by its Facebook ID
- * @param {*} cfg 
- * @param {*} fbId 
- * @param {*} cb 
+ * @param {*} cfg
+ * @param {*} fbId
+ * @param {*} cb
  */
 Account.GetAccountByFbid = (cfg, fbId, cb) => {
     cb = cb || function () {};
@@ -178,9 +228,7 @@ Account.GetAccountByFbid = (cfg, fbId, cb) => {
  * Either return the account or create one if one does not exist
  */
 Account.FindOrCreate = (cfg, opts) => {
-    if(opts.fbId) {
-        
-    }
+    if (opts.fbId) {}
 }
 
 /**
@@ -192,6 +240,7 @@ Account.GetByEmail = function (cfg, e, cb) {
     dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email = ? LIMIT 1', [e], function (result) {
         cb(result.length === 0
             ? {
+                userMissing: true,
                 message: "No user found."
             }
             : null, result.length > 0
@@ -243,13 +292,20 @@ Account.Create = function (cfg, details, cb) {
         created_at: new Date(),
         updated_at: new Date(),
         email: "",
-        pw_md5: md5('')
+        pw_md5: md5(''),
+        emailverified: false
     };
     if (details.password) {
         details.pw_md5 = md5(details.password);
         delete details.password;
     }
     extend(_Defaults, details);
+    if (_Defaults.emailverified === false) {
+        _Defaults.emailverified = 0;
+    }
+    if (_Defaults.emailverified === true) {
+        _Defaults.emailverified = 1;
+    }
     var valKeys = Object.keys(_Defaults),
         query = 'INSERT INTO ' + cfg.db.db + '.' + tablename + ' SET ',
         params = [],

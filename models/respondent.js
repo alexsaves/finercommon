@@ -11,6 +11,12 @@ const dbcmd = require('../utils/dbcommand'),
  */
 var Respondent = function (details) {
     extend(this, details || {});
+    if (this.variables && this.variables instanceof Buffer) {
+        this.variables = JSON.parse(this.variables.toString());
+    }
+    if (this.answers && this.answers instanceof Buffer) {
+        this.answers = JSON.parse(this.answers.toString());
+    }
 };
 
 /**
@@ -168,6 +174,49 @@ Respondent.DeleteAll = function (cfg, cb) {
 };
 
 /**
+ * Save any changes to the DB row
+ */
+Respondent.prototype.commit = function (cfg, cb) {
+    cb = cb || function () {};
+    var excludes = [
+            'id', 'created_at'
+        ],
+        valKeys = Object.keys(this),
+        query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET ',
+        params = [],
+        count = 0;
+    if (!this.variables) {
+        this.variables = {};
+    }
+    if (!this.answers) {
+        this.answers = {};
+    }
+    this.updated_at = new Date();
+    for (var elm in valKeys) {
+        if (excludes.indexOf(valKeys[elm]) == -1) {
+            if (count > 0) {
+                query += ', ';
+            }
+            query += valKeys[elm] + ' = ?';
+            if (typeof this[valKeys[elm]] == "object" && !(this[valKeys[elm]] instanceof Date)) {
+                params.push(new Buffer(JSON.stringify(this[valKeys[elm]])));
+            } else {
+                params.push(this[valKeys[elm]]);
+            }
+            count++;
+        }
+    }
+    query += ' WHERE id = ?';
+    params.push(this.id);
+
+    dbcmd.cmd(cfg.pool, query, params, function (result) {
+        cb(null, this);
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
  * Create a Respondent
  */
 Respondent.Create = function (cfg, details, cb) {
@@ -178,7 +227,9 @@ Respondent.Create = function (cfg, details, cb) {
     }
     var _Defaults = {
         created_at: new Date(),
-        updated_at: new Date()
+        updated_at: new Date(),
+        variables: {},
+        answers: {}
     };
     if (details.user_agent) {
         if (details.user_agent.length > 512) {
@@ -188,6 +239,12 @@ Respondent.Create = function (cfg, details, cb) {
         }
     }
     extend(_Defaults, details);
+    if (typeof _Defaults.variables == "object") {
+        _Defaults.variables = new Buffer(JSON.stringify(_Defaults.variables));
+    }
+    if (typeof _Defaults.answers == "object") {
+        _Defaults.answers = new Buffer(JSON.stringify(_Defaults.answers));
+    }
     var valKeys = Object.keys(_Defaults),
         query = 'INSERT INTO ' + cfg.db.db + '.' + tablename + ' SET ',
         params = [],

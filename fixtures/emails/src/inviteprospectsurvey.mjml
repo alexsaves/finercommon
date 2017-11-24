@@ -4,6 +4,7 @@
       <mj-section>
         <mj-column>
           <mj-text>Please do our survey, <%= contact.FirstName %>. Start it here: <%= surveyurl %></mj-text>
+          <mj-text>To unsubscribe from FinerInk emails, visit <%= unsuburl %></mj-text>
         </mj-column>
       </mj-section>
     </mj-container>

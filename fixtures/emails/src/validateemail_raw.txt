@@ -1,6 +1,6 @@
 Hi <%= account.name %>
 
-Reset your password at <%= reseturl %>
+Validate your FinerInk account at <%= validateurl %>
 
 ------------------
 To unsubscribe from FinerInk emails, visit <%= unsuburl %>
