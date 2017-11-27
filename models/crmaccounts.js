@@ -37,6 +37,44 @@ CRMAccounts.GetByIds = function (cfg, oids, cb) {
   });
 };
 
+CRMAccounts.GetAllGivenIntegrationId = function(cfg, integrationId, cb) {
+  cb = cb || function () {};
+  if (integrationId) {
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE integration_id = ? ', [integrationId], function (result) {
+      var res = [];
+      for (var i = 0; i < result.length; i++) {
+        res.push(new CRMAccounts(result[i]));
+      }
+      cb(null, res);
+    }, function (err) {
+      cb(err);
+    });
+  } else {
+    cb(null, []);
+  }
+}
+
+CRMAccounts.GetAccountsByOwnerIds = function (cfg, oids, cb) {
+  cb = cb || function () {};
+  var finalStr = "(";
+  for (var k = 0; k < oids.length; k++) {
+      if (k > 0) {
+          finalStr += ", ";
+      }
+      finalStr += "'" + oids[k] + "'";
+  }
+  finalStr += ")";
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE OwnerId IN ' + finalStr, function (result) {
+      var res = [];
+      for (var i = 0; i < result.length; i++) {
+          res.push(new CRMAccounts(result[i]));
+      }
+      cb(null, res);
+  }, function (err) {
+      cb(err);
+  });
+}
+
 /**
 * Create an integration
 */

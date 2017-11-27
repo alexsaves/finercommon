@@ -26,7 +26,7 @@ CRMUsers.GetByIds = function (cfg, oids, cb) {
       finalStr += "'" + oids[k] + "'";
     }
     finalStr += ")";
-    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id IN ' + finalStr, function (result) {
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE Id IN ' + finalStr, function (result) {
       var res = [];
       for (var i = 0; i < result.length; i++) {
         res.push(new CRMUsers(result[i]));
@@ -40,12 +40,29 @@ CRMUsers.GetByIds = function (cfg, oids, cb) {
   }
 };
 
+CRMUsers.GetAllGivenIntegrationId = function(cfg, integrationId, cb) {
+  cb = cb || function () {};
+  if (integrationId) {
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE integration_id = ? ', [integrationId], function (result) {
+      var res = [];
+      for (var i = 0; i < result.length; i++) {
+        res.push(new CRMUsers(result[i]));
+      }
+      cb(null, res);
+    }, function (err) {
+      cb(err);
+    });
+  } else {
+    cb(null, []);
+  }
+}
+
 /**
 * Get a user by their id
 */
 CRMUsers.GetById = function (cfg, guid, cb) {
   cb = cb || function () {};
-  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [guid], function (result) {
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE Id = ?', [guid], function (result) {
     cb(result.length === 0
       ? {
         message: "No opportunity found."
