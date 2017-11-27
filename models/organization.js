@@ -190,7 +190,10 @@ Organization.Create = function (cfg, details, cb) {
     feature_list: [
       "Flexibility & customization", "Quality & performance", "Security & trust concerns", "Integration with other vendors", "Reporting and analytics"
     ],
-    competitor_list: [],
+    competitor_list: [
+      "Preloaded Competitor A",
+      "Preloaded Competitor B"
+    ],
     default_survey_template: 'bokehlight'
   };
   extend(_Defaults, details);
