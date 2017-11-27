@@ -293,18 +293,18 @@ Account.Create = function (cfg, details, cb) {
         updated_at: new Date(),
         email: "",
         pw_md5: md5(''),
-        emailVerified: false
+        emailverified: false
     };
     if (details.password) {
         details.pw_md5 = md5(details.password);
         delete details.password;
     }
     extend(_Defaults, details);
-    if (_Defaults.emailVerified === false) {
-        _Defaults.emailVerified = 0;
+    if (_Defaults.emailverified === false) {
+        _Defaults.emailverified = 0;
     }
-    if (_Defaults.emailVerified === true) {
-        _Defaults.emailVerified = 1;
+    if (_Defaults.emailverified === true) {
+        _Defaults.emailverified = 1;
     }
     var valKeys = Object.keys(_Defaults),
         query = 'INSERT INTO ' + cfg.db.db + '.' + tablename + ' SET ',
