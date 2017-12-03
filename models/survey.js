@@ -243,6 +243,7 @@ Survey.EnforceSurveyExistsForOpportunityAndType = function (cfg, opportunity_id,
                             opportunity_id: opportunity_id,
                             organization_id: organization_id,
                             survey_type: survey_type,
+                            theme: org.default_survey_template,
                             name: org.name + " Feedback",
                             survey_model: new Buffer(JSON.stringify(Survey.getSurveyFixture(survey_type)))
                         }, (err, sv) => {
