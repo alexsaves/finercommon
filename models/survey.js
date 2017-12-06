@@ -268,6 +268,9 @@ Survey.EnforceSurveyExistsForOpportunityAndType = function (cfg, opportunity_id,
 Survey.Create = function (cfg, details, cb) {
     cb = cb || function () {};
     details = details || {};
+    if (!details.opportunity_id) {
+        throw new Error("Missing opportunity ID on Survey");
+    }
     var _Defaults = {
         guid: shortid.generate(),
         name: "",
