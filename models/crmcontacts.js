@@ -31,6 +31,33 @@ CRMContacts.GetById = function (cfg, guid, cb) {
 };
 
 /**
+ * Get contacts by an array of ids
+ */
+CRMContacts.GetByAccountIds = function (cfg, aids, cb) {
+  cb = cb || function () {};
+  if (aids && aids.length > 0) {
+    var finalStr = "(";
+    for (var k = 0; k < aids.length; k++) {
+      if (k > 0) {
+        finalStr += ", ";
+      }
+      finalStr += "'" + aids[k] + "'";
+    }
+    finalStr += ")";
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE AccountId IN ' + finalStr, function (result) {
+      var res = [];
+      for (var i = 0; i < result.length; i++) {
+        res.push(new CRMContacts(result[i]));
+      }
+      cb(null, res);
+    }, function (err) {
+      cb(err);
+    });
+  } else {
+    cb(null, []);
+  }
+
+/*
 * Get all Contact by their opportunity
 */
 CRMContacts.GetByOpportunityId = function (cfg, opportunity_id, cb) {
@@ -81,6 +108,10 @@ CRMContacts.Create = function (cfg, data, extraFields, cb) {
   {
     name: "Email",
     row_name: "Email"
+  },
+  {
+    name: "Name",
+    row_name: "Name"
   },
   {
     name: "Department",
