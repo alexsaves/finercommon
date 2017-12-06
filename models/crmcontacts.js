@@ -12,7 +12,6 @@ var CRMContacts = function (details) {
   extend(this, details || {});
 };
 
-
 /**
 * Get an Contact by its id
 */
@@ -31,6 +30,23 @@ CRMContacts.GetById = function (cfg, guid, cb) {
   });
 };
 
+/**
+* Get all Contact by their opportunity
+*/
+CRMContacts.GetByOpportunityId = function (cfg, opportunity_id, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [guid], function (result) {
+    cb(result.length === 0
+      ? {
+        message: "No approval found."
+      }
+      : null, result.length > 0
+      ? new CRMContacts(result[0])
+      : null);
+  }, function (err) {
+    cb(err);
+  });
+};
 
 /**
 * Create a CRM contact
