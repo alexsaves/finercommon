@@ -56,6 +56,7 @@ CRMContacts.GetByAccountIds = function (cfg, aids, cb) {
   } else {
     cb(null, []);
   }
+};
 
 /*
 * Get all Contact by their opportunity
@@ -81,50 +82,42 @@ CRMContacts.GetByOpportunityId = function (cfg, opportunity_id, cb) {
 CRMContacts.Create = function (cfg, data, extraFields, cb) {
   cb = cb || function () {};
   const rowDict = [
-  {
-    name: "Id",
-    row_name: "Id"
-  },
-  {
-    name: "AccountId",
-    row_name: "AccountId"
-  },
-  {
-    name: "OwnerId",
-    row_name: "OwnerId"
-  },
-  {
-    name: "Title",
-    row_name: "Title"
-  },
-  {
-    name: "FirstName",
-    row_name: "FirstName"
-  },
-  {
-    name: "LastName",
-    row_name: "LastName"
-  },
-  {
-    name: "Email",
-    row_name: "Email"
-  },
-  {
-    name: "Name",
-    row_name: "Name"
-  },
-  {
-    name: "Department",
-    row_name: "Department"
-  }];
-  const { query, params } = utils.createInsertOrUpdateStatementGivenData(cfg.db.db, 'crm_contacts', data, rowDict, extraFields, 'Id');
-  
-  dbcmd
-    .cmd(cfg.pool, query, params, function (result) {
-      console.log(result);
-    }, function (err) {
-      cb(err);
-    });
+    {
+      name: "Id",
+      row_name: "Id"
+    }, {
+      name: "AccountId",
+      row_name: "AccountId"
+    }, {
+      name: "OwnerId",
+      row_name: "OwnerId"
+    }, {
+      name: "Title",
+      row_name: "Title"
+    }, {
+      name: "FirstName",
+      row_name: "FirstName"
+    }, {
+      name: "LastName",
+      row_name: "LastName"
+    }, {
+      name: "Email",
+      row_name: "Email"
+    }, {
+      name: "Name",
+      row_name: "Name"
+    }, {
+      name: "Department",
+      row_name: "Department"
+    }
+  ];
+  const {query, params} = utils.createInsertOrUpdateStatementGivenData(cfg.db.db, 'crm_contacts', data, rowDict, extraFields, 'Id');
+
+  dbcmd.cmd(cfg.pool, query, params, function (result) {
+    console.log(result);
+  }, function (err) {
+    cb(err);
+  });
 };
 
 // Expose it
