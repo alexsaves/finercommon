@@ -360,10 +360,7 @@
                 }
             ],
             "name": "reasonsWhyWinnerChosen",
-            "showIf": [
-                "vendorRankings[3]>0",
-                "vendorRankings[4]>0"
-            ]
+            "showIf": "vendorRankings[1]>0"
         },
         {
             "elements": [
@@ -386,10 +383,7 @@
                 }
             ],
             "name": "rateWinningVendor",
-            "showIf": [
-                "vendorRankings[3]>0",
-                "vendorRankings[4]>0"
-            ]
+            "showIf": "vendorRankings[1]>0"
         },
         {
             "elements": [
