@@ -1,35 +1,65 @@
+const Surveyvalueextractor = require('../models/surveyvalueextractor');
+
 /**
  * All the weightings for BuyX
  */
-var BuyXWeightings = [
+const BuyXWeightings = [
   {
-    qname: "overall",
-    weight: 0.9
+    segment: "Overall",
+    questions: ["buyXRating"],
+    weight: 0.25
   },
   {
-    qname: "overall",
-    weight: 0.9
+    segment: "Buying Criteria",
+    questions: ["howWellInAreas[0]", "howWellInAreas[1]", "howWellInAreas[2]"],
+    weight: 0.3
   },
   {
-    qname: "overall",
-    weight: 0.9
+    segment: "Product/ Service Offering",
+    questions: ["rateWinningVendor[0]", "rateWinningVendor[1]", "rateWinningVendor[2]", "rateWinningVendor[3]", "rateWinningVendor[4]"],
+    weight: 0.2
   },
   {
-    qname: "overall",
-    weight: 0.9
-  },
-  {
-    qname: "overall",
-    weight: 0.9
-  },
-  {
-    qname: "overall",
-    weight: 0.9
+    segment: "Connection Score",
+    questions: ["reconnect"],
+    weight: 0.25
   },
 ];
 
-module.exports = {
-  CalculateBuyXFromResponses: function(responses) {
+// Get the value
+const ValueExtractor = new Surveyvalueextractor();
 
+// Expose
+module.exports = {
+  /**
+   * Get a response from a list of responses
+   */
+  GetResponse: function(qname, resps, surveydef) {
+    var res = ValueExtractor.getSurveyQuestionValue(qname, resps, surveydef, {}, {});
+    return res;
+  },
+
+  /**
+   * Get a buyX Score. -1 is no score possible
+   */
+  CalculateBuyXFromResponses: function(surveydef, responses) {
+    let overallScore = 0;
+    for (let i = 0; i < BuyXWeightings.length; i++) {
+      let weighting = BuyXWeightings[i];
+      let itemsInGroup = 0;
+      let runningtally = 0;
+      for (let q = 0; q < weighting.questions.length; q++) {
+        let ans = this.GetResponse(weighting.questions[q], responses, surveydef.survey_model.pages);
+        if (ans != null) {
+          itemsInGroup++;
+          runningtally += ans;
+        }        
+      }
+      if (itemsInGroup == 0) {
+        return;
+      }
+      overallScore += (runningtally / itemsInGroup) * weighting.weight;
+    }
+    return overallScore;
   }
 };
