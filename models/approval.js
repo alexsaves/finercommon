@@ -50,7 +50,6 @@ Approval.prototype.execute = function (cfg, cb) {
               } else {
                 // Success
                 this.commit(cfg, cb);
-                cb(null);
               }
             });          
           }
@@ -112,6 +111,24 @@ Approval.GetByGuid = function (cfg, guid, cb) {
     cb(err);
   });
 };
+
+Approval.GetForContacts = function (cfg, contacts, cb) {
+  cb = cb || function () {};
+  const contactIds = contacts.map(c => c.Id);
+  dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE crm_contact_id IN (${contactIds.map(c=>'?').join(', ')})`, contactIds, function (result) {
+    if (result && result.length > 0) {
+      var res = [];
+      for (var i = 0; i < result.length; i++) {
+        res.push(new Approval(result[i]));
+      }
+      cb(null, res);
+    } else {
+      cb();
+    }
+  }, function (err) {
+    cb(err);
+  });
+} 
 
 /**
 * Get an approval by its oppportunity ID and contact
