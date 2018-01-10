@@ -56,7 +56,8 @@ class Daemon {
         // Dealing with accurate history now
         let nowDate = new Date(),
           nowMoment = moment(nowDate),
-          nowInfo = this._getDateInfo(nowDate);
+          nowInfo = this._getDateInfo(nowDate),
+          nowDayOfWeek = nowMoment.day();
 
         // For each task, go back and determine the last date it COULD have run on.
         this
@@ -70,18 +71,18 @@ class Daemon {
               .second(0)
               .millisecond(0);
 
-            // Now see if that's in the future. If it is, then subtract a week
-            if (nowMoment.isBefore(idealDate)) {
-              // It's in the future
-              idealDate.subtract(1, 'week');
-            }
+            if (nowDayOfWeek == tsk.dayOfWeek) {
+              // Now see if that's in the future. If it is, then subtract a week
+              if (nowMoment.isBefore(idealDate)) {
+                // It's in the future
+                idealDate.subtract(1, 'week');
+              }
 
-            // We have an ideal date now that is in the past Check to see if we already did
-            // it
-            if (!this._didTaskHappen(tsk.taskName, idealDate)) {
-              this._execTask(tsk, idealDate);
+              // We have an ideal date now that is in the past Check to see if we already did it            
+              if (!this._didTaskHappen(tsk.taskName, idealDate)) {
+                this._execTask(tsk, idealDate);
+              }
             }
-
           });
 
         // Release the lock
@@ -180,12 +181,26 @@ class Daemon {
   }
 
   /**
-   * Schedule a task
-   * @param {*} dayOfWeek
+   * Have a task run at the same time every day
    * @param {*} hourOfDay
    * @param {*} taskName
    */
+  scheduleDailyTask(hourOfDay, taskName) {
+    for (let i = 1; i <= 7; i++) {
+      this.scheduleTask(i, hourOfDay, taskName);
+    }
+  }
+
+  /**
+   * Schedule a task
+   * @param {Number} dayOfWeek - 1 is Monday and 7 is Sunday
+   * @param {Number} hourOfDay - 0 - 24
+   * @param {String} taskName - The name of the task
+   */
   scheduleTask(dayOfWeek, hourOfDay, taskName) {
+    if (taskName.length > 45) {
+      throw new Error("Task name is too long (max length: 45 characters).");
+    }
     dayOfWeek = parseInt(dayOfWeek);
     hourOfDay = parseInt(hourOfDay);
     if (isNaN(dayOfWeek) || isNaN(hourOfDay)) {
