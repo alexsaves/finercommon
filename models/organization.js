@@ -10,6 +10,12 @@ const dbcmd = require('../utils/dbcommand'),
 */
 var Organization = function (details) {
   extend(this, details || {});
+  if (this.competitor_list instanceof Buffer) {
+    this.competitor_list = JSON.parse(this.competitor_list.toString());
+  }
+  if (this.feature_list instanceof Buffer) {
+    this.feature_list = JSON.parse(this.feature_list.toString());
+  }
 };
 
 /**
@@ -23,12 +29,12 @@ Organization.prototype.getIntegrations = function (cfg, cb) {
  * Delete all
  */
 Organization.DeleteAll = function (cfg, cb) {
-    cb = cb || function () {};
-    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id > 0', function () {
-        cb();
-    }, function (err) {
-        cb(err);
-    });
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id > 0', function () {
+    cb();
+  }, function (err) {
+    cb(err);
+  });
 };
 
 /**
@@ -92,7 +98,10 @@ Organization.prototype.getSharingSettingsForUser = function (cfg, userid, cb) {
                         asc.type = "INVITE";
                       });
                       let finalList = assocs.concat(ivts);
-                      cb(null, {organization_id: this.id, shares: finalList});
+                      cb(null, {
+                        organization_id: this.id,
+                        shares: finalList
+                      });
                     }
                   });
               }
@@ -163,7 +172,8 @@ Organization.DeleteById = function (cfg, id, cb) {
   dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [id], function (result) {
     cb(null);
   }, function (err) {
-    cb(err);
+    var EmailUnsubscriptions = require('./emailunsubscription');
+    EmailUnsubscriptions.DeleteForOrgId(cfg, id, cb);
   });
 };
 
@@ -176,9 +186,19 @@ Organization.Create = function (cfg, details, cb) {
   var _Defaults = {
     name: "",
     created_at: new Date(),
-    updated_at: new Date()
+    updated_at: new Date(),
+    feature_list: [
+      "Flexibility & customization", "Quality & performance", "Security & trust concerns", "Integration with other vendors", "Reporting and analytics"
+    ],
+    competitor_list: [
+      "Preloaded Competitor A",
+      "Preloaded Competitor B"
+    ],
+    default_survey_template: 'bokehlight'
   };
   extend(_Defaults, details);
+  _Defaults.feature_list = new Buffer(JSON.stringify(_Defaults.feature_list));
+  _Defaults.competitor_list = new Buffer(JSON.stringify(_Defaults.competitor_list));
   var valKeys = Object.keys(_Defaults),
     query = 'INSERT INTO ' + cfg.db.db + '.' + tablename + ' SET ',
     params = [],
@@ -225,7 +245,11 @@ Organization.prototype.commit = function (cfg, cb) {
         query += ', ';
       }
       query += valKeys[elm] + ' = ?';
-      params.push(this[valKeys[elm]]);
+      if (this[valKeys[elm]]instanceof Array) {
+        params.push(new Buffer(JSON.stringify(this[valKeys[elm]])));
+      } else {
+        params.push(this[valKeys[elm]]);
+      }
       count++;
     }
   }

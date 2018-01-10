@@ -19,6 +19,10 @@ var All = {
     CRMOpportunities: require('../models/crmopportunities'),
     CRMRoles: require('../models/crmroles'),
     Email: require('../models/email'),
+    EmailUnsubscription: require('../models/emailunsubscription'),
+    CRMIntegrationRules: require('../models/crmintegrationrules'),
+    BuyX: require('../models/buyx'),
+    Daemon: require('../models/daemon'),
     // TODO: update delete to include CRM entities
     DeleteAll: function (cfg, cb) {
         console.log("Deleting all...");

@@ -4,6 +4,7 @@
       <mj-section>
         <mj-column>
           <mj-text><%= account.name %> has accepted your invitation to join <%= org.name %> on FinerInk.</mj-text>
+          <mj-text>To unsubscribe from FinerInk emails, visit <%= unsuburl %></mj-text>
         </mj-column>
       </mj-section>
     </mj-container>

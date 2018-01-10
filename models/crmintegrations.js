@@ -14,32 +14,34 @@ var CRMIntegrations = function (details) {
 /**
  * Save any changes to the DB row
  */
-CRMIntegrations.prototype.commit = function(cfg, cb) {
-    cb = cb || function() {};
-    var excludes = ['uid', 'created_at'],
-        valKeys = Object.keys(this),
-        query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET ',
-        params = [],
-        count = 0;
-    this.updated_at = new Date();
-    for (var elm in valKeys) {
-        if (excludes.indexOf(valKeys[elm]) == -1) {
-            if (count > 0) {
-                query += ', ';
-            }
-            query += valKeys[elm] + ' = ?';
-            params.push(this[valKeys[elm]]);
-            count++;
-        }
+CRMIntegrations.prototype.commit = function (cfg, cb) {
+  cb = cb || function () {};
+  var excludes = [
+      'uid', 'created_at'
+    ],
+    valKeys = Object.keys(this),
+    query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET ',
+    params = [],
+    count = 0;
+  this.updated_at = new Date();
+  for (var elm in valKeys) {
+    if (excludes.indexOf(valKeys[elm]) == -1) {
+      if (count > 0) {
+        query += ', ';
+      }
+      query += valKeys[elm] + ' = ?';
+      params.push(this[valKeys[elm]]);
+      count++;
     }
-    query += ' WHERE uid = ?';
-    params.push(this.id || this.uid);
+  }
+  query += ' WHERE uid = ?';
+  params.push(this.id || this.uid);
 
-    dbcmd.cmd(cfg.pool, query, params, function(result) {
-        cb(null, this);
-    }, function(err) {
-        cb(err);
-    });
+  dbcmd.cmd(cfg.pool, query, params, function (result) {
+    cb(null, this);
+  }, function (err) {
+    cb(err);
+  });
 };
 
 /**
@@ -72,16 +74,20 @@ CRMIntegrations.GetForOrgIds = function (cfg, organization_ids, cb) {
   if (!Array.isArray(organization_ids)) {
     organization_ids = [organization_ids];
   }
-  dbcmd
-    .cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id IN (?)', [organization_ids.join(', ')], function (result) {
-      let ints = [];
-      for (let i = 0; i < result.length; i++) {
-        ints.push(new CRMIntegrations(result[i]));
-      }
-      cb(null, ints);
-    }, function (err) {
-      cb(err);
-    });
+  if (organization_ids.length > 0) {
+    dbcmd
+      .cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE organization_id IN (${organization_ids.map(o => '?').join(', ')})`, organization_ids, function (result) {
+        let ints = [];
+        for (let i = 0; i < result.length; i++) {
+          ints.push(new CRMIntegrations(result[i]));
+        }
+        cb(null, ints);
+      }, function (err) {
+        cb(err);
+      });
+  } else {
+    cb();
+  }
 };
 
 /**
@@ -89,12 +95,13 @@ CRMIntegrations.GetForOrgIds = function (cfg, organization_ids, cb) {
 */
 CRMIntegrations.DeleteForUQ = function (cfg, orgid, uq, cb) {
   cb = cb || function () {};
-  dbcmd
-    .cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND uq = ?', [orgid, uq], function (result) {
-      cb(null);
-    }, function (err) {
-      cb(err);
-    });
+  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND uq = ?', [
+    orgid, uq
+  ], function (result) {
+    cb(null);
+  }, function (err) {
+    cb(err);
+  });
 };
 
 /**
@@ -124,8 +131,11 @@ CRMIntegrations.GetForOrg = function (cfg, organization_id, cb) {
 */
 CRMIntegrations.GetByUQ = function (cfg, orgid, uq, cb) {
   cb = cb || function () {};
-  //console.log("GETBYUQ", 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND uq = ? LIMIT 1', orgid, uq);
-  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND uq = ? LIMIT 1', [orgid, uq], function (result) {
+  // console.log("GETBYUQ", 'SELECT * FROM ' + cfg.db.db + '.' + tablename + '
+  // WHERE organization_id = ? AND uq = ? LIMIT 1', orgid, uq);
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND uq = ? LIMIT 1', [
+    orgid, uq
+  ], function (result) {
     /*console.log("got: ", result.length > 0
       ? new CRMIntegrations(result[0])
       : null);*/
@@ -155,12 +165,12 @@ CRMIntegrations.GetByUId = function (cfg, id, cb) {
  * Delete all
  */
 CRMIntegrations.DeleteAll = function (cfg, cb) {
-    cb = cb || function () {};
-    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid != NULL', function () {
-        cb();
-    }, function (err) {
-        cb(err);
-    });
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid != NULL', function () {
+    cb();
+  }, function (err) {
+    cb(err);
+  });
 };
 
 /**

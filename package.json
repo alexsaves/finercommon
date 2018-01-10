@@ -19,6 +19,7 @@
   "dependencies": {
     "aws-sdk": "^2.28.0",
     "bity-promise": "0.0.6",
+    "btoa": "^1.1.2",
     "check-types": "^7.1.5",
     "colors": "^1.1.2",
     "connect-redis": "^3.2.0",
@@ -28,12 +29,17 @@
     "gulp-mjml": "^2.2.0",
     "md5": "^2.2.1",
     "mjml": "^3.3.2",
+    "moment": "^2.20.1",
     "mysql": "^2.13.0",
     "node-ses": "^2.0.5",
-    "redis": "^2.7.1",
+    "redis": "^2.8.0",
+    "redis-lock": "^0.1.4",
     "shortid": "^2.2.8",
     "underscore": "^1.8.3",
     "utf8": "^2.1.2",
     "uuid": "^3.0.1"
+  },
+  "devDependencies": {
+    "eslint-config-google": "^0.9.1"
   }
 }

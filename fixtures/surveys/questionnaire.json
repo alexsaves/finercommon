@@ -4,7 +4,7 @@
             "elements": [
                 {
                     "type": "none",
-                    "name": "logoImg",
+                    "name": "logoImgBlack",
                     "image": {
                         "url": "/static/assets/logos/finerink.svg",
                         "modifier": "SMALL"
@@ -13,7 +13,7 @@
                 },
                 {
                     "type": "none",
-                    "name": "logoImg",
+                    "name": "logoImgWhite",
                     "image": {
                         "url": "/static/assets/logos/finerink_w.svg",
                         "modifier": "SMALL"
@@ -165,11 +165,14 @@
                 {
                     "type": "radio",
                     "choices": [
-                        "Flexibility & customization",
-                        "Quality & performance",
-                        "Security & trust concerns",
-                        "Integration with other vendors",
-                        "Reporting and analytics"
+                        "${feature1}",
+                        "${feature2}",
+                        "${feature3}",
+                        "${feature4}",
+                        "${feature5}",
+                        "${feature6}",
+                        "${feature7}",
+                        "${feature8}"
                     ],
                     "name": "missingFeature",
                     "title": "What was the key missing product / service feature?",
@@ -180,7 +183,7 @@
                     "otherplaceholder": "Other"
                 }
             ],
-            "name": "missingFeature",
+            "name": "missingFeaturePage",
             "showIf": "whyNotSelected=1"
         },
         {
@@ -237,7 +240,7 @@
                     "type": "sort",
                     "choices": [
                         "Understood business needs",
-                        "Communication",
+                        "Communication skills",
                         "Product demo & marketing materials",
                         "Product / technical knowledge",
                         "Trusted relationship",
@@ -304,11 +307,15 @@
                 {
                     "type": "sort",
                     "choices": [
-                        "Preloaded Competitor A",
-                        "Preloaded Competitor B",
-                        "Preloaded Competitor C",
                         "${companyName}",
-                        "_No Vendor Chosen"
+                        "_No Vendor Chosen",
+                        "${competitor1}",
+                        "${competitor2}",
+                        "${competitor3}",
+                        "${competitor4}",
+                        "${competitor5}",
+                        "${competitor6}",
+                        "${competitor7}"
                     ],
                     "name": "vendorRankings",
                     "title": "Rank the vendors from best to worst starting with the winning vendor as #1",
@@ -353,10 +360,7 @@
                 }
             ],
             "name": "reasonsWhyWinnerChosen",
-            "showIf": [
-                "vendorRankings[3]>0",
-                "vendorRankings[4]>0"
-            ]
+            "showIf": "vendorRankings[1]>0"
         },
         {
             "elements": [
@@ -379,10 +383,7 @@
                 }
             ],
             "name": "rateWinningVendor",
-            "showIf": [
-                "vendorRankings[3]>0",
-                "vendorRankings[4]>0"
-            ]
+            "showIf": "vendorRankings[1]>0"
         },
         {
             "elements": [
@@ -489,7 +490,7 @@
                 {
                     "type": "rating",
                     "modifier": "slider",
-                    "name": "decisionMakerCustom2Influence",
+                    "name": "decisionMakerCustom3Influence",
                     "subtitle": "${majorPlayersList[2]}",
                     "low": "None",
                     "high": "High",
@@ -500,7 +501,7 @@
                 {
                     "type": "rating",
                     "modifier": "slider",
-                    "name": "decisionMakerCustom3Influence",
+                    "name": "decisionMakerCustom4Influence",
                     "subtitle": "${majorPlayersList[3]}",
                     "low": "None",
                     "high": "High",
@@ -557,7 +558,7 @@
             "elements": [
                 {
                     "type": "none",
-                    "name": "thanksImg",
+                    "name": "thanksImgBlack",
                     "image": {
                         "url": "/static/assets/other/thanks.svg",
                         "modifier": "MEDIUM",
@@ -567,7 +568,7 @@
                 },
                 {
                     "type": "none",
-                    "name": "thanksImg",
+                    "name": "thanksImgWhite",
                     "image": {
                         "url": "/static/assets/other/thanks_w.svg",
                         "modifier": "MEDIUM",
@@ -586,7 +587,7 @@
                 },
                 {
                     "type": "none",
-                    "name": "logoImg",
+                    "name": "logoImgEndBlack",
                     "image": {
                         "url": "/static/assets/logos/finerink.svg",
                         "modifier": "SMALL",
@@ -597,7 +598,7 @@
                 },
                 {
                     "type": "none",
-                    "name": "logoImg",
+                    "name": "logoImgEndWhite",
                     "image": {
                         "url": "/static/assets/logos/finerink_w.svg",
                         "modifier": "SMALL",
