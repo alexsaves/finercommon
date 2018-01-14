@@ -68,6 +68,33 @@ CRMOpportunities.GetByAccountIds = function (cfg, aids, cb) {
   }
 };
 
+/**
+ * Get opportunities by an array of ids
+ */
+CRMOpportunities.GetByAccountIdsWithDates = function (cfg, aids, startDate, endDate, cb) {
+  cb = cb || function () {};
+  if (aids && aids.length > 0) {
+    var finalStr = "(";
+    for (var k = 0; k < aids.length; k++) {
+      if (k > 0) {
+        finalStr += ", ";
+      }
+      finalStr += "'" + aids[k] + "'";
+    }
+    finalStr += ")";
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE CloseDate >= ? AND CloseDate <= ? AND AccountId IN ' + finalStr, [startDate, endDate], function (result) {
+      var res = [];
+      for (var i = 0; i < result.length; i++) {
+        res.push(new CRMOpportunities(result[i]));
+      }
+      cb(null, res);
+    }, function (err) {
+      cb(err);
+    });
+  } else {
+    cb(null, []);
+  }
+};
 
 /**
 * Get an opportunity by its id
@@ -197,7 +224,7 @@ CRMOpportunities.Create = function (cfg, data, extraFields, cb) {
   const {query, params} = utils.createInsertOrUpdateStatementGivenData(cfg.db.db, 'crm_opportunities', data, rowDict, extraFields, 'Id');
 
   dbcmd.cmd(cfg.pool, query, params, function (result) {
-    console.log(result);
+    //console.log(result);
   }, function (err) {
     cb(err);
   });

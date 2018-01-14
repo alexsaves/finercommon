@@ -112,6 +112,12 @@ Approval.GetByGuid = function (cfg, guid, cb) {
   });
 };
 
+/**
+ * Get any approvals for the supplied contacts
+ * @param {*} cfg 
+ * @param {*} contacts 
+ * @param {*} cb 
+ */
 Approval.GetForContacts = function (cfg, contacts, cb) {
   cb = cb || function () {};
   const contactIds = contacts.map(c => c.Id);
@@ -142,6 +148,34 @@ Approval.GetByOppAndContact = function (cfg, opportunity_id, crm_contact_id, cb)
       cb(null, new Approval(result[0]));
     } else {
       cb();
+    }
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
+* Get an approval by its oppportunity ID and contacts (array)
+*/
+Approval.GetByOppAndContacts = function (cfg, opportunity_id, crm_contact_ids, cb) {
+  cb = cb || function () {};
+  if (!crm_contact_ids || crm_contact_ids.length == 0) {
+    cb(null, []);
+    return;
+  }
+  var cstr = crm_contact_ids.reduce(x => "'" + x + "',");
+  cstr = cstr.substr(0, cstr.length - 1);
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE opportunity_id = ? AND crm_contact_id IN (' + cstr + ')', [
+    opportunity_id
+  ], function (result) {
+    if (result && result.length > 0) {
+      var resset = [];
+      for (let g = 0; g < result.length; g++) {
+        resset.push(new Approval(result[g]));
+      }
+      cb(null, resset);
+    } else {
+      cb(null, []);
     }
   }, function (err) {
     cb(err);
