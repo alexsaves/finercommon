@@ -13,6 +13,55 @@ var CRMOpportunities = function (details) {
 };
 
 /**
+ * Set the approval status
+ * @param {*} cfg
+ * @param {Number} status The Status. 0 = nothing has happened
+                                      1 = some approval happened
+                                      2 = cancelled
+ * @param {*} cb
+ */
+CRMOpportunities.prototype.setApprovalStatus = function (cfg, status, cb) {
+  status = parseInt(status);
+  cb = cb || function () {};
+  if (isNaN(status)) {
+    cb(new Error("Invalid status"));
+    return;
+  }
+  let query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET approval_status = ? WHERE id = ?';
+  dbcmd.cmd(cfg.pool, query, [
+    status, this.id
+  ], () => {
+    cb(null, this);
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
+ * Set the approval status
+ * @param {*} cfg
+ * @param {Number} status The Status. 0 = nothing has happened
+                                      1 = some approval happened
+                                      2 = cancelled
+ * @param {*} cb
+ */
+CRMOpportunities.setApprovalStatus = function (cfg, id, status, cb) {
+  status = parseInt(status);
+  if (isNaN(status)) {
+    cb(new Error("Invalid status"));
+    return;
+  }
+  let query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET approval_status = ? WHERE id = ?';
+  dbcmd.cmd(cfg.pool, query, [
+    status, id
+  ], () => {
+    cb(null);
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
  * Get opportunities by an array of ids
  */
 CRMOpportunities.GetByIds = function (cfg, oids, cb) {
@@ -82,7 +131,9 @@ CRMOpportunities.GetByAccountIdsWithDates = function (cfg, aids, startDate, endD
       finalStr += "'" + aids[k] + "'";
     }
     finalStr += ")";
-    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE CloseDate >= ? AND CloseDate <= ? AND AccountId IN ' + finalStr, [startDate, endDate], function (result) {
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE CloseDate >= ? AND CloseDate <= ? AND AccountId IN ' + finalStr, [
+      startDate, endDate
+    ], function (result) {
       var res = [];
       for (var i = 0; i < result.length; i++) {
         res.push(new CRMOpportunities(result[i]));
@@ -187,6 +238,28 @@ CRMOpportunities.PopulateOwners = function (cfg, oppslist, cb) {
 };
 
 /**
+ * Mark CRM Opportunities as cancelled
+ */
+CRMOpportunities.setApprovalStatusOnIdsAsync = function (cfg, ids) {
+  return new Promise((resolve, reject) => {
+    let fdfs = "(";
+    for (let g = 0; g < ids.length; g++) {
+      if (g > 0) {
+        fdfs += ",";
+      }
+      fdfs += "'" + ids[g] + "'";
+    }
+    fdfs += ")";
+    let query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET approval_status = ? WHERE id IN ' + fdfs;
+    dbcmd.cmd(cfg.pool, query, [2], () => {
+      resolve(ids);
+    }, function (err) {
+      reject(err);
+    });
+  });
+};
+
+/**
 * Create an opportunity
 */
 CRMOpportunities.Create = function (cfg, data, extraFields, cb) {
@@ -216,9 +289,12 @@ CRMOpportunities.Create = function (cfg, data, extraFields, cb) {
     }, {
       name: "CloseDate",
       row_name: "CloseDate"
-    },{
+    }, {
       name: "Name",
       row_name: "Name"
+    }, {
+      name: "approval_status",
+      row_name: "approval_status"
     }
   ];
   const {query, params} = utils.createInsertOrUpdateStatementGivenData(cfg.db.db, 'crm_opportunities', data, rowDict, extraFields, 'Id');
