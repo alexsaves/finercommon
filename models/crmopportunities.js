@@ -13,6 +13,14 @@ var CRMOpportunities = function (details) {
 };
 
 /**
+ * Confirm that a user has the rights to send to a particular opportunity
+ * @param {*} cfg
+ */
+CRMOpportunities.prototype.doesAUserHaveRightstoApproveAsync = function (cfg) {
+  return new Promise((resolve, reject) => {});
+};
+
+/**
  * Set the approval status
  * @param {*} cfg
  * @param {Number} status The Status. 0 = nothing has happened
@@ -34,6 +42,26 @@ CRMOpportunities.prototype.setApprovalStatus = function (cfg, status, cb) {
     cb(null, this);
   }, function (err) {
     cb(err);
+  });
+};
+
+/**
+ * Set the approval status
+ * @param {*} cfg
+ * @param {Number} status The Status. 0 = nothing has happened
+                                      1 = some approval happened
+                                      2 = cancelled
+ * @param {*} cb
+ */
+CRMOpportunities.prototype.setApprovalStatusAsync = function (cfg, status) {
+  return new Promise((resolve, reject) => {
+    this.setApprovalStatus(cfg, status, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(this);
+      }
+    });
   });
 };
 
@@ -162,6 +190,21 @@ CRMOpportunities.GetById = function (cfg, guid, cb) {
       : null);
   }, function (err) {
     cb(err);
+  });
+};
+
+/**
+* Get an opportunity by its id
+*/
+CRMOpportunities.GetByIdAsync = function (cfg, guid) {
+  return new Promise((resolve, reject) => {
+    CRMOpportunities.GetById(cfg, guid, (err, opp) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(opp);
+      }
+    });
   });
 };
 

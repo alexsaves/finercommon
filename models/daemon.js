@@ -57,33 +57,28 @@ class Daemon {
         let nowDate = new Date(),
           nowMoment = moment(nowDate),
           nowInfo = this._getDateInfo(nowDate),
-          nowDayOfWeek = nowMoment.day();
+          nowDayOfWeek = nowMoment.day(),
+          tsks = this.tasks;
 
         // For each task, go back and determine the last date it COULD have run on.
-        this
-          .tasks
-          .forEach((tsk) => {
+        tsks.forEach((tsk) => {
+          if (nowDayOfWeek == tsk.dayOfWeek) {
             // Set the ideal date
-            let idealDate = moment(nowInfo)
-              .day(tsk.dayOfWeek)
+            let idealDate = moment(nowDate)
               .hour(tsk.hourOfDay)
               .minute(0)
               .second(0)
               .millisecond(0);
 
-            if (nowDayOfWeek == tsk.dayOfWeek) {
-              // Now see if that's in the future. If it is, then subtract a week
-              if (nowMoment.isBefore(idealDate)) {
-                // It's in the future
-                idealDate.subtract(1, 'week');
-              }
-
-              // We have an ideal date now that is in the past Check to see if we already did it            
+            // Now see if that's in the future. If it is, then subtract a week
+            if (nowMoment.isAfter(idealDate)) {
+              // We have an ideal date now that is in the past Check to see if we already did it
               if (!this._didTaskHappen(tsk.taskName, idealDate)) {
                 this._execTask(tsk, idealDate);
               }
             }
-          });
+          }
+        });
 
         // Release the lock
         done();
@@ -192,6 +187,26 @@ class Daemon {
   }
 
   /**
+   * Get the name of the day from the number
+   * @param {*} daynum
+   */
+  getDayNameFromNumber(daynum) {
+    var dys = [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ];
+    if (daynum < 1 || daynum > 7) {
+      throw new Error("Invalid day. Valid: 1-7");
+    }
+    return dys[daynum - 1];
+  }
+
+  /**
    * Schedule a task
    * @param {Number} dayOfWeek - 1 is Monday and 7 is Sunday
    * @param {Number} hourOfDay - 0 - 24
@@ -218,7 +233,7 @@ class Daemon {
     this
       .tasks
       .push({dayOfWeek: dayOfWeek, hourOfDay: hourOfDay, taskName: taskName});
-    this._log("scheduling a \"" + taskName + "\" task for the " + dayOfWeek + this.getDaySuffix(dayOfWeek) + " day of the week at " + hourOfDay + "hrs (24hr) time.");
+    this._log("scheduling a \"" + taskName + "\" task for the " + dayOfWeek + this.getDaySuffix(dayOfWeek) + " day of the week (" + this.getDayNameFromNumber(dayOfWeek) + ") at " + hourOfDay + "hrs (24hr) time.");
   }
 
   /**
