@@ -147,6 +147,40 @@ Organization.GetForAccount = function (cfg, id, cb) {
 };
 
 /**
+* Get all organizations
+*/
+Organization.GetAll = function (cfg, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.org_account_associations', function (assocresult) {
+    if (assocresult.length == 0) {
+      cb(null, []);
+    } else {
+      let idlist = [];
+      for (let t = 0; t < assocresult.length; t++) {
+        idlist.push(assocresult[t].organization_id);
+      }
+      dbcmd
+        .cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id IN (' + idlist.join(', ') + ')', function (result) {
+          let outOrgs = [];
+          for (let h = 0; h < result.length; h++) {
+            let org = new Organization(result[h]);
+            let assoc = assocresult.find(function (val) {
+              return val.organization_id == org.id;
+            });
+            org.association = assoc;
+            outOrgs.push(org);
+          }
+          cb(null, outOrgs);
+        }, function (err) {
+          cb(err);
+        });
+    }
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
 * Get an org by its id
 */
 Organization.GetById = function (cfg, id, cb) {

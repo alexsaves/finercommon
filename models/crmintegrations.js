@@ -67,6 +67,21 @@ CRMIntegrations.GetForOrgs = function (cfg, organizations, cb) {
 };
 
 /**
+* Get the integrations for a particular organization
+*/
+CRMIntegrations.GetForOrgsAsync = function (cfg, organizations) {
+  return new Promise((resolve, reject) => {
+    CRMIntegrations.GetForOrgs(cfg, organizations, (err, orgs) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(orgs);
+      }
+    });
+  });
+};
+
+/**
 * Get the integrations for a list of org ids
 */
 CRMIntegrations.GetForOrgIds = function (cfg, organization_ids, cb) {
@@ -127,18 +142,28 @@ CRMIntegrations.GetForOrg = function (cfg, organization_id, cb) {
 };
 
 /**
+* Get the integrations for a particular organization
+*/
+CRMIntegrations.GetForOrgAsync = function (cfg, organization_id) {
+  return new Promise((resolve, reject) => {
+    CRMIntegrations.GetForOrg(cfg, organization_id, (err, org) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(org);
+      }
+    });
+  });
+}
+
+/**
 * Get an org by its UQ (unique id that connects it to the 3rd party system)
 */
 CRMIntegrations.GetByUQ = function (cfg, orgid, uq, cb) {
   cb = cb || function () {};
-  // console.log("GETBYUQ", 'SELECT * FROM ' + cfg.db.db + '.' + tablename + '
-  // WHERE organization_id = ? AND uq = ? LIMIT 1', orgid, uq);
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND uq = ? LIMIT 1', [
     orgid, uq
   ], function (result) {
-    /*console.log("got: ", result.length > 0
-      ? new CRMIntegrations(result[0])
-      : null);*/
     cb(null, result.length > 0
       ? new CRMIntegrations(result[0])
       : null);
