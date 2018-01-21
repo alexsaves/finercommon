@@ -17,6 +17,7 @@ var All = {
     CRMUsers: require('../models/crmusers'),
     CRMOrganizations: require('../models/crmorganizations'),
     CRMOpportunities: require('../models/crmopportunities'),
+    PromoSignup: require('../models/promosignup'),
     CRMRoles: require('../models/crmroles'),
     Email: require('../models/email'),
     EmailUnsubscription: require('../models/emailunsubscription'),
