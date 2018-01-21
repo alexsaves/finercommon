@@ -100,7 +100,7 @@ CRMAccounts.Create = function (cfg, data, extraFields, cb) {
 
   dbcmd
     .cmd(cfg.pool, query, params, function (result) {
-      console.log(result);
+      //console.log(result);
     }, function (err) {
       cb(err);
     });

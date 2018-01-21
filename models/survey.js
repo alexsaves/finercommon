@@ -263,6 +263,25 @@ Survey.EnforceSurveyExistsForOpportunityAndType = function (cfg, opportunity_id,
 };
 
 /**
+ * Make sure a survey exists for a particular opportunity and type
+ * @param {*} cfg
+ * @param {*} opportunity_id
+ * @param {*} survey_type
+ * @param {*} organization_id
+ */
+Survey.EnforceSurveyExistsForOpportunityAndTypeAsync = function (cfg, opportunity_id, survey_type, organization_id) {
+    return new Promise((resolve, reject) => {
+        Survey.EnforceSurveyExistsForOpportunityAndType(cfg, opportunity_id, survey_type, organization_id, (err, sv) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(sv);
+            }
+        });
+    });
+};
+
+/**
  * Create a prospect
  */
 Survey.Create = function (cfg, details, cb) {
