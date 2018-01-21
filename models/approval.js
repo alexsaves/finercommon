@@ -51,14 +51,28 @@ Approval.prototype.execute = function (cfg, cb) {
                 // Success
                 this.commit(cfg, cb);
               }
-            });          
+            });
           }
-        });        
+        });
       }
     });
   } else {
     process.nextTick(cb);
   }
+};
+
+/**
+ * Execute asynchronously an approval
+ * @param {*} cfg
+ */
+Approval.prototype.executeAsync = async function (cfg) {
+  await(() => {
+    return new Promise(resolve => {
+      this.execute(cfg, (err) => {
+        resolve(err);
+      });
+    });
+  })();
 };
 
 /**
@@ -112,10 +126,16 @@ Approval.GetByGuid = function (cfg, guid, cb) {
   });
 };
 
+/**
+ * Get any approvals for the supplied contacts
+ * @param {*} cfg
+ * @param {*} contacts
+ * @param {*} cb
+ */
 Approval.GetForContacts = function (cfg, contacts, cb) {
   cb = cb || function () {};
   const contactIds = contacts.map(c => c.Id);
-  dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE crm_contact_id IN (${contactIds.map(c=>'?').join(', ')})`, contactIds, function (result) {
+  dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE crm_contact_id IN (${contactIds.map(c => '?').join(', ')})`, contactIds, function (result) {
     if (result && result.length > 0) {
       var res = [];
       for (var i = 0; i < result.length; i++) {
@@ -128,7 +148,7 @@ Approval.GetForContacts = function (cfg, contacts, cb) {
   }, function (err) {
     cb(err);
   });
-} 
+}
 
 /**
 * Get an approval by its oppportunity ID and contact
@@ -147,6 +167,61 @@ Approval.GetByOppAndContact = function (cfg, opportunity_id, crm_contact_id, cb)
     cb(err);
   });
 };
+
+/**
+* Get an approval by its oppportunity ID and contacts (array)
+*/
+Approval.GetByOppAndContacts = function (cfg, opportunity_id, crm_contact_ids, cb) {
+  cb = cb || function () {};
+  if (!crm_contact_ids || crm_contact_ids.length == 0) {
+    cb(null, []);
+    return;
+  }
+  if (crm_contact_ids.length == 1) {
+    Approval.GetByOppAndContact(cfg, opportunity_id, crm_contact_ids[0], (err, apr) => {
+      if (err) {
+        cb(err);
+      } else {
+        if (apr) {
+          cb(null, [apr]);
+        } else {
+          cb(null, []);
+        }
+      }
+    });
+    return;
+  }
+  var cstr = crm_contact_ids.reduce(x => "'" + x + "',");
+  cstr = cstr.substr(0, cstr.length - 1);
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE opportunity_id = ? AND crm_contact_id IN (' + cstr + ')', [opportunity_id], function (result) {
+    if (result && result.length > 0) {
+      var resset = [];
+      for (let g = 0; g < result.length; g++) {
+        resset.push(new Approval(result[g]));
+      }
+      cb(null, resset);
+    } else {
+      cb(null, []);
+    }
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
+* Get an approval by its oppportunity ID and contacts (array)
+*/
+Approval.GetByOppAndContactsAsync = function (cfg, opportunity_id, crm_contact_ids) {
+  return new Promise((resolve, reject) => {
+    Approval.GetByOppAndContacts(cfg, opportunity_id, crm_contact_ids, (err, apprvs) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(apprvs);
+      }
+    });
+  });
+}
 
 /**
 * Delete all
@@ -197,16 +272,33 @@ Approval.Create = function (cfg, details, cb) {
   dbcmd
     .cmd(cfg.pool, query, params, function (result) {
       Approval
-        .GetByGuid(cfg, _Defaults.guid, function (err, user) {
+        .GetByGuid(cfg, _Defaults.guid, function (err, apr) {
           if (err) {
             cb(err);
           } else {
-            cb(null, user);
+            cb(null, apr);
           }
         });
     }, function (err) {
       cb(err);
     });
+};
+
+/**
+ * Create an approval
+ * @param {*} cfg
+ * @param {*} details
+ */
+Approval.CreateAsync = function (cfg, details) {
+  return new Promise((resolve, reject) => {
+    Approval.Create(cfg, details, (err, apr) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(apr);
+      }
+    });
+  });
 };
 
 // Expose it

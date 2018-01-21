@@ -252,6 +252,23 @@ Account.GetByEmail = function (cfg, e, cb) {
 };
 
 /**
+ * Get an account by its email
+ * @param {*} cfg 
+ * @param {*} e 
+ */
+Account.GetByEmailAsync = function (cfg, e) {
+    return new Promise((resolve, reject) => {
+        Account.GetByEmail(cfg, e, (err, act) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(act);
+            }
+        });
+    });
+};
+
+/**
  * Get an account by its id
  */
 Account.GetById = function (cfg, id, cb) {

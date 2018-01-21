@@ -81,6 +81,10 @@ EmailUnsubscriptions.GetAllForEmail = function (cfg, email, cb) {
 */
 EmailUnsubscriptions.EmailCanReceiveMessages = function (cfg, email, org, cb) {
   cb = cb || function () {};
+  if (!email || email.trim().length == 0) {
+    cb(null, false);
+    return;
+  }
   email = email.toLowerCase().trim();
   //console.log(email, md5(email));
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email_hash = ? AND (organization_id = 0 OR organization_id = ?)', [md5(email), org], function (result) {    
