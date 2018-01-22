@@ -5,7 +5,7 @@ var utils = {
     /**
      * Auto-trim strings if necessary, based on length
      */
-    enforceStringLength: function(str, len) {
+    enforceStringLength: function (str, len) {
         str = str || '';
         if (str.length > len) {
             str = str.substr(0, len);
@@ -16,7 +16,7 @@ var utils = {
     /**
      * Is this question name for an "other"
      */
-    isOtherLabel: function(label) {
+    isOtherLabel: function (label) {
         if (label.length > ("-Comment".length) && label.indexOf('-Comment') > -1) {
             return true;
         } else {
@@ -29,12 +29,12 @@ var utils = {
      * ArrObj
      * InsertDescription
      */
-    createInsertStatementGivenData: function(dbName, tableName, dataArr, rowDict, extraFields){
+    createInsertStatementGivenData: function (dbName, tableName, dataArr, rowDict, extraFields) {
         let query = `INSERT INTO ${dbName}.${tableName} (`;
         let rowNames = rowDict.map((d) => d.row_name);
         let extraValues = [];
-        if(extraFields.length > 0) {
-            for(let i=0; i< extraFields.length; i++) {
+        if (extraFields.length > 0) {
+            for (let i = 0; i < extraFields.length; i++) {
                 rowNames.push(extraFields[i].name);
                 extraValues.push(`'${extraFields[i].value}'`);
             }
@@ -42,30 +42,34 @@ var utils = {
         query = query + rowNames.join(', ') + ') VALUES ';
         dataArr.map((data, index) => {
             let valueSet = [];
-            for(let i=0; i<rowDict.length; i++) {
+            for (let i = 0; i < rowDict.length; i++) {
                 let desc = rowDict[i];
-                if(data[desc.name]) {
+                if (data[desc.name]) {
                     valueSet.push(`'${data[desc.name]}'`);
                 } else {
                     valueSet.push('NULL');
                 }
             }
-            query = query + '(' + valueSet.join(', ') + (extraFields.length > 0 ? ', ' + extraValues.join(', ') + ')' : ')') + (index === dataArr.length-1 ? ';' : ',');
+            query = query + '(' + valueSet.join(', ') + (extraFields.length > 0
+                ? ', ' + extraValues.join(', ') + ')'
+                : ')') + (index === dataArr.length - 1
+                ? ';'
+                : ',');
         });
         return query;
     },
 
-        /**
+    /**
      * Create insert query given an array of data to be inserted
      * ArrObj
      * InsertDescription
      */
-    createInsertOrUpdateStatementGivenData: function(dbName, tableName, dataArr, rowDict, extraFields, uniqueKeyName){
+    createInsertOrUpdateStatementGivenData: function (dbName, tableName, dataArr, rowDict, extraFields, uniqueKeyName) {
         let query = `INSERT INTO ${dbName}.${tableName} (`;
         let rowNames = rowDict.map((d) => d.row_name);
         let extraValues = [];
-        if(extraFields.length > 0) {
-            for(let i=0; i< extraFields.length; i++) {
+        if (extraFields.length > 0) {
+            for (let i = 0; i < extraFields.length; i++) {
                 rowNames.push(extraFields[i].name);
                 extraValues.push(`'${extraFields[i].value}'`);
             }
@@ -76,17 +80,25 @@ var utils = {
         let params = [];
         dataArr.map((data, index) => {
             let valueSet = [];
-            for(let i=0; i<rowDict.length; i++) {
+            for (let i = 0; i < rowDict.length; i++) {
                 let desc = rowDict[i];
-                if(data[desc.name]) {
+                if (data[desc.name]) {
                     valueSet.push(`${data[desc.name]}`);
                 } else {
                     valueSet.push('NULL');
                 }
             }
-            params = params.concat(valueSet).concat(extraFields.map(e=>e.value));
+            params = params
+                .concat(valueSet)
+                .concat(extraFields.map(e => e.value));
             // TODO: add extra values
-            query = query + '(' + valueSet.map(v=>'?').join(', ') + (extraFields.length > 0 ? ', ' + extraValues.map(e=>'?').join(', ') + ')' : ')') + (index === dataArr.length-1 ? `` : ',');
+            query = query + '(' + valueSet
+                .map(v => '?')
+                .join(', ') + (extraFields.length > 0
+                ? ', ' + extraValues.map(e => '?').join(', ') + ')'
+                : ')') + (index === dataArr.length - 1
+                ? ``
+                : ',');
         });
 
         const valueSets = [];
@@ -97,11 +109,10 @@ var utils = {
         });
 
         query += `${dupQuery} ${valueSets.join(', ')}`;
-        
-        return { query, params };
+
+        return {query, params};
     }
 };
-
 
 // Expose it
 module.exports = utils;
