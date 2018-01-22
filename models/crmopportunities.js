@@ -335,9 +335,6 @@ CRMOpportunities.Create = function (cfg, data, extraFields, cb) {
     }, {
       name: "Name",
       row_name: "Name"
-    }, {
-      name: "approval_status",
-      row_name: "approval_status"
     }
   ];
   const {query, params} = utils.createInsertOrUpdateStatementGivenData(cfg.db.db, 'crm_opportunities', data, rowDict, extraFields, 'Id');
