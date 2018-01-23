@@ -42,6 +42,43 @@ CRMIntegrationRules.prototype.commit = function(cfg, cb) {
   });
 };
 
+
+CRMIntegrationRules.prototype.listUsersWhoCanApprove = function(cfg, cb) {
+  dbcmd.cmd(cfg.pool, 'SELECT approvers FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [this.uid], function (results) {
+    results = results.toString();
+    if(results.length > 0) {
+      if (results === "*") {
+        cb(null, results);
+      } else {
+        cb(null, JSON.parse(results));
+      }
+    } else {
+      cb('No approvers found');
+    }
+  }, function (err) {
+    cb(err);
+  });
+}
+
+CRMIntegrationRules.prototype.canUserApprove = function(cfg, userId, cb) {
+  if (!userId) {
+    cb('userId is required');
+  }
+  this.listUsersWhoCanApprove(cfg, (err, users) => {
+    if (err) {
+      cb(err);
+    } else {
+      if (users === "*") {
+        cb(null, true);
+      } else if (users.filter(u => u.value === userId).length > 0) {
+        cb(null, true);
+      } else {
+        cb(null, false);
+      }
+    }
+  });
+}
+
 /**
 * Get an integration rule by its id
 */
