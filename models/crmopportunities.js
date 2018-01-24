@@ -3,6 +3,9 @@ const dbcmd = require('../utils/dbcommand'),
   extend = require('extend'),
   uuidV4 = require('uuid/v4'),
   utils = require('../utils/utils'),
+  CRMIntegrationRules = require('../models/crmintegrationrules'),
+  CRMIntegrations = require('../models/crmintegrations'),
+  CRMAccounts = require('../models/crmaccounts'),
   tablename = 'crm_opportunities';
 
 /**
@@ -43,6 +46,30 @@ CRMOpportunities.prototype.setApprovalStatus = function (cfg, status, cb) {
   }, function (err) {
     cb(err);
   });
+};
+
+/**
+ * Can a user approve this opportunity?
+ * @param {*} cfg
+ * @param {*} userid
+ * @param {*} cb
+ */
+CRMOpportunities.prototype.canUserApprove = function (cfg, userid, cb) {
+  CRMIntegrationRules.GetForIntegration(cfg, this.integration_id, (err, rules) => {
+    if (err) {
+      cb(err);
+    } else {
+      if (!rules || rules.length == 0) {
+        cb(new Error("Missing Rules for Opportunity"));
+      } else {
+        CRMIntegrationRules.CanUserApproveWithTheseRules(cfg, rules, userid).then((canthey) => {
+          cb(canthey);
+        }).catch((err) => {
+          cb(err);
+        });
+      }
+    }
+  })
 };
 
 /**
