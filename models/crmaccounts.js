@@ -12,7 +12,6 @@ var CRMAccounts = function (details) {
   extend(this, details || {});
 };
 
-
 /**
  * Get accounts by an array of ids
  */
@@ -37,6 +36,24 @@ CRMAccounts.GetByIds = function (cfg, oids, cb) {
   });
 };
 
+/**
+ * Get account by its id
+ */
+CRMAccounts.GetById = function (cfg, id, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [id], function (result) {      
+      cb(null, result.length > 0 ? new CRMAccounts(result[0]) : null);
+  }, function (err) {
+      cb(err);
+  });
+};
+
+/**
+ * Get everything for an integration id
+ * @param {*} cfg 
+ * @param {*} integrationId 
+ * @param {*} cb 
+ */
 CRMAccounts.GetAllGivenIntegrationId = function(cfg, integrationId, cb) {
   cb = cb || function () {};
   if (integrationId) {
@@ -54,6 +71,12 @@ CRMAccounts.GetAllGivenIntegrationId = function(cfg, integrationId, cb) {
   }
 }
 
+/**
+ * Get the accounts by some owners
+ * @param {*} cfg 
+ * @param {*} oids 
+ * @param {*} cb 
+ */
 CRMAccounts.GetAccountsByOwnerIds = function (cfg, oids, cb) {
   cb = cb || function () {};
   var finalStr = "(";
