@@ -1,22 +1,25 @@
 <mjml>
-  <mj-body>
+  <mj-body padding="20">
     <mj-container background-color="#121738">
     <!-- Company Header -->
     <mj-section padding="20"></mj-section>
-    <mj-section padding="0 0 0 0">
-      <mj-column width="100%" vertical-align="middle" background-color="#ffffff"  >
-        <mj-image align="center" src="cid:finklogo" width="130px" height="35px" padding-top="35px" ></mj-image>
+    <mj-section padding="40 80 40 80" background-color="#ffffff">
+      <mj-column width="100%" >
+        <mj-image align="center" src="cid:finklogo" width="120px" height="32px" ></mj-image>
         <%= main %>
+        
       </mj-column>
     </mj-section>
-    <mj-section padding="0 0 0 0">
-      <mj-column width="100%" vertical-align="middle" background-color="#f9f7e8" >
-        <mj-text>Bla bla bla bla</mj-text>
+    <mj-section padding="40 80 40 80" background-color="#f9f7e8">
+      <mj-column width="100%" vertical-align="middle"  >
+        <mj-text>About FinerInk:</mj-text>
+        <mj-text>We are on a mission to help people like yourself share your thoughtful opinions about the buying experience. A few minutes can help shape the careers of many people and the future of FunCo. </mj-text>
+        <mj-text>Don't want to hear from us anymore? That’s fine, you can <a href="<%= unsuburl %>">unsubscribe</a>. We'll be sad, but no hard feelings.</mj-text>        
         <mj-image align="center" src="cid:bridge" width="65px" padding-top="35px" ></mj-image>
       </mj-column>
     </mj-section>
     <mj-section padding="0px 0px 20px 0px"  >
-      <mj-column width="100%" vertical-align="middle">
+      <mj-column width="100%" >
         <mj-text color="#6d8797" align="center"><a href="#" style="color: #6d8797 !important; cursor: default; text-decoration: none;">FinerInk Ltd., 1350 Washington St / Unit #41 / San Francisco CA / 94109</a></mj-text>          
       </mj-column>
     </mj-section>
