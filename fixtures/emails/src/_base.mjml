@@ -4,7 +4,7 @@
     <!-- Company Header -->
     <mj-section padding="20"></mj-section>
     <mj-section padding="0 0 0 0">
-      <mj-column width="100%" vertical-align="middle" background-color="#ffffff" >
+      <mj-column width="100%" vertical-align="middle" background-color="#ffffff"  >
         <mj-image align="center" src="cid:finklogo" width="130px" height="35px" padding-top="35px" ></mj-image>
         <%= main %>
       </mj-column>
