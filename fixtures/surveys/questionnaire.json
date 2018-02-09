@@ -371,7 +371,8 @@
                         "Product / service quality",
                         "Industry leadership",
                         "Meet commitments and promises",
-                        "Act as a valued partner"
+                        "Act as a valued partner",
+                        "Poised for long term success"
                     ],
                     "name": "rateWinningVendor",
                     "title": "Compared to your ideal vendor, rate ${companyName} on the following areas.",

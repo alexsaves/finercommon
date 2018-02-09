@@ -1,0 +1,25 @@
+<mjml>
+  <mj-body>
+    <mj-container background-color="#121738">
+    <!-- Company Header -->
+    <mj-section padding="20"></mj-section>
+    <mj-section padding="0 0 0 0">
+      <mj-column width="100%" vertical-align="middle" background-color="#ffffff" >
+        <mj-image align="center" src="cid:finklogo" width="130px" height="35px" padding-top="35px" ></mj-image>
+        <%= main %>
+      </mj-column>
+    </mj-section>
+    <mj-section padding="0 0 0 0">
+      <mj-column width="100%" vertical-align="middle" background-color="#f9f7e8" >
+        <mj-text>Bla bla bla bla</mj-text>
+        <mj-image align="center" src="cid:bridge" width="65px" padding-top="35px" ></mj-image>
+      </mj-column>
+    </mj-section>
+    <mj-section padding="0px 0px 20px 0px"  >
+      <mj-column width="100%" vertical-align="middle">
+        <mj-text color="#6d8797" align="center"><a href="#" style="color: #6d8797 !important; cursor: default; text-decoration: none;">FinerInk Ltd., 1350 Washington St / Unit #41 / San Francisco CA / 94109</a></mj-text>          
+      </mj-column>
+    </mj-section>
+    </mj-container>
+  </mj-body>
+</mjml>

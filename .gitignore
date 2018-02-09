@@ -1,2 +1,6 @@
 /node_modules
 /package-lock.json
+/.DS_Store
+/fixtures/.DS_Store
+/fixtures/emails/.DS_Store
+/fixtures/emails/dist/.DS_Store
