@@ -47,7 +47,8 @@
       }
       .ratingButtonLabels div {
         display: inline-block;
-        width: 300px;
+        width: 400px;
+        white-space: nowrap;
       }
       .ratingButtonLabels span {
         font-size: 10px;
@@ -55,12 +56,16 @@
       .ratingButtonLabels span:last-child {
         float: right;
       }
+      .ratingButton div {
+        white-space: nowrap;
+      }
       .ratingButton a {
+        white-space: nowrap;
         display: inline-block;
         color: white;
         background-color: #4caf50;
-        padding: 10px;
-        font-size: 14px;
+        padding: 14px;
+        font-size: 17px;
         line-height: 14px;
         font-weight: bold;
         text-decoration: none;
@@ -71,6 +76,9 @@
       .ratingButton a:hover {
         background-color: #6acc6e;
       }
+      .ratingButtonLabelsMobile span {
+          display: none;
+        }
       @media (max-width:650px) {
         .logoImg td {
           padding-top: 0px !important;
@@ -94,10 +102,24 @@
           padding-right: 0px !important;
           font-size: 14px;
         }
+        .ratingButtonLabels {
+          display: none;
+        }
+        .ratingButtonLabelsMobile span {
+          display: inline-block;
+        }
         body, html {
           margin: 0;
           padding: 0;
-        }        
+        }
+        .ratingButton a {
+          padding: 20px;
+          font-size: 22px;
+        }     
+        .logoImg img {
+          width: 200px !important;
+          height: 54px !important;
+        }
       }
     </style><style type="text/css">
   @media only screen and (min-width:480px) {
