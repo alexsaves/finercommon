@@ -1,12 +1,2 @@
-<mjml>
-  <mj-body>
-    <mj-container>
-      <mj-section>
-        <mj-column>
-          <mj-text>Hi <%= account.name %>. Reset your password at <%= reseturl %></mj-text>
-          <mj-text>To unsubscribe from FinerInk emails, visit <%= unsuburl %></mj-text>
-        </mj-column>
-      </mj-section>
-    </mj-container>
-  </mj-body>
-</mjml>
+<mj-text>Hi <%= account.name %>. Reset your password at <%= reseturl %></mj-text>
+<mj-text>To unsubscribe from FinerInk emails, visit <%= unsuburl %></mj-text>

@@ -1,12 +1,2 @@
-<mjml>
-  <mj-body>
-    <mj-container>
-      <mj-section>
-        <mj-column>
-          <mj-text><%= account.name %> has declined your invitation to join <%= org.name %> on FinerInk.</mj-text>
-          <mj-text>To unsubscribe from FinerInk emails, visit <%= unsuburl %></mj-text>
-        </mj-column>
-      </mj-section>
-    </mj-container>
-  </mj-body>
-</mjml>
+<mj-text><%= account.name %> has declined your invitation to join <%= org.name %> on FinerInk.</mj-text>
+<mj-text>To unsubscribe from FinerInk emails, visit <%= unsuburl %></mj-text>

@@ -1,12 +1,4 @@
-<mjml>
-  <mj-body>
-    <mj-container>
-      <mj-section>
-        <mj-column>
-          <mj-text>You've been invited by <%= account.name %> to join their organization <%= org.name %> on FinerInk. Create your account at <%= ivturl %></mj-text>
-          <mj-text>To unsubscribe from FinerInk emails, visit <%= unsuburl %></mj-text>
-        </mj-column>
-      </mj-section>
-    </mj-container>
-  </mj-body>
-</mjml>
+
+<mj-text>You've been invited by <%= account.name %> to join their organization <%= org.name %> on FinerInk. Create your account at <%= ivturl %></mj-text>
+<mj-text>To unsubscribe from FinerInk emails, visit <%= unsuburl %></mj-text>
+      

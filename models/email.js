@@ -1,9 +1,11 @@
-const dbcmd = require('../utils/dbcommand'),
-  md5 = require('md5'),
-  extend = require('extend'),
-  ses = require('node-ses'),
-  fs = require('fs'),
-  _ = require('underscore');
+const dbcmd = require('../utils/dbcommand');
+const md5 = require('md5');
+const extend = require('extend');
+const nodemailer = require('nodemailer');
+const fs = require('fs');
+const _ = require('underscore');
+const aws = require('aws-sdk');
+const sesTransport = require('nodemailer-ses-transport');
 
 /**
 * Module for sending email
@@ -57,8 +59,21 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
           unsuburl: cfg.portalUrl + EmailUnsubscription.GenerateValidUnsubscribeLink(useremail, org)
         }, details);
 
-        let client = ses.createClient({key: this.key, secret: this.secret, amazon: this.server});
-
+        // let client = ses.createClient({key: this.key, secret: this.secret, amazon:
+        // this.server});
+        let attachments = [];
+        let imagesdir = __dirname + "/../fixtures/emails/images/";
+        
+        fs.readdirSync(imagesdir).forEach(file => {
+          if (file.indexOf('.png') > -1) {
+            attachments.push({
+              cid: file.substr(0, file.indexOf(".")),
+              filename: file,
+              content: fs.readFileSync(imagesdir + file)
+            });
+          }          
+        });
+        
         let templatefile = fs
             .readFileSync(__dirname + '/../fixtures/emails/dist/' + template + '.html', 'utf8')
             .toString(),
@@ -70,15 +85,20 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
         let result = templateObj(details),
           rawresult = rawtemplateObj(details);
 
+        var transporter = nodemailer.createTransport(sesTransport({region: this.server, accessKeyId: this.key, secretAccessKey: this.secret, rateLimit: 5}));
+
         // Give SES the details and let it construct the message for you.
-        client.sendEmail({
+        transporter.sendMail({
           to: to,
           from: from,
           subject: subject,
-          message: result,
-          altText: rawresult
+          html: result,
+          text: rawresult,
+          attachments: attachments
         }, function (err, data, res) {
-          callback(err, data);
+          if (callback) {
+            callback(err, data);
+          }
         });
       }
     }
