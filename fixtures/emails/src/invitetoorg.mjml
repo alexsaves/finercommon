@@ -1,4 +1,3 @@
 
-<mj-text>You've been invited by <%= account.name %> to join their organization <%= org.name %> on FinerInk. Create your account at <%= ivturl %></mj-text>
-<mj-text>To unsubscribe from FinerInk emails, visit <%= unsuburl %></mj-text>
+<mj-text mj-class="bodyText" css-class="bodyText">You've been invited by <%= account.name %> to join their organization <%= org.name %> on FinerInk. <a href="<%= ivturl %>">Create your account here</a>.</mj-text>
       
