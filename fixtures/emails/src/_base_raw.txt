@@ -1,4 +1,6 @@
 <%= main %>
 
 ------------------
+We are on a mission to help people like yourself share your thoughtful opinions about the buying experience. A few minutes can help shape the careers of many people and the future of your vendors and partners. 
+
 To unsubscribe from FinerInk emails, visit <%= unsuburl %>

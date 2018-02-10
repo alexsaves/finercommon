@@ -1,4 +1,4 @@
 
-<mj-text>15You've been invited by <%= account.name %> to join their organization <%= org.name %> on FinerInk. Create your account at <%= ivturl %></mj-text>
+<mj-text>You've been invited by <%= account.name %> to join their organization <%= org.name %> on FinerInk. Create your account at <%= ivturl %></mj-text>
 <mj-text>To unsubscribe from FinerInk emails, visit <%= unsuburl %></mj-text>
       
