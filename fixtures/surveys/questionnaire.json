@@ -3,41 +3,6 @@
         {
             "elements": [
                 {
-                    "type": "none",
-                    "name": "logoImgBlack",
-                    "image": {
-                        "url": "/static/assets/logos/finerink.svg",
-                        "modifier": "SMALL"
-                    },
-                    "showIf": "surveyTheme=bokehlight"
-                },
-                {
-                    "type": "none",
-                    "name": "logoImgWhite",
-                    "image": {
-                        "url": "/static/assets/logos/finerink_w.svg",
-                        "modifier": "SMALL"
-                    },
-                    "showIf": "surveyTheme=bokehdark"
-                },
-                {
-                    "type": "buttons",
-                    "title": "Help us help ${companyName} improve your buying experience. Your feedback is greatly appreciated.",
-                    "name": "intro",
-                    "choices": [
-                        {
-                            "title": "Get started",
-                            "color": "green"
-                        }
-                    ]
-                }
-            ],
-            "hideLogo": true,
-            "hidePagination": true
-        },
-        {
-            "elements": [
-                {
                     "type": "rating",
                     "modifier": "buttons",
                     "name": "buyXRating",
@@ -371,7 +336,8 @@
                         "Product / service quality",
                         "Industry leadership",
                         "Meet commitments and promises",
-                        "Act as a valued partner"
+                        "Act as a valued partner",
+                        "Poised for long term success"
                     ],
                     "name": "rateWinningVendor",
                     "title": "Compared to your ideal vendor, rate ${companyName} on the following areas.",

@@ -42,7 +42,7 @@ Approval.prototype.execute = function (cfg, cb) {
             emailCtrl.send(cfg, org.id, cfg.email.defaultFrom, cntc.Email, 'inviteprospectsurvey', cntc.FirstName + ', help ' + org.name + ' do better in the future!', {
               contact: cntc,
               org: org,
-              surveyurl: cfg.surveyUrl + "/s/" + encodeURIComponent(this.survey_guid) + "?p=" + encodeURIComponent(this.guid)
+              surveyurl: cfg.surveyUrl + "/s/" + encodeURIComponent(this.survey_guid) + "/2?p=" + encodeURIComponent(this.guid)
             }, (err) => {
               if (err) {
                 console.log("Error sending invitation email", err);
