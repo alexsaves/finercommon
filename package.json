@@ -1,6 +1,6 @@
 {
   "name": "finercommon",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -24,6 +24,7 @@
     "colors": "^1.1.2",
     "connect-redis": "^3.2.0",
     "encoding": "^0.1.12",
+    "eslint": "^4.17.0",
     "extend": "^3.0.0",
     "gulp": "^3.9.1",
     "md5": "^2.2.1",
