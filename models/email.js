@@ -69,6 +69,7 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
             attachments.push({
               cid: file.substr(0, file.indexOf(".")),
               filename: file,
+              contentType: 'image/png',
               content: fs.readFileSync(imagesdir + file)
             });
           }          
