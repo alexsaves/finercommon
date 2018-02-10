@@ -2,9 +2,12 @@
   <mj-head>
      <mj-attributes>
        <mj-text font-size="14px" color="#121738" />
-       <mj-class name="footerText" font-size="13px" line-height="18px" padding-left="80" padding-right="80" /> 
+       <mj-class name="footerText" color="#8fa4af" font-size="13px" line-height="18px" padding-left="90" padding-right="90" /> 
        <mj-class name="bodyText" padding-left="90" padding-right="80" font-size="16px" line-height="22px" />      
-       <mj-class name="gutterText" color="#6d8797" align="center" padding-top="0" padding-bottom="0" />
+       <mj-class name="ratingButton" padding-left="90" padding-right="80" padding-bottom="0" align="center" />
+       <mj-class name="ratingButtonLabels" padding-left="90" padding-right="80" padding-bottom="0" padding-top="0" align="center" />      
+       <mj-class name="gutterText" color="#8fa4af" align="center" padding-top="0" padding-bottom="0" padding-right="10" />
+       <mj-class name="surveyInviteHighlight" color="#424242" align="center" letter-spacing="-1px" padding-left="90" padding-right="90" font-size="24px" font-weight="bold" />
        <mj-all font-family="Arial" />
      </mj-attributes>
      <mj-style>
@@ -12,16 +15,59 @@
         background-color: #121738;
         padding-top: 40px;
       }
-      @media (max-width:800px) {
+      .ratingButtonLabels div {
+        display: inline-block;
+        width: 300px;
+      }
+      .ratingButtonLabels span {
+        font-size: 10px;
+      }
+      .ratingButtonLabels span:last-child {
+        float: right;
+      }
+      .ratingButton a {
+        display: inline-block;
+        color: white;
+        background-color: #4caf50;
+        padding: 10px;
+        font-size: 14px;
+        line-height: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        border: 1px solid white;
+        min-width: 19px;
+        border-radius: 3px;
+      }
+      .ratingButton a:hover {
+        background-color: #6acc6e;
+      }
+      @media (max-width:650px) {
+        .logoImg td {
+          padding-top: 0px !important;
+        }
         .topContainer {
           background-color: transparent;
           padding-top: 0;
         }
-        .bodyText td, .footerText td {
+        .bodyText td {
           padding-left: 10px !important;
           padding-right: 0px !important;
           font-size: 14px;
         }
+        .footerText td {
+          padding-left: 10px !important;
+          padding-right: 10px !important;
+          font-size: 14px;
+        }
+        .surveyInviteHighlight td {
+          padding-left: 10px !important;
+          padding-right: 0px !important;
+          font-size: 14px;
+        }
+        body, html {
+          margin: 0;
+          padding: 0;
+        }        
       }
     </mj-style>
   </mj-head>
@@ -29,7 +75,7 @@
     <mj-container css-class="topContainer">
       <mj-section css-class="contentHolder" padding="0px" background-color="white" padding-bottom="40px">
         <mj-column width="100%">        
-          <mj-image align="center" src="cid:finklogo" width="125px" height="34px" padding-bottom="30" padding-top="50"></mj-image>
+          <mj-image align="center" css-class="logoImg" src="cid:finklogo" width="125px" height="34px" padding-bottom="30" padding-top="50"></mj-image>
           <%= main %>        
         </mj-column>
       </mj-section>

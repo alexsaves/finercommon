@@ -1,2 +1,1 @@
-<mj-text>Hi <%= account.name %>. Reset your password at <%= reseturl %></mj-text>
-<mj-text>To unsubscribe from FinerInk emails, visit <%= unsuburl %></mj-text>
+<mj-text mj-class="bodyText" css-class="bodyText">Hi <%= account.name %>. Reset your password at <%= reseturl %></mj-text>
