@@ -21,7 +21,10 @@ gulp.task('mjml', function (cb) {
       let fcontents = fs
         .readFileSync(src.email + file)
         .toString();
-      fcontents = mjml.mjml2html(basetemplate.replace(/\<\%\= main \%\>/, fcontents));
+      var finalTemplate = basetemplate.replace(/\<\%\= main \%\>/, fcontents);
+      //console.log(finalTemplate);
+      fcontents = mjml.mjml2html(finalTemplate);
+      
       if (fcontents.errors.length > 0) {
         console.log("Errors", fcontents.errors);
       }
