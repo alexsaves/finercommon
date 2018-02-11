@@ -67,8 +67,7 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
         fs.readdirSync(imagesdir).forEach(file => {
           if (file.indexOf('.png') > -1) {
             attachments.push({
-              cid: file.substr(0, file.indexOf(".")),
-              filename: file,
+              cid: file.substr(0, file.indexOf(".")),              
               contentType: 'image/png',
               content: fs.readFileSync(imagesdir + file)
             });
