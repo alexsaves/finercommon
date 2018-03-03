@@ -1,3 +1,0 @@
-
-<mj-text mj-class="bodyText" css-class="bodyText">You've been invited by <%= account.name %> to join their organization <%= org.name %> on FinerInk. <a href="<%= ivturl %>">Create your account here</a>.</mj-text>
-      
