@@ -36,6 +36,7 @@
     "node-ses": "^2.0.5",
     "nodemailer": "^4.4.2",
     "nodemailer-ses-transport": "^1.5.1",
+    "pug": "^2.0.0-rc.4",
     "redis": "^2.8.0",
     "redis-lock": "^0.1.4",
     "shortid": "^2.2.8",

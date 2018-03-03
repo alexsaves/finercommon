@@ -54,10 +54,12 @@ Account.prototype.validationSecureIsValid = function(securetoken) {
  * @param {*} cb 
  */
 Account.prototype.sendValidationEmail = function(cfg, cb) {
+    var firstName = this.name.trim().split(' ')[0];    
     // Invite updated! Send an updated email
     let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
     emailCtrl.send(cfg, 0, cfg.email.defaultFrom, this.email, 'validateemail', 'Validate your FinerInk account.', {
       account: this,
+      firstName: firstName,
       validateurl: cfg.portalUrl + "/checkvalidate/?id=" + encodeURIComponent(this.id) + "&secure=" + encodeURIComponent(md5(this.email + this.id + "_f437"))
     }, function (err) {
       if (err) {

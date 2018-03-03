@@ -6,6 +6,7 @@ const fs = require('fs');
 const _ = require('underscore');
 const aws = require('aws-sdk');
 const sesTransport = require('nodemailer-ses-transport');
+const pug = require('pug');
 
 /**
 * Module for sending email
@@ -56,12 +57,11 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
         callback();
       } else {
         details = extend({
+          imagebase: cfg.portalUrl + "/eml/",
           unsuburl: cfg.portalUrl + EmailUnsubscription.GenerateValidUnsubscribeLink(useremail, org)
         }, details);
 
-        // let client = ses.createClient({key: this.key, secret: this.secret, amazon:
-        // this.server});
-        let attachments = [];
+        /*let attachments = [];
         let imagesdir = __dirname + "/../fixtures/emails/images/";
         
         fs.readdirSync(imagesdir).forEach(file => {
@@ -72,29 +72,41 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
               content: fs.readFileSync(imagesdir + file)
             });
           }          
-        });
-        
+        });*/
+        let basetemplatefile = fs
+            .readFileSync(__dirname + '/../fixtures/emails/src/_base.pug', 'utf8')
+            .toString(),
+          baserawtemplatefile = fs
+            .readFileSync(__dirname + '/../fixtures/emails/src/_base_raw.txt', 'utf8')
+            .toString();
         let templatefile = fs
-            .readFileSync(__dirname + '/../fixtures/emails/dist/' + template + '.html', 'utf8')
+            .readFileSync(__dirname + '/../fixtures/emails/src/' + template + '.pug', 'utf8')
             .toString(),
           rawtemplatefile = fs
-            .readFileSync(__dirname + '/../fixtures/emails/dist/' + template + '_raw.txt', 'utf8')
+            .readFileSync(__dirname + '/../fixtures/emails/src/' + template + '_raw.txt', 'utf8')
             .toString();
-        let templateObj = _.template(templatefile),
-          rawtemplateObj = _.template(rawtemplatefile);
-        let result = templateObj(details),
-          rawresult = rawtemplateObj(details);
+        let richBaseTemplate = pug.compile(basetemplatefile, {});
+        let richTemplate = pug.compile(templatefile, {});
+        let baseResult = richBaseTemplate(details);
+        let templateResult = richTemplate(details);
+        templateResult = baseResult.replace(/\[\[main\]\]/i, templateResult);
+        let rawtemplateObj = _.template(rawtemplatefile);
+        let rawresult = rawtemplateObj(details);
 
         var transporter = nodemailer.createTransport(sesTransport({region: this.server, accessKeyId: this.key, secretAccessKey: this.secret, rateLimit: 5}));
-
+        //console.log(details);
+        //console.log(templateResult);
+        //callback();
+        //return;
         // Give SES the details and let it construct the message for you.
+        //callback(null, templateResult);
         transporter.sendMail({
           to: to,
           from: from,
           subject: subject,
-          html: result,
+          html: templateResult,
           text: rawresult,
-          attachments: attachments
+          //attachments: attachments
         }, function (err, data, res) {
           if (callback) {
             callback(err, data);
