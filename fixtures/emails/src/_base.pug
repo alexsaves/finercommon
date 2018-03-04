@@ -5,24 +5,27 @@ html(xmlns="http://www.w3.org/1999/xhtml", xmlns:v="urn:schemas-microsoft-com:vm
     meta(http-equiv="X-UA-Compatible", content="IE=edge")
     meta(http-equiv="Content-Type", content="text/html; charset=UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    link(href="https://fonts.googleapis.com/css?family=Open+Sans:300,400", rel="stylesheet")
     style(type="text/css").
-        body, body * { font-family: Arial, Helvetica, sans-serif; }
-        div.contentHldr { display: flex; justify-content: center; }
-        div.contentMain { width: 500px; }
-        div.centerAlign { text-align: center; }
-        #finkLogo { width: 172px; height: 47px; }
+        h2 { padding: 0px; margin: 0px; font-size: 14px; }
+        p { font-weight: 300; }
         #outlook a { padding: 0; }
-        xml { display: none !important; }
         .outlook-group-fix { width:100% !important; }
         @media only screen and (max-width:480px) { @-ms-viewport { width:320px; } @viewport { width:320px; } }
-    xml
-      o:OfficeDocumentSettings
-        o:AllowPNG
-        o:PixelsPerInch 96
-  body
-    div(class="contentHldr")
-      div(class="contentMain")
-        div(class="centerAlign")
-          img(src=imagebase + "finklogo.png", id="finkLogo")
+  body(style="font-family: 'Open Sans', Arial, Helvetica, sans-serif; margin:0px; padding: 0px; font-weight: light;")
+    div(class="contentHldr", style="text-align:center;")
+      div(class="contentMain", style="display:inline-block; width: 420px; padding-left: 10px; padding-right: 10px; text-align:left; box-sizing: border-box;")
+        div(class="centerAlign", style="text-align: center;")
+          img(src=imagebase + "finklogo.png", id="finkLogo", style="width: 120px; height: 32px;")
         div [[main]]
-        div footer
+      div(style="background-color: #F4F4F4; padding-top:40px; padding-bottom:40px; margin-top: 25px;")
+        div(class="contentHldr", style="text-align:center;")
+          div(class="contentMain", style="display:inline-block; width: 420px; padding-left: 10px; padding-right: 10px; text-align:left; color: #8FA4AF;box-sizing: border-box;")
+            h2 About FinerInk
+            p(style="font-size:13px;font-weight:lightest;") We are on a mission to help people like yourself share your thoughtful opinions about the buying experience. A few minutes can help shape the careers of many people and the future of FunCo. 
+            p(style="font-size:13px;font-weight:lightest;")
+              | Don't want to hear from us anymore? That’s fine, you can 
+              a(href=unsuburl, style="color:#8FA4AF;") unsubscribe
+              | . We'll be sad, but no hard feelings.
+            div(class="centerAlign", style="text-align: center;")
+              img(src=imagebase + "bridge.png", id="bridge", style="width: 100px; height: 38px; margin-top: 15px;")
