@@ -7,7 +7,6 @@ div(align="center", style="text-align:center;")
   div(align="center", style="text-align: center; margin-top:20px;")
     each val in [1, 2, 3, 4, 5, 6, 7]
       a(href!=surveyurl + "&a=%7B%22buyXRating%22%3A" + val + "%7D", style="text-decoration:none !important;", title=val)
-        div(style=buttonStyle, align="center")= val
-  div(style="height:10px;")
+        img(src=imagebase + "star.png", width=45, height=45)
   span(style="font-size:12px;") Poor
-  span(style="font-size:12px;margin-left:213px;") Excellent
+  span(style="font-size:12px;padding-left:235px;") Excellent
