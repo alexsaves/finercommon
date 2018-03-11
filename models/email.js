@@ -109,8 +109,8 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
           //attachments: attachments
         }, function (err, data, res) {
           if (callback) {
-            callback(null, templateResult);
-            //callback(err, data);
+            //callback(null, templateResult);
+            callback(err, data);
           }
         });
       }
