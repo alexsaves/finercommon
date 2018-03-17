@@ -62,5 +62,20 @@ var GeneralReport = function (cfg, orgid, startdate, enddate, cb) {
   });
 };
 
+/**
+* The general report class ASYNC
+*/
+var GeneralReportAsync = function (cfg, orgid, startdate, enddate) {
+  return new Promise((resolve, reject) => {
+    GeneralReport(cfg, orgid, startdate, enddate, (err, rep) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(rep);
+      }
+    });
+  });
+};
+
 // Expose it
-module.exports = GeneralReport;
+module.exports = { GeneralReport, GeneralReportAsync }
