@@ -127,6 +127,9 @@ var All = {
                         });
                 }
             })
+    },
+    reports: {
+        general: require('../models/reports/general')
     }
 };
 

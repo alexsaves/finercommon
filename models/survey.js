@@ -26,7 +26,8 @@ var Survey = function (details) {
  * The types of surveys
  */
 Survey.SURVEY_TYPES = {
-    PROSPECT: 0
+    PROSPECT: 0,
+    EMPLOYEE: 1
 };
 
 /**
@@ -137,6 +138,41 @@ Survey.GetForOrganization = function (cfg, organization_id, cb) {
         cb(null, res);
     }, function (err) {
         cb(err);
+    });
+};
+
+
+/**
+ * Get surveys by the organization
+ */
+Survey.GetForOrganizationAndType = function (cfg, organization_id, SURVEY_TYPE, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND survey_type = ?', [organization_id, SURVEY_TYPE], function (result) {
+        var res = [];
+        for (var i = 0; i < result.length; i++) {
+            res.push(new Survey(result[i]));
+        }
+        cb(null, res);
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
+ * Get surveys by the organization
+ * @param {*} cfg 
+ * @param {*} organization_id 
+ * @param {*} SURVEY_TYPE 
+ */
+Survey.GetForOrganizationAndTypeAsync = function(cfg, organization_id, SURVEY_TYPE) {
+    return new Promise((resolve, reject) => {
+        Survey.GetForOrganizationAndType(cfg, organization_id, SURVEY_TYPE, (err, svs) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(svs);
+            }
+        });
     });
 };
 
