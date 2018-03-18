@@ -148,7 +148,7 @@ Approval.GetForContacts = function (cfg, contacts, cb) {
   }, function (err) {
     cb(err);
   });
-}
+};
 
 /**
 * Get an approval by its oppportunity ID and contact
@@ -165,6 +165,46 @@ Approval.GetByOppAndContact = function (cfg, opportunity_id, crm_contact_id, cb)
     }
   }, function (err) {
     cb(err);
+  });
+};
+
+/**
+ * Get a collection of approvals
+ * @param {*} cfg 
+ * @param {*} approvals 
+ * @param {*} cb 
+ */
+Approval.GetList = function (cfg, approvalIds, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE guid IN (${approvalIds.map(c => '?').join(', ')})`, approvalIds, function (result) {
+    if (result && result.length > 0) {
+      var res = [];
+      for (var i = 0; i < result.length; i++) {
+        res.push(new Approval(result[i]));
+      }
+      cb(null, res);
+    } else {
+      cb();
+    }
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
+ * Get a bunch of approvals
+ * @param {*} cfg 
+ * @param {*} approvalIds 
+ */
+Approval.GetListAsync = function(cfg, approvalIds) {
+  return new Promise((resolve, reject) => {
+    Approval.GetList(cfg, approvalIds, (err, aprs) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(aprs);
+      }
+    });
   });
 };
 
@@ -221,7 +261,7 @@ Approval.GetByOppAndContactsAsync = function (cfg, opportunity_id, crm_contact_i
       }
     });
   });
-}
+};
 
 /**
 * Delete all
