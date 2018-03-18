@@ -111,7 +111,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
           let otheroo = answers.whyNotSelected.other;          
           if (typeof(otheroo) != "undefined" && otheroo.trim().length > 0) {
             if (!otherval.responses.find((vl) => {
-              return vl == answers.whyNotSelected;
+              return vl == otheroo;
             })) {
               otherval.responses.push(otheroo.trim());
             }
@@ -173,21 +173,24 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
 
   // Now make decisions about who actually won each opportunity
   for (let i = 0; i < uniqueOpportunities.length; i++) {
+    // Quickreference the opportunity
+    let theOpp = uniqueOpportunities[i];
+
     // Iterate over the surveys for this opportunity
-    let surveysForOpp = await Survey.GetForOpportunityAndTypeAsync(cfg, uniqueOpportunities[i].id, Survey.SURVEY_TYPES.PROSPECT);
-    uniqueOpportunities[i].surveys = surveysForOpp;
+    let surveysForOpp = await Survey.GetForOpportunityAndTypeAsync(cfg, theOpp.id, Survey.SURVEY_TYPES.PROSPECT);
+    theOpp.surveys = surveysForOpp;
 
     // Get all the respondents for each opportunity
     var approvalsForOpp = uniqueApprovals.filter((apr) => {
-      return apr.opportunity_id == uniqueOpportunities[i];
+      return apr.opportunity_id == theOpp.id;
     });
-    uniqueOpportunities[i].approvals = approvalsForOpp;
+    theOpp.approvals = approvalsForOpp;
     var opportunityResps = respondentArr.filter((rep) => {
       return !!surveysForOpp.find((sv) => {
         return sv.guid == rep.survey_guid;
       });
     });
-    uniqueOpportunities[i].respondents = opportunityResps;
+    theOpp.respondents = opportunityResps;
     
     // Now do the piping for each respondent and survey so we know what they actually said
     opportunityResps.forEach((rep) => {
@@ -200,10 +203,108 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     });
 
     // Now find out who won according to each person
-    
+    let orgVotes = [];
+
+    // Loop over each respondent and tally up the votes
+    opportunityResps.forEach((resp) => {
+      let vendorRankings = resp.answers.vendorRankings;
+      // Only proceed if the user answered the question
+      if (vendorRankings && vendorRankings.order && vendorRankings.order.length > 0) {
+        let vendorQuestion = exter._locateQuestionObjectForName("vendorRankings", resp.survey_model.pages);
+        let winningVendorId = vendorRankings.order[0];
+        if (winningVendorId == 9999) {
+          // OTHER
+          let otherval = orgVotes.find((vl) => {
+            return vl.label === "__other__";
+          });
+          if (otherval == null) {
+            otherval = {
+              label: "__other__",
+              shortLabel: ShortCleanupOnLabels("__other__"),
+              count: 0,
+              responses: []
+            };
+            orgVotes.push(otherval);
+          }
+          otherval.count++;
+          let otheroo = vendorRankings.other;          
+          if (typeof(otheroo) != "undefined" && otheroo.trim().length > 0) {
+            if (!otherval.responses.find((vl) => {
+              return vl == otheroo;
+            })) {
+              otherval.responses.push(otheroo.trim());
+            }
+          }
+        } else {
+          // REAL
+          // Tally it up
+          let val = vendorQuestion.choices[winningVendorId];
+          let existingEntry = orgVotes.find((vl) => {
+            return vl.label == val;
+          });
+          if (!existingEntry) {
+            existingEntry = {
+              label: val,
+              shortLabel: ShortCleanupOnLabels(val),
+              count: 0
+            };
+            orgVotes.push(existingEntry);
+          }
+          existingEntry.count++;
+        }
+      }
+    });
+
+    // Sort orgVotes
+    orgVotes = orgVotes.sort((a, b) => {
+      if (a.count < b.count) {
+        return 1;
+      } else if (a.count > b.count) {
+        return -1;
+      } else {
+        return 0;
+      }
+    });
+
+    // Now we have a sorted list
+    var winningVendor = orgVotes[0];
+    winningVendor.Amount = theOpp.Amount;
+
+    // Merge with the master list
+    var existingItem = competitorInfo.find((og) => {
+      return og.label == winningVendor.label;
+    });
+    if (!existingItem) {
+      competitorInfo.push(winningVendor);
+    } else {
+      existingItem.Amount += winningVendor.Amount;
+      // Is it "other"?
+      if (existingItem.label == "__other__") {
+        // Merge the responses
+        for (let g = 0; g < winningVendor.responses.length; g++) {
+          if (!existingItem.responses.find((rp) => {
+            return rp == winningVendor.responses[g];
+          })) {
+            existingItem.responses.push(winningVendor.responses[g]);
+          }
+        }
+      }
+    }
   }
-  
-  console.log("OPPS:", uniqueOpportunities);
+
+  // Sort the list
+  competitorInfo = competitorInfo.sort((a, b) => {
+    if (a.Amount < b.Amount) {
+      return 1;
+    } else if (a.Amount > b.Amount) {
+      return -1;
+    } else {
+      return 0;
+    }
+  });
+
+  // Assign it
+  resultObject.losingDealsTo = competitorInfo;
 
   // Return the result array
   return resultObject;
