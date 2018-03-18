@@ -233,7 +233,7 @@ Approval.GetByOppAndContacts = function (cfg, opportunity_id, crm_contact_ids, c
   }
   var cstr = crm_contact_ids.reduce(x => "'" + x + "',");
   cstr = cstr.substr(0, cstr.length - 1);
-  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE opportunity_id = ? AND crm_contact_id IN (' + cstr + ')', [opportunity_id], function (result) {
+  dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE opportunity_id = '${opportunity_id}' AND crm_contact_id IN (${crm_contact_ids.map(c => '?').join(', ')})`, crm_contact_ids, function (result) {  
     if (result && result.length > 0) {
       var resset = [];
       for (let g = 0; g < result.length; g++) {
