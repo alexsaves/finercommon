@@ -8,6 +8,7 @@ const Response = require('../response');
 const Respondent = require('../respondent');
 const BuyX = require('../buyx');
 const Approval = require('../approval');
+const Survey = require('../survey');
 const CRMOpportunities = require('../crmopportunities');
 
 /**
@@ -24,6 +25,8 @@ var ShortCleanupOnLabels = function(str) {
       return "Features";
     } else if (str.indexOf("business needs") > -1) {
       return "Misses business needs";
+    } else if (str.indexOf("_No Vendor Chosen") > -1) {
+      return "None";
     }
   }
   return str;
@@ -168,7 +171,37 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
   // Set up competitors object
   var competitorInfo = [];
 
-  // Extract the competitors and their lost dollars
+  // Now make decisions about who actually won each opportunity
+  for (let i = 0; i < uniqueOpportunities.length; i++) {
+    // Iterate over the surveys for this opportunity
+    let surveysForOpp = await Survey.GetForOpportunityAndTypeAsync(cfg, uniqueOpportunities[i].id, Survey.SURVEY_TYPES.PROSPECT);
+    uniqueOpportunities[i].surveys = surveysForOpp;
+
+    // Get all the respondents for each opportunity
+    var approvalsForOpp = uniqueApprovals.filter((apr) => {
+      return apr.opportunity_id == uniqueOpportunities[i];
+    });
+    uniqueOpportunities[i].approvals = approvalsForOpp;
+    var opportunityResps = respondentArr.filter((rep) => {
+      return !!surveysForOpp.find((sv) => {
+        return sv.guid == rep.survey_guid;
+      });
+    });
+    uniqueOpportunities[i].respondents = opportunityResps;
+    
+    // Now do the piping for each respondent and survey so we know what they actually said
+    opportunityResps.forEach((rep) => {
+      let svForRep = surveysForOpp.find((sv) => {
+        return sv.guid == rep.survey_guid;
+      });
+      if (svForRep) {
+        rep.survey_model = svForRep.getPipedModel(rep);
+      }
+    });
+
+    // Now find out who won according to each person
+    
+  }
   
   console.log("OPPS:", uniqueOpportunities);
 
