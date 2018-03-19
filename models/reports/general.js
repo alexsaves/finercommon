@@ -398,10 +398,17 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
   // Populate a tally object for sales process
   let sampleSalesProcessQuestion = exter._locateQuestionObjectForName("mostImportantVendorCriteria", respondentArr[0].survey_model.pages);
   let sampleSalesProcessFactors = JSON.parse(JSON.stringify(sampleSalesProcessQuestion.choices));
-  
+
   // Now create a tally object for those choices
   var salesProcessImportTally = sampleSalesProcessFactors.map((sr) => {
-    return {label: sr, shortLabel: ShortCleanupOnLabels(sr), importanceScore: 0, topRatedCount: 0, topRatedWithDetail: 0, ratingScore: 0};
+    return {
+      label: sr,
+      shortLabel: ShortCleanupOnLabels(sr),
+      importanceScore: 0,
+      topRatedCount: 0,
+      topRatedWithDetail: 0,
+      ratingScore: 0
+    };
   });
   var otherFactor = {
     label: "__other__",
@@ -422,7 +429,8 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     // Get the sales issue ranking question from the answers
     let mostImportantVendorCriteria = resp.answers.mostImportantVendorCriteria;
     if (mostImportantVendorCriteria && mostImportantVendorCriteria.order && mostImportantVendorCriteria.order.length > 0) {
-      // Score in reverse order with the highest score going to the first item, and so-on
+      // Score in reverse order with the highest score going to the first item, and
+      // so-on
       for (let y = 0; y < mostImportantVendorCriteria.order.length; y++) {
         let orderVal = mostImportantVendorCriteria.order[y];
         let scoreVal = mostImportantVendorCriteria.order.length - y - 1;
@@ -430,16 +438,22 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
         if (orderVal == 9999) {
           // OTHER
           otherFactor.importanceScore += scoreVal;
-          otherFactor.topRatedCount += isInTop ? 1 : 0;
+          otherFactor.topRatedCount += isInTop
+            ? 1
+            : 0;
           if (mostImportantVendorCriteria.other) {
             if (!otherFactor.responses.find((rp) => {
               return rp == mostImportantVendorCriteria.other;
             })) {
-              otherFactor.responses.push(mostImportantVendorCriteria.other);
+              otherFactor
+                .responses
+                .push(mostImportantVendorCriteria.other);
             }
           }
         } else {
-          salesProcessImportTally[orderVal].topRatedCount += isInTop ? 1 : 0;
+          salesProcessImportTally[orderVal].topRatedCount += isInTop
+            ? 1
+            : 0;
           salesProcessImportTally[orderVal].importanceScore += scoreVal;
         }
 
@@ -461,7 +475,8 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     }
   }
 
-  // Now normalize the scores for salesProcessImportTally based on how much detail we have
+  // Now normalize the scores for salesProcessImportTally based on how much detail
+  // we have
   for (let w = 0; w < salesProcessImportTally.length; w++) {
     // Quickreference
     let tallyObj = salesProcessImportTally[w];
@@ -483,8 +498,49 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     }
   });
 
-  // Assign it  
+  // Assign it
   resultObject.salesProcess = salesProcessImportTally;
+
+  // Now do overall perception scoring. Start with the slider ones.
+  var freqRating = {
+    label: "Frequency of contact",
+    shortLabel: ShortCleanupOnLabels("Frequency of contact"),
+    score: 0,
+    count: 0
+  };
+  var responsivenessRating = {
+    label: "Responsiveness",
+    shortLabel: ShortCleanupOnLabels("Responsiveness"),
+    score: 0,
+    count: 0
+  };
+  var perceptionScores = [freqRating, responsivenessRating];
+
+  // Now look at all the answers for this
+  for (let s = 0; s < respondentArr.length; s++) {
+    let resp = respondentArr[s];
+    if (typeof(resp.answers.frequencyRating) != "undefined") {
+      freqRating.score += resp.answers.frequencyRating;
+      freqRating.count++;
+    }
+    if (typeof(resp.answers.responsivenessRating) != "undefined") {
+      responsivenessRating.score += resp.answers.responsivenessRating;
+      responsivenessRating.count++;
+    }
+  }
+
+  // Normalize the two
+  if (freqRating.count > 0) {
+    freqRating.score /= freqRating.count;
+    freqRating.score /= 10;
+  }
+  if (responsivenessRating.count > 0) {
+    responsivenessRating.score /= responsivenessRating.count;
+    responsivenessRating.score /= 10;
+  }
+
+  // Now make a second list for the others, which you will later combine with the first
+  
 
   // Return the result array
   return resultObject;
