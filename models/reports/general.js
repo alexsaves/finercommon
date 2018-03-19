@@ -532,15 +532,69 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
   // Normalize the two
   if (freqRating.count > 0) {
     freqRating.score /= freqRating.count;
+    freqRating.rawScore = freqRating.score + 0;
+    // All this stuff is because the further you are from zero, the worse you are
     freqRating.score /= 10;
+    freqRating.score -= 5;
+    freqRating.score = 5 - Math.abs(freqRating.score);
+    freqRating.score *= 2;
   }
   if (responsivenessRating.count > 0) {
     responsivenessRating.score /= responsivenessRating.count;
+    responsivenessRating.rawScore = responsivenessRating.score + 0;
+    // All this stuff is because the further you are from zero, the worse you are
     responsivenessRating.score /= 10;
+    responsivenessRating.score -= 5;
+    responsivenessRating.score = 5 - Math.abs(responsivenessRating.score);
+    responsivenessRating.score *= 2;
   }
 
-  // Now make a second list for the others, which you will later combine with the first
-  
+  // Now make a second list for the others, which you will later combine with the first  
+  let rateWinningVendorQuestion = exter._locateQuestionObjectForName("rateWinningVendor", respondentArr[0].survey_model.pages);
+  let rateWinningVendorDimensions = JSON.parse(JSON.stringify(rateWinningVendorQuestion.choices));
+  var rateWinningVendorTallies = rateWinningVendorDimensions.map((dm) => {
+    return {
+      label: dm,
+      shortLabel: ShortCleanupOnLabels(dm),
+      score: 0,
+      count: 0
+    };
+  });
+
+  // Now gather all the responses
+  for (let s = 0; s < respondentArr.length; s++) {
+    let resp = respondentArr[s];
+    if (resp.answers.rateWinningVendor && resp.answers.rateWinningVendor.length > 0) {
+      for (let q = 0; q < resp.answers.rateWinningVendor.length; q++) {
+        rateWinningVendorTallies[q].count++;
+        rateWinningVendorTallies[q].score += resp.answers.rateWinningVendor[q];
+      }
+    }
+  }
+
+  // Normalize them
+  for (let s = 0; s < rateWinningVendorTallies.length; s++) {
+    if (rateWinningVendorTallies[s].count > 0) {
+      rateWinningVendorTallies[s].score /= rateWinningVendorTallies[s].count;
+    }
+
+    // Add them to the first list
+    perceptionScores.push(rateWinningVendorTallies[s]);
+  }
+
+  // Sort by score
+  perceptionScores = perceptionScores.sort((a, b) => {
+    if (a.score < b.score) {
+      return 1;
+    } else if (a.score > b.score) {
+      return -1;
+    } else {
+      return 0;
+    }
+  });
+
+  // Assign it
+  resultObject.perceptions = perceptionScores;
 
   // Return the result array
   return resultObject;
