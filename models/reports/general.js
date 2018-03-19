@@ -25,8 +25,6 @@ var ShortCleanupOnLabels = function (str) {
         .trim();
     } else if (str.indexOf("features") > -1) {
       return "Features";
-    } else if (str.indexOf("business needs") > -1) {
-      return "Misses business needs";
     } else if (str.indexOf("_No Vendor Chosen") > -1) {
       return "None";
     }
@@ -365,7 +363,9 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
                 if (!otherReason.responses.find((rs) => {
                   return rs == reasons.other;
                 })) {
-                  otherReason.responses.push(reasons.other);
+                  otherReason
+                    .responses
+                    .push(reasons.other);
                 }
               }
             } else {
@@ -394,6 +394,97 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
 
   // Assign it
   resultObject.losingDealsTo = competitorInfo;
+
+  // Populate a tally object for sales process
+  let sampleSalesProcessQuestion = exter._locateQuestionObjectForName("mostImportantVendorCriteria", respondentArr[0].survey_model.pages);
+  let sampleSalesProcessFactors = JSON.parse(JSON.stringify(sampleSalesProcessQuestion.choices));
+  
+  // Now create a tally object for those choices
+  var salesProcessImportTally = sampleSalesProcessFactors.map((sr) => {
+    return {label: sr, shortLabel: ShortCleanupOnLabels(sr), importanceScore: 0, topRatedCount: 0, topRatedWithDetail: 0, ratingScore: 0};
+  });
+  var otherFactor = {
+    label: "__other__",
+    shortLabel: ShortCleanupOnLabels("__other__"),
+    importanceScore: 0,
+    topRatedCount: 0,
+    topRatedWithDetail: 0,
+    ratingScore: 0,
+    responses: []
+  };
+  salesProcessImportTally.push(otherFactor);
+
+  // Iterate the respondents and add the sales process rankings
+  for (let s = 0; s < respondentArr.length; s++) {
+    // Quickreference the respondent
+    let resp = respondentArr[s];
+
+    // Get the sales issue ranking question from the answers
+    let mostImportantVendorCriteria = resp.answers.mostImportantVendorCriteria;
+    if (mostImportantVendorCriteria && mostImportantVendorCriteria.order && mostImportantVendorCriteria.order.length > 0) {
+      // Score in reverse order with the highest score going to the first item, and so-on
+      for (let y = 0; y < mostImportantVendorCriteria.order.length; y++) {
+        let orderVal = mostImportantVendorCriteria.order[y];
+        let scoreVal = mostImportantVendorCriteria.order.length - y - 1;
+        let isInTop = y < 3;
+        if (orderVal == 9999) {
+          // OTHER
+          otherFactor.importanceScore += scoreVal;
+          otherFactor.topRatedCount += isInTop ? 1 : 0;
+          if (mostImportantVendorCriteria.other) {
+            if (!otherFactor.responses.find((rp) => {
+              return rp == mostImportantVendorCriteria.other;
+            })) {
+              otherFactor.responses.push(mostImportantVendorCriteria.other);
+            }
+          }
+        } else {
+          salesProcessImportTally[orderVal].topRatedCount += isInTop ? 1 : 0;
+          salesProcessImportTally[orderVal].importanceScore += scoreVal;
+        }
+
+        // If this is a top 3 then look at the next question
+        if (isInTop) {
+          let howWellInAreas = resp.answers.howWellInAreas;
+          if (howWellInAreas && howWellInAreas.length > y) {
+            // We have a ranking
+            if (orderVal == 9999) {
+              otherFactor.topRatedWithDetail++;
+              otherFactor.ratingScore += howWellInAreas[y];
+            } else {
+              salesProcessImportTally[orderVal].topRatedWithDetail++;
+              salesProcessImportTally[orderVal].ratingScore += howWellInAreas[y];
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Now normalize the scores for salesProcessImportTally based on how much detail we have
+  for (let w = 0; w < salesProcessImportTally.length; w++) {
+    // Quickreference
+    let tallyObj = salesProcessImportTally[w];
+
+    // If we have detail, then normalize
+    if (tallyObj.topRatedWithDetail > 0) {
+      tallyObj.ratingScore /= tallyObj.topRatedWithDetail;
+    }
+  }
+
+  // Sort by importance
+  salesProcessImportTally = salesProcessImportTally.sort((a, b) => {
+    if (a.importanceScore < b.importanceScore) {
+      return 1;
+    } else if (a.importanceScore > b.importanceScore) {
+      return -1;
+    } else {
+      return 0;
+    }
+  });
+
+  // Assign it  
+  resultObject.salesProcess = salesProcessImportTally;
 
   // Return the result array
   return resultObject;
