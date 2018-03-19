@@ -596,6 +596,9 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
   // Assign it
   resultObject.perceptions = perceptionScores;
 
+  // Now do reconnection stuff
+  
+
   // Return the result array
   return resultObject;
 };
