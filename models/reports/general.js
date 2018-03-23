@@ -56,14 +56,21 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
   // Start computing buyX
   resultObject.buyX = 0;
 
+  // Count the buyxs
+  let buyXCount = 0;
+
   // First compute the buyX score for all responses
   for (let i = 0; i < svs.length; i++) {
     svs[i].respondents = await Respondent.GetBySurveyAndTimeRangeAsync(cfg, svs[i].guid, startdate, enddate);
     for (let j = 0; j < svs[i].respondents.length; j++) {
-      svs[i].respondents[j].survey = svs[i];
-      svs[i].respondents[j].buyX = BuyX.CalculateBuyXFromResponses(svs[i], svs[i].respondents[j].answers);
-      respondentArr.push(svs[i].respondents[j]);
-      resultObject.buyX += svs[i].respondents[j].buyX;
+      let resp = svs[i].respondents[j];
+      resp.survey = svs[i];
+      resp.buyX = BuyX.CalculateBuyXFromResponses(svs[i], resp.answers);
+      respondentArr.push(resp);
+      if (resp.buyX !== undefined) {
+        buyXCount++;
+        resultObject.buyX += resp.buyX;
+      }
     }
   }
 
@@ -80,7 +87,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
 
   // Only proceed if we have data
   if (respondentArr.length > 0) {
-    resultObject.buyX /= respondentArr.length;
+    resultObject.buyX /= buyXCount;
   }
 
   // Compute reasons for loss
@@ -96,7 +103,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     let questionDef = exter._locateQuestionObjectForName("whyNotSelected", surveymodel.pages);
 
     // Proceed if we have everything
-    if (questionDef && answers.whyNotSelected && answers.whyNotSelected.responses && answers.whyNotSelected.responses.length > 0) {      
+    if (questionDef && answers.whyNotSelected && answers.whyNotSelected.responses && answers.whyNotSelected.responses.length > 0) {
       let choices = questionDef.choices;
       let resps = answers.whyNotSelected.responses;
       for (let j = 0; j < resps.length; j++) {
@@ -747,9 +754,16 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     if (resp.answers && resp.answers.onePieceAdvice && resp.answers.onePieceAdvice.trim().length > 4) {
       var cmt = {
         when: resp.updated_at,
-        text: resp.answers.onePieceAdvice.trim(),
-        anonymous: (resp.answers.anonymity && resp.answers.anonymity.response) === 1 ? true : false,
-        amount: (resp.approval && resp.approval.opportunity && resp.approval.opportunity.Amount != "NULL") ? resp.approval.opportunity.Amount : 0
+        text: resp
+          .answers
+          .onePieceAdvice
+          .trim(),
+        anonymous: (resp.answers.anonymity && resp.answers.anonymity.response) === 1
+          ? true
+          : false,
+        amount: (resp.approval && resp.approval.opportunity && resp.approval.opportunity.Amount != "NULL")
+          ? resp.approval.opportunity.Amount
+          : 0
       };
       if (resp.buyX) {
         cmt.buyX = resp.buyX;
@@ -762,14 +776,14 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
         if (cmt.title == "NULL") {
           delete cmt.title;
         }
-        
+
         // Figure out the winning vendor
         var winner = resp.approval.opportunity.winningVendor;
         if (winner) {
           cmt.winningVendor = winner;
         }
       }
-      commentList.push(resp); 
+      commentList.push(cmt);
     }
   }
 
