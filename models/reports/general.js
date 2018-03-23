@@ -10,6 +10,7 @@ const BuyX = require('../buyx');
 const Approval = require('../approval');
 const Survey = require('../survey');
 const CRMOpportunities = require('../crmopportunities');
+const CRMContacts = require('../crmcontacts');
 
 /**
  * Fix up labels to be more presentable
@@ -66,6 +67,17 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     }
   }
 
+  // Sort the respondents by date
+  respondentArr = respondentArr.sort((a, b) => {
+    if (a.updated_at < b.updated_at) {
+      return 1;
+    } else if (a.updated_at > b.updated_at) {
+      return -1;
+    } else {
+      return 0;
+    }
+  });
+
   // Only proceed if we have data
   if (respondentArr.length > 0) {
     resultObject.buyX /= respondentArr.length;
@@ -84,9 +96,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     let questionDef = exter._locateQuestionObjectForName("whyNotSelected", surveymodel.pages);
 
     // Proceed if we have everything
-    if (questionDef && answers.whyNotSelected && answers.whyNotSelected.responses && answers.whyNotSelected.responses.length > 0) {
-      // console.log("Looking at", answers.whyNotSelected); console.log("def",
-      // questionDef);
+    if (questionDef && answers.whyNotSelected && answers.whyNotSelected.responses && answers.whyNotSelected.responses.length > 0) {      
       let choices = questionDef.choices;
       let resps = answers.whyNotSelected.responses;
       for (let j = 0; j < resps.length; j++) {
@@ -487,11 +497,24 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     }
   }
 
+  // Figure out the weighted importance of sales process items
+  let salesProcessMaxImportance = salesProcessImportTally.reduce((accumulator, sp) => {
+    return Math.max(accumulator, sp.importanceScore);
+  }, 0);
+
+  // Loop over them and compute the scores
+  for (let s = 0; s < salesProcessImportTally.length; s++) {
+    let proc = salesProcessImportTally[s];
+    let maxPerc = proc.importanceScore / salesProcessMaxImportance;
+    let ratingPerc = 1 - ((proc.ratingScore - 1) / 6);
+    proc.importanceOpportunityScore = (ratingPerc + maxPerc) / 2;
+  }
+
   // Sort by importance
   salesProcessImportTally = salesProcessImportTally.sort((a, b) => {
-    if (a.importanceScore < b.importanceScore) {
+    if (a.importanceOpportunityScore < b.importanceOpportunityScore) {
       return 1;
-    } else if (a.importanceScore > b.importanceScore) {
+    } else if (a.importanceOpportunityScore > b.importanceOpportunityScore) {
       return -1;
     } else {
       return 0;
@@ -549,16 +572,12 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     responsivenessRating.score *= 2;
   }
 
-  // Now make a second list for the others, which you will later combine with the first  
+  // Now make a second list for the others, which you will later combine with the
+  // first
   let rateWinningVendorQuestion = exter._locateQuestionObjectForName("rateWinningVendor", respondentArr[0].survey_model.pages);
   let rateWinningVendorDimensions = JSON.parse(JSON.stringify(rateWinningVendorQuestion.choices));
   var rateWinningVendorTallies = rateWinningVendorDimensions.map((dm) => {
-    return {
-      label: dm,
-      shortLabel: ShortCleanupOnLabels(dm),
-      score: 0,
-      count: 0
-    };
+    return {label: dm, shortLabel: ShortCleanupOnLabels(dm), score: 0, count: 0};
   });
 
   // Now gather all the responses
@@ -597,7 +616,137 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
   resultObject.perceptions = perceptionScores;
 
   // Now do reconnection stuff
-  
+  var hotLead = 0;
+  var warmLead = 0;
+  var coldLead = 0;
+  var totalAnswers = 0;
+
+  // Figure out recommend score
+  for (let s = 0; s < respondentArr.length; s++) {
+    let resp = respondentArr[s];
+    if (resp.answers && typeof(resp.answers.reconnect) != "undefined" && resp.answers.reconnect !== null) {
+      totalAnswers++;
+      if (resp.answers.reconnect >= 6) {
+        hotLead++;
+      } else if (resp.answers.reconnect <= 2) {
+        coldLead++;
+      } else {
+        warmLead++;
+      }
+    }
+  }
+  var netConnect = ((hotLead / totalAnswers) - ((coldLead + warmLead) / totalAnswers));
+
+  // Calculate the answers
+  var recommend = {
+    totalAnswers: totalAnswers,
+    netConnector: Math.round(netConnect * 1000) / 10,
+    futureLeadSentiment: {
+      hotLead: hotLead,
+      warmLead: warmLead,
+      coldLead: coldLead
+    }
+  };
+
+  // Assign it
+  resultObject.recommend = recommend;
+
+  // Now compile a list of top decision makers and their titles
+  var decisionMakers = [];
+
+  for (let s = 0; s < respondentArr.length; s++) {
+    let resp = respondentArr[s];
+    let smodel = resp.survey_model.pages;
+    let rankingPage = smodel.find((pg) => {
+      return pg.name == "majorPlayerRanking";
+    });
+    if (rankingPage) {
+      let elms = rankingPage.elements;
+      for (let personNum = 1; personNum <= 5; personNum++) {
+        let srch = "decisionMaker" + personNum + "Influence";
+        let q = elms.find((q) => {
+          return q.name == srch;
+        });
+        if (q && typeof(q.subtitle) != "undefined" && q.subtitle.length > 0 && q.subtitle.indexOf("(") > -1) {
+          let fullPersonNameTitle = q
+            .subtitle
+            .substr(q.subtitle.indexOf("(") + 1);
+          fullPersonNameTitle = fullPersonNameTitle
+            .substr(0, fullPersonNameTitle.length - 1)
+            .trim();
+          if (fullPersonNameTitle != "NULL" && fullPersonNameTitle.trim().length > 0) {
+            var decm = decisionMakers.find((dm) => {
+              return dm.name == fullPersonNameTitle;
+            });
+            if (!decm) {
+              decm = {
+                name: fullPersonNameTitle,
+                count: 0,
+                score: 0
+              };
+              decisionMakers.push(decm);
+            }
+            // Now read the respondents scoring of this person
+            if (resp.answers && typeof(resp.answers[srch]) != "undefined") {
+              decm.count++;
+              decm.score += resp.answers[srch];
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Loop over the decision makers and normalize them
+  for (let s = 0; s < decisionMakers.length; s++) {
+    if (decisionMakers[s].count > 0) {
+      decisionMakers[s].score /= decisionMakers[s].count;
+    }
+  }
+
+  // Sort by score
+  decisionMakers = decisionMakers.sort((a, b) => {
+    if (a.score < b.score) {
+      return 1;
+    } else if (a.score > b.score) {
+      return -1;
+    } else {
+      return 0;
+    }
+  });
+
+  // Assign it
+  resultObject.decisionMakers = decisionMakers;
+
+  // Assign the approvals to the respondents so we can find them easily
+  for (let s = 0; s < respondentArr.length; s++) {
+    let resp = respondentArr[s];
+    if (resp.approval_guid && resp.approval_guid.length > 2) {
+      var theApr = uniqueApprovals.find((apr) => {
+        return apr.guid == resp.approval_guid;
+      });
+      if (theApr) {
+        resp.theApr = theApr;
+        if (resp.theApr.crm_contact_id && resp.theApr.crm_contact_id.length > 2) {
+          resp.theApr.contact = await CRMContacts.GetByIdAsync(cfg, resp.theApr.crm_contact_id);
+        }
+      }
+    }
+  }
+
+  // Find some comments
+  var commentList = [];
+  for (let s = 0; s < respondentArr.length; s++) {
+    let resp = respondentArr[s];
+    if (resp.answers && resp.answers.onePieceAdvice && resp.answers.onePieceAdvice.trim().length > 4) {
+      var cmt = {
+        text: resp.answers.onePieceAdvice.trim()
+      };
+      // Are they anonymous?
+      
+      console.log(resp);
+    }
+  }
 
   // Return the result array
   return resultObject;

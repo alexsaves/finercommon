@@ -31,6 +31,23 @@ CRMContacts.GetById = function (cfg, guid, cb) {
 };
 
 /**
+ * Get a CRM contact (ASYNC)
+ * @param {*} cfg 
+ * @param {*} guid 
+ */
+CRMContacts.GetByIdAsync = function (cfg, guid) {
+  return new Promise((resolve, reject) => {
+    CRMContacts.GetById(cfg, guid, (err, cnt) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(cnt);
+      }
+    });
+  });
+};
+
+/**
  * Get contacts by an array of ids
  */
 CRMContacts.GetByAccountIds = function (cfg, aids, cb) {
