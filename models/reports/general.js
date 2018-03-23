@@ -281,6 +281,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     // Now we have a sorted list
     var winningVendor = orgVotes[0];
     winningVendor.Amount = theOpp.Amount;
+    theOpp.winningVendor = winningVendor;
 
     // Merge with the master list
     var existingItem = competitorInfo.find((og) => {
@@ -726,9 +727,14 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
         return apr.guid == resp.approval_guid;
       });
       if (theApr) {
-        resp.theApr = theApr;
-        if (resp.theApr.crm_contact_id && resp.theApr.crm_contact_id.length > 2) {
-          resp.theApr.contact = await CRMContacts.GetByIdAsync(cfg, resp.theApr.crm_contact_id);
+        resp.approval = theApr;
+        if (theApr.opportunity_id) {
+          theApr.opportunity = uniqueOpportunities.find((op) => {
+            return op.id == theApr.opportunity_id;
+          });
+        }
+        if (theApr.crm_contact_id && theApr.crm_contact_id.length > 2) {
+          theApr.contact = await CRMContacts.GetByIdAsync(cfg, theApr.crm_contact_id);
         }
       }
     }
@@ -740,13 +746,35 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     let resp = respondentArr[s];
     if (resp.answers && resp.answers.onePieceAdvice && resp.answers.onePieceAdvice.trim().length > 4) {
       var cmt = {
-        text: resp.answers.onePieceAdvice.trim()
+        when: resp.updated_at,
+        text: resp.answers.onePieceAdvice.trim(),
+        anonymous: (resp.answers.anonymity && resp.answers.anonymity.response) === 1 ? true : false,
+        amount: (resp.approval && resp.approval.opportunity && resp.approval.opportunity.Amount != "NULL") ? resp.approval.opportunity.Amount : 0
       };
-      // Are they anonymous?
-      
-      console.log(resp);
+      if (resp.buyX) {
+        cmt.buyX = resp.buyX;
+      }
+      if (cmt.anonymous) {
+        delete cmt.amount;
+      } else if (resp.approval && resp.approval.contact) {
+        // Populate the contact info
+        cmt.title = resp.approval.contact.Title;
+        if (cmt.title == "NULL") {
+          delete cmt.title;
+        }
+        
+        // Figure out the winning vendor
+        var winner = resp.approval.opportunity.winningVendor;
+        if (winner) {
+          cmt.winningVendor = winner;
+        }
+      }
+      commentList.push(resp); 
     }
   }
+
+  // Assign it
+  resultObject.comments = commentList;
 
   // Return the result array
   return resultObject;
