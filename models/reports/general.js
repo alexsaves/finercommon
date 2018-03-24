@@ -85,6 +85,14 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     }
   });
 
+  // Bomb out if there are no respondents
+  if (respondentArr.length == 0) {
+    return {respondents: 0};
+  }
+
+  // Add the respondents
+  resultObject.respondents = respondentArr.length;
+
   // Only proceed if we have data
   if (respondentArr.length > 0) {
     resultObject.buyX /= buyXCount;

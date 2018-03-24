@@ -22,6 +22,7 @@ var All = {
     Email: require('../models/email'),
     EmailUnsubscription: require('../models/emailunsubscription'),
     CRMIntegrationRules: require('../models/crmintegrationrules'),
+    OrgReportCache: require('../models/orgreportcache'),
     BuyX: require('../models/buyx'),
     Daemon: require('../models/daemon'),
     // TODO: update delete to include CRM entities
