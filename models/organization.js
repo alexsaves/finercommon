@@ -3,7 +3,10 @@ const dbcmd = require('../utils/dbcommand'),
   extend = require('extend'),
   tablename = 'organizations',
   CRMIntegrations = require('../models/crmintegrations'),
-  OrganizationAssociations = require('../models/organizationassociations');
+  moment = require('moment'),
+  OrganizationAssociations = require('../models/organizationassociations'),
+  OrgReportCache = require('../models/orgreportcache'),
+  GeneralReport = require('../models/reports/general');
 
 /**
 * The organizations class
@@ -35,6 +38,60 @@ Organization.DeleteAll = function (cfg, cb) {
   }, function (err) {
     cb(err);
   });
+};
+
+/**
+ * Figure out all the monthly reports prior to this month for all organizations
+ * @param {*} cfg 
+ * @param {*} cb 
+ */
+Organization.ComputeAllPreviousMonthlyReports = async function(cfg, cb) {
+  var orgs = await Organization.GetAllAsync(cfg);
+  if (orgs && orgs.length > 0) {
+    var monthList = [];
+    var currentMonth = moment();
+
+    // Build an array of months prior to this one with start and end dates
+    for (let i = 0; i < 12; i++) {
+      currentMonth.subtract(1, "month");
+      var startDay = currentMonth.clone().startOf("month");
+      var endDay = currentMonth.clone().endOf("month");
+      monthList.push({
+        monthStr: currentMonth.format("MMM"),
+        month: currentMonth.month(),
+        year: currentMonth.year(),
+        startDay: startDay.toDate(),
+        endDay: endDay.toDate()
+      });
+    }
+
+    // Loop over the orgs and grab all their reports
+    for (let i = 0; i < orgs.length; i++) {
+      let orgReports = await OrgReportCache.GetReportsForOrgAndTypeAsync(cfg, orgs[i].id, OrgReportCache.REPORT_TYPE.MONTHLY_SUMMARY);
+
+      // Now iterate over each month and see if we have it
+      for (let j = 0; j < monthList.length; j++) {        
+        let existingRep = orgReports.find((rep) => {
+          return rep.created_for_year == monthList[j].year && rep.created_for_month == monthList[j].month;
+        });
+        if (!existingRep) {
+          // We dont have it! Make one
+          var rep = await GeneralReport.GeneralReportAsync(cfg, orgs[i].id, monthList[j].startDay, monthList[j].endDay);
+          
+          // Save it in the DB
+          var finalRep = await OrgReportCache.CreateAsync(cfg, {
+            report: new Buffer(JSON.stringify(rep)),
+            report_type: OrgReportCache.REPORT_TYPE.MONTHLY_SUMMARY,
+            organization_id: orgs[i].id,
+            created_for_year: monthList[j].year,
+            created_for_month: monthList[j].month
+          });
+          orgReports.push(finalRep);
+        }
+      }
+    }
+  }
+  return orgs;
 };
 
 /**
@@ -177,6 +234,22 @@ Organization.GetAll = function (cfg, cb) {
     }
   }, function (err) {
     cb(err);
+  });
+};
+
+/**
+ * Get all organizations (ASYNC)
+ * @param {*} cfg 
+ */
+Organization.GetAllAsync = function (cfg) {
+  return new Promise((resolve, reject) => {
+    Organization.GetAll(cfg, (err, orgs) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(orgs);
+      }
+    });
   });
 };
 

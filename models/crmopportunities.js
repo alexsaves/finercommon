@@ -330,6 +330,46 @@ CRMOpportunities.setApprovalStatusOnIdsAsync = function (cfg, ids) {
 };
 
 /**
+ * Get a collection of opportunities
+ * @param {*} cfg 
+ * @param {*} approvals 
+ * @param {*} cb 
+ */
+CRMOpportunities.GetList = function (cfg, oppIds, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE id IN (${oppIds.map(c => '?').join(', ')})`, oppIds, function (result) {
+    if (result && result.length > 0) {
+      var res = [];
+      for (var i = 0; i < result.length; i++) {
+        res.push(new CRMOpportunities(result[i]));
+      }
+      cb(null, res);
+    } else {
+      cb();
+    }
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
+ * Get a bunch of opportunities
+ * @param {*} cfg 
+ * @param {*} approvalIds 
+ */
+CRMOpportunities.GetListAsync = function(cfg, oppIds) {
+  return new Promise((resolve, reject) => {
+    CRMOpportunities.GetList(cfg, oppIds, (err, opps) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(opps);
+      }
+    });
+  });
+};
+
+/**
 * Create an opportunity
 */
 CRMOpportunities.Create = function (cfg, data, extraFields, cb) {

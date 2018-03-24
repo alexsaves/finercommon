@@ -1,6 +1,6 @@
 const dbcmd = require('../utils/dbcommand'),
     md5 = require('md5'),
-    extend = require('extend'),    
+    extend = require('extend'),
     utils = require('../utils/utils'),
     tablename = 'responses',
     RESPONSE_STATES = {
@@ -253,6 +253,24 @@ Response.GetByRespondentAndSurvey = function (cfg, rid, sid, cb) {
         }, function (err) {
             cb(err);
         });
+};
+
+/**
+ * Get all responses for a respondent async
+ * @param {*} cfg
+ * @param {*} rid
+ * @param {*} sid
+ */
+Response.GetByRespondentAndSurveyAsync = function (cfg, rid, sid) {
+    return new Promise((resolve, reject) => {
+        Response.GetByRespondentAndSurvey(cfg, rid, sid, (err, responses) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(responses);
+            }
+        });
+    });
 };
 
 /**
