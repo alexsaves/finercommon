@@ -69,7 +69,13 @@ else
 +spacer
 +heading('Decision Makers')
 +spacer
-+paragraph('The most influential decision maker is ' + decisionMakers[0].name + '.')
++paragraph('The most influential decision maker is ' + decisionMakers[0].name + ' (' + decisionMakers[0].count + '). Overall, the influential job titles were:')
++spacer
+each maker, index in decisionMakers
+  if index > 0
+    span , 
+  span(color="#00cc00", style="color:#00cc00; font-size:14px; font-weight: bold;") #{maker.name} 
+  span(style="font-size:14px;color:#727272;", color="#727272") (#{maker.count}) 
 +spacer
 +reportlink('/', 'View Details')
 mixin comment(cmt)
