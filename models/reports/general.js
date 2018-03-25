@@ -904,6 +904,9 @@ var SendReportForOrgAsync = async function (cfg, orgid, lastmonth) {
   // Get the Org NS
   const Organization = require('../../models/organization');
 
+  // Grab the Email namespace
+  const Email = require('../../models/email');
+
   // Get Account
   const Account = require('../account');
 
@@ -927,7 +930,15 @@ var SendReportForOrgAsync = async function (cfg, orgid, lastmonth) {
     }
   }
 
-  return accounts;
+  // Send all the emails
+  for (let i = 0; i < accounts.length; i++) {
+
+  }
+  
+  let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
+  var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, "alexei.white@gmail.com", 'generalreport', 'BLA, help ' + org.name + ' do better in the future!', report);
+
+  return result;
 };
 
 /**
