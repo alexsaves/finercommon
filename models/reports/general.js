@@ -833,17 +833,17 @@ var GeneralReportAsync = function (cfg, orgid, startdate, enddate) {
 };
 
 /**
- * Send a Report for an Org
- * @param {*} cfg 
- * @param {*} orgid 
+ * Get a complete report with history for an organization
+ * @param {*} cfg
+ * @param {*} orgid
  * @param {Boolean} lastmonth Is this for the last month (true)? Or current (false)?
  */
-var SendReportForOrg = async function(cfg, orgid, lastmonth) {
+var GetFullReportForOrg = async function (cfg, orgid, lastmonth) {
   // First get the org
   var org = await Organization.GetByIdAsync(cfg, orgid);
 
   // Then run and retrieve the reports
-  var reports = org.ComputeAllPreviousMonthlyReportsAsync(cfg);
+  var reports = await org.ComputeAllPreviousMonthlyReportsAsync(cfg);
 
   // Convert them all to POJO's
   for (let i = 0; i < reports.length; i++) {
@@ -863,22 +863,49 @@ var SendReportForOrg = async function(cfg, orgid, lastmonth) {
     var endDay = currentMonth
       .clone()
       .endOf("month");
-      focusRep = await GeneralReport.GeneralReportAsync(cfg, org.id, startDay, endDay);
+    focusRep = await GeneralReport.GeneralReportAsync(cfg, org.id, startDay, endDay);
   } else {
     // Remove the last one
-    reports.splice(-1,1);
+    reports.splice(-1, 1);
   }
 
-  // Build the histograms for past BuyX scores and past Likelihood to Recommend Scores
+  // Build the histograms for past BuyX scores and past Likelihood to Recommend
+  // Scores
   var previousBuyX = [];
   var previousRecommend = [];
-  
 
+  for (let i = 0; i < reports.length; i++) {
+    var previousBuyXScore = reports[i].buyX || 0;
+    var previousConnectorScore = reports[i].recommend ? reports[i].recommend.netConnector : 0;
+    previousBuyX.push(previousBuyXScore);
+    previousRecommend.push(previousConnectorScore);
+  }
+
+  // Assign
+  focusRep.previousBuyX = previousBuyX;
+  focusRep.previousRecommend = previousRecommend;
+
+  return focusRep;
+};
+
+/**
+ * Send an email report for an organization
+ * @param {*} cfg 
+ * @param {*} orgid 
+ * @param {*} lastmonth 
+ */
+var SendReportForOrg = async function (cfg, orgid, lastmonth) {
+  // First GET the report
+  var report = await GetFullReportForOrg(cfg, orgid, lastmonth);
+
+  // Now decide WHO gets to receive it
+  
 };
 
 // Expose it
 module.exports = {
   GeneralReport,
   GeneralReportAsync,
+  GetFullReportForOrg,
   SendReportForOrg
 }
