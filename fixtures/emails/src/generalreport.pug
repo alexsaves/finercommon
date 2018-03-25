@@ -9,7 +9,7 @@ mixin spacer
 mixin heading(contents)
   div(style="font-weight:bold;font-size:16px;color:#424242;", color="#424242")= contents
 mixin paragraph(contents)
-  div(style="color:#727272;", color="#727272")= contents
+  div(style="color:#727272;font-size:14px;", color="#727272")= contents
 mixin reportlink(linkref, contents)
   a(href=linkref)= contents
 +heading('Win/Loss Analysis')
@@ -72,8 +72,13 @@ else
 +paragraph('The most influential decision maker is ' + decisionMakers[0].name + '.')
 +spacer
 +reportlink('/', 'View Details')
-+spacer
-+hline
-+spacer
-img(src=imagebase + "whatcustomersaresaying.png", alt="What customers are saying", style="width: 270px; height: 59px;", width="270", height="59", border="0", data-imagetype="External")
-+spacer
+if comments && comments.length > 0
+  +spacer
+  +hline
+  +spacer
+  img(src=imagebase + "whatcustomersaresaying.png", alt="What customers are saying", style="width: 270px; height: 59px;", width="270", height="59", border="0", data-imagetype="External")
+  +spacer
+  each comment in comments
+    div(style="padding-left:20px;padding-right:20px") comment
+  +spacer
+  +reportlink('/', 'See More Comments')

@@ -957,6 +957,11 @@ var SendReportForOrgAsync = async function (cfg, orgid, lastmonth) {
     }
   }
 
+  // Trim excess comments if they exist
+  if (report.comments && report.comments.length > 3) {
+    report.comments.length = 3;
+  }
+
   // Send all the emails
   for (let i = 0; i < accounts.length; i++) {
 
