@@ -870,7 +870,9 @@ var SendReportForOrg = async function(cfg, orgid, lastmonth) {
   }
 
   // Build the histograms for past BuyX scores and past Likelihood to Recommend Scores
-
+  var previousBuyX = [];
+  var previousRecommend = [];
+  
 
 };
 
