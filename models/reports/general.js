@@ -838,7 +838,7 @@ var GeneralReportAsync = function (cfg, orgid, startdate, enddate) {
  * @param {*} orgid
  * @param {Boolean} lastmonth Is this for the last month (true)? Or current (false)?
  */
-var GetFullReportForOrg = async function (cfg, orgid, lastmonth) {
+var GetFullReportForOrgAsync = async function (cfg, orgid, lastmonth) {
   // First get the org
   var org = await Organization.GetByIdAsync(cfg, orgid);
 
@@ -894,18 +894,18 @@ var GetFullReportForOrg = async function (cfg, orgid, lastmonth) {
  * @param {*} orgid 
  * @param {*} lastmonth 
  */
-var SendReportForOrg = async function (cfg, orgid, lastmonth) {
+var SendReportForOrgAsync = async function (cfg, orgid, lastmonth) {
   // First GET the report
-  var report = await GetFullReportForOrg(cfg, orgid, lastmonth);
+  var report = await GetFullReportForOrgAsync(cfg, orgid, lastmonth);
 
   // Now decide WHO gets to receive it
-  
+
 };
 
 // Expose it
 module.exports = {
   GeneralReport,
   GeneralReportAsync,
-  GetFullReportForOrg,
-  SendReportForOrg
+  GetFullReportForOrgAsync,
+  SendReportForOrgAsync
 }
