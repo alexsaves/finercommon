@@ -845,9 +845,15 @@ var SendReportForOrg = async function(cfg, orgid, lastmonth) {
   // Then run and retrieve the reports
   var reports = org.ComputeAllPreviousMonthlyReportsAsync(cfg);
 
-  // Get the last report
-  var focusRep = JSON.parse(reports[reports.length - 1].report.toString());
+  // Convert them all to POJO's
+  for (let i = 0; i < reports.length; i++) {
+    reports[i] = JSON.parse(reports[i].report.toString());
+  }
 
+  // Get the last report
+  var focusRep = reports[reports.length - 1];
+
+  // Should we be focused on last month or THIS month?
   if (!lastmonth) {
     // The focus should be on this month
     var currentMonth = moment();
@@ -859,8 +865,11 @@ var SendReportForOrg = async function(cfg, orgid, lastmonth) {
       .endOf("month");
       focusRep = await GeneralReport.GeneralReportAsync(cfg, org.id, startDay, endDay);
   } else {
+    // Remove the last one
     reports.splice(-1,1);
   }
+
+  // Build the histograms for past BuyX scores and past Likelihood to Recommend Scores
 
 
 };

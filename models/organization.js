@@ -66,7 +66,7 @@ Organization.prototype.ComputeAllPreviousMonthlyReportsAsync = async function (c
     currentMonth = moment();
 
   // Build an array of months prior to this one with start and end dates
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 14; i++) {
     currentMonth.subtract(1, "month");
     var startDay = currentMonth
       .clone()
