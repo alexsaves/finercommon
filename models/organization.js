@@ -300,6 +300,23 @@ Organization.GetById = function (cfg, id, cb) {
 };
 
 /**
+ * Get an org by its ID
+ * @param {*} cfg 
+ * @param {*} id 
+ */
+Organization.GetByIdAsync = function (cfg, id) {
+  return new Promise((resolve, reject) => {
+    Organization.GetById(cfg, id, (err, org) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(org);
+      }
+    });
+  });
+};
+
+/**
 * Delete an org by its id
 */
 Organization.DeleteById = function (cfg, id, cb) {

@@ -289,6 +289,23 @@ Account.GetById = function (cfg, id, cb) {
 };
 
 /**
+ * Get an account by its ID (ASYNC)
+ * @param {*} cfg 
+ * @param {*} id 
+ */
+Account.GetByIdAsync = function (cfg, id) {
+    return new Promise((resolve, reject) => {
+        Account.GetById(cfg, id, (err, act) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(act);
+            }
+        });
+    });
+};
+
+/**
  * Delete all
  */
 Account.DeleteAll = function (cfg, cb) {

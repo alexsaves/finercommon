@@ -6,12 +6,13 @@ const SurveyValueExtractor = require('../surveyvalueextractor');
 const ResponseCollection = require('../responsecollection');
 const Response = require('../response');
 const Respondent = require('../respondent');
-const Organization = require('../organization');
+const OrganizationAssociations = require('../organizationassociations');
 const BuyX = require('../buyx');
 const Approval = require('../approval');
 const Survey = require('../survey');
 const CRMOpportunities = require('../crmopportunities');
 const CRMContacts = require('../crmcontacts');
+const moment = require('moment');
 
 /**
  * Fix up labels to be more presentable
@@ -839,6 +840,9 @@ var GeneralReportAsync = function (cfg, orgid, startdate, enddate) {
  * @param {Boolean} lastmonth Is this for the last month (true)? Or current (false)?
  */
 var GetFullReportForOrgAsync = async function (cfg, orgid, lastmonth) {
+  // Get the Org NS
+  const Organization = require('../../models/organization');
+
   // First get the org
   var org = await Organization.GetByIdAsync(cfg, orgid);
 
@@ -863,7 +867,7 @@ var GetFullReportForOrgAsync = async function (cfg, orgid, lastmonth) {
     var endDay = currentMonth
       .clone()
       .endOf("month");
-    focusRep = await GeneralReport.GeneralReportAsync(cfg, org.id, startDay, endDay);
+    focusRep = await GeneralReportAsync(cfg, org.id, startDay.toDate(), endDay.toDate());
   } else {
     // Remove the last one
     reports.splice(-1, 1);
@@ -876,7 +880,9 @@ var GetFullReportForOrgAsync = async function (cfg, orgid, lastmonth) {
 
   for (let i = 0; i < reports.length; i++) {
     var previousBuyXScore = reports[i].buyX || 0;
-    var previousConnectorScore = reports[i].recommend ? reports[i].recommend.netConnector : 0;
+    var previousConnectorScore = reports[i].recommend
+      ? reports[i].recommend.netConnector
+      : 0;
     previousBuyX.push(previousBuyXScore);
     previousRecommend.push(previousConnectorScore);
   }
@@ -890,16 +896,62 @@ var GetFullReportForOrgAsync = async function (cfg, orgid, lastmonth) {
 
 /**
  * Send an email report for an organization
- * @param {*} cfg 
- * @param {*} orgid 
- * @param {*} lastmonth 
+ * @param {*} cfg
+ * @param {*} orgid
+ * @param {*} lastmonth
  */
 var SendReportForOrgAsync = async function (cfg, orgid, lastmonth) {
+  // Get the Org NS
+  const Organization = require('../../models/organization');
+
+  // Get Account
+  const Account = require('../account');
+
   // First GET the report
   var report = await GetFullReportForOrgAsync(cfg, orgid, lastmonth);
 
-  // Now decide WHO gets to receive it
+  // Then get the org
+  var org = await Organization.GetByIdAsync(cfg, orgid);
 
+  // Now decide WHO gets to receive it
+  var assocs = await OrganizationAssociations.GetAllForOrgAsync(cfg, orgid);
+
+  // Holds the accounds
+  var accounts = [];
+
+  // Get all the accounts for each association
+  for (let i = 0; i < assocs.length; i++) {
+    var act = await Account.GetByIdAsync(cfg, assocs[i].account_id);
+    if (act) {
+      accounts.push(act);
+    }
+  }
+
+  return accounts;
+};
+
+/**
+ * Send all the email reports
+ * @param {*} cfg
+ * @param {*} lastmonth
+ */
+var SendReportForAllOrgsAsync = async function (cfg, lastmonth) {
+  // Get the Org NS
+  const Organization = require('../../models/organization');
+
+  // Then get the org
+  var orgs = await Organization.GetAllAsync(cfg);
+  
+  // Hold the results
+  var results = [];
+
+  // Loop over them and send all the emails
+  for (let i = 0; i < orgs.length; i++) {
+    var result = await SendReportForOrgAsync(cfg, orgs[i].id, lastmonth);
+    results.push(result);
+  }
+
+  return results;
 };
 
 // Expose it
@@ -907,5 +959,6 @@ module.exports = {
   GeneralReport,
   GeneralReportAsync,
   GetFullReportForOrgAsync,
-  SendReportForOrgAsync
+  SendReportForOrgAsync,
+  SendReportForAllOrgsAsync
 }
