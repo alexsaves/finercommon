@@ -99,8 +99,8 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
         //callback();
         //return;
         // Give SES the details and let it construct the message for you.
-        //callback(null, templateResult);
-        transporter.sendMail({
+        callback(null, templateResult);
+        /*transporter.sendMail({
           to: to,
           from: from,
           subject: subject,
@@ -112,7 +112,7 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
             //callback(null, templateResult);
             callback(err, data);
           }
-        });
+        });*/
       }
     }
   });
