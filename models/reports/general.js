@@ -6,11 +6,13 @@ const SurveyValueExtractor = require('../surveyvalueextractor');
 const ResponseCollection = require('../responsecollection');
 const Response = require('../response');
 const Respondent = require('../respondent');
+const OrganizationAssociations = require('../organizationassociations');
 const BuyX = require('../buyx');
 const Approval = require('../approval');
 const Survey = require('../survey');
 const CRMOpportunities = require('../crmopportunities');
 const CRMContacts = require('../crmcontacts');
+const moment = require('moment');
 
 /**
  * Fix up labels to be more presentable
@@ -28,6 +30,8 @@ var ShortCleanupOnLabels = function (str) {
       return "Features";
     } else if (str.indexOf("_No Vendor Chosen") > -1) {
       return "None";
+    } else if (str.toLowerCase().indexOf("understood business needs") > -1) {
+      return "Understanding business needs";
     }
   }
   return str;
@@ -41,8 +45,28 @@ var ShortCleanupOnLabels = function (str) {
  * @param {*} enddate
  */
 var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
+  // Is this date "up to today"?
+  var isTrailingDate = false;
+
+  // Set the enddate to no later than right now
+  var nowDate = new Date();
+  if (enddate >= nowDate) {
+    enddate = nowDate;
+    isTrailingDate = true;
+  }
+
   // This will hold the final result
-  var resultObject = {};
+  var resultObject = {
+    startDate: startdate,
+    endDate: enddate,
+    isTrailingDate: isTrailingDate
+  };
+
+  // Compute the days
+  let stD = moment(startdate);
+  let enD = moment(enddate);
+  resultObject.daysInReport = enD.diff(stD, 'days') + 1;
+  resultObject.monthName = stD.format('MMMM');
 
   // Set up a survey value extractor
   let exter = new SurveyValueExtractor();
@@ -657,12 +681,18 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
   var recommend = {
     totalAnswers: totalAnswers,
     netConnector: Math.round(netConnect * 1000) / 10,
+    willingToReconnect: Math.round((hotLead / (warmLead + coldLead)) * 1000)/10,
     futureLeadSentiment: {
       hotLead: hotLead,
       warmLead: warmLead,
       coldLead: coldLead
     }
   };
+  if (recommend.willingToReconnect > 50) {
+    recommend.majorityWillingToReconnect = true;
+  } else {
+    recommend.majorityWillingToReconnect = false;
+  }
 
   // Assign it
   resultObject.recommend = recommend;
@@ -778,11 +808,12 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
       }
       if (cmt.anonymous) {
         delete cmt.amount;
+        cmt.title = "Anonymous";
       } else if (resp.approval && resp.approval.contact) {
         // Populate the contact info
         cmt.title = resp.approval.contact.Title;
         if (cmt.title == "NULL") {
-          delete cmt.title;
+          cmt.title = "Unknown Title";
         }
 
         // Figure out the winning vendor
@@ -791,6 +822,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
           cmt.winningVendor = winner;
         }
       }
+      cmt.whenStr = moment(cmt.when).format("MMMM Do, YYYY");
       commentList.push(cmt);
     }
   }
@@ -828,8 +860,150 @@ var GeneralReportAsync = function (cfg, orgid, startdate, enddate) {
   });
 };
 
+/**
+ * Get a complete report with history for an organization
+ * @param {*} cfg
+ * @param {*} orgid
+ * @param {Boolean} lastmonth Is this for the last month (true)? Or current (false)?
+ */
+var GetFullReportForOrgAsync = async function (cfg, orgid, lastmonth) {
+  // Get the Org NS
+  const Organization = require('../../models/organization');
+
+  // First get the org
+  var org = await Organization.GetByIdAsync(cfg, orgid);
+
+  // Then run and retrieve the reports
+  var reports = await org.ComputeAllPreviousMonthlyReportsAsync(cfg);
+
+  // Convert them all to POJO's
+  for (let i = 0; i < reports.length; i++) {
+    reports[i] = JSON.parse(reports[i].report.toString());
+  }
+
+  // Get the last report
+  var focusRep = reports[reports.length - 1];
+
+  // Should we be focused on last month or THIS month?
+  if (!lastmonth) {
+    // The focus should be on this month
+    var currentMonth = moment();
+    var startDay = currentMonth
+      .clone()
+      .startOf("month");
+    var endDay = currentMonth
+      .clone()
+      .endOf("month");
+    focusRep = await GeneralReportAsync(cfg, org.id, startDay.toDate(), endDay.toDate());
+  } else {
+    // Remove the last one
+    reports.splice(-1, 1);
+  }
+
+  // Build the histograms for past BuyX scores and past Likelihood to Recommend
+  // Scores
+  var previousBuyX = [];
+  var previousRecommend = [];
+
+  for (let i = 0; i < reports.length; i++) {
+    var previousBuyXScore = reports[i].buyX || 0;
+    var previousConnectorScore = reports[i].recommend
+      ? reports[i].recommend.netConnector
+      : 0;
+    previousBuyX.push(previousBuyXScore);
+    previousRecommend.push(previousConnectorScore);
+  }
+
+  // Assign
+  focusRep.previousBuyX = previousBuyX;
+  focusRep.previousRecommend = previousRecommend;
+
+  focusRep.isRollingCurrentMonth = !lastmonth;
+
+  return focusRep;
+};
+
+/**
+ * Send an email report for an organization
+ * @param {*} cfg
+ * @param {*} orgid
+ * @param {*} lastmonth
+ */
+var SendReportForOrgAsync = async function (cfg, orgid, lastmonth) {
+  // Get the Org NS
+  const Organization = require('../../models/organization');
+
+  // Grab the Email namespace
+  const Email = require('../../models/email');
+
+  // Get Account
+  const Account = require('../account');
+
+  // First GET the report
+  var report = await GetFullReportForOrgAsync(cfg, orgid, lastmonth);
+
+  // Then get the org
+  var org = await Organization.GetByIdAsync(cfg, orgid);
+
+  // Now decide WHO gets to receive it
+  var assocs = await OrganizationAssociations.GetAllForOrgAsync(cfg, orgid);
+
+  // Holds the accounds
+  var accounts = [];
+
+  // Get all the accounts for each association
+  for (let i = 0; i < assocs.length; i++) {
+    var act = await Account.GetByIdAsync(cfg, assocs[i].account_id);
+    if (act) {
+      accounts.push(act);
+    }
+  }
+
+  // Trim excess comments if they exist
+  if (report.comments && report.comments.length > 3) {
+    report.comments.length = 3;
+  }
+
+  // Send all the emails
+  for (let i = 0; i < accounts.length; i++) {
+
+  }
+  
+  let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
+  var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, "alexei.white@gmail.com", 'generalreport', 'BLA, help ' + org.name + ' do better in the future!', report);
+
+  return result;
+};
+
+/**
+ * Send all the email reports
+ * @param {*} cfg
+ * @param {*} lastmonth
+ */
+var SendReportForAllOrgsAsync = async function (cfg, lastmonth) {
+  // Get the Org NS
+  const Organization = require('../../models/organization');
+
+  // Then get the org
+  var orgs = await Organization.GetAllAsync(cfg);
+  
+  // Hold the results
+  var results = [];
+
+  // Loop over them and send all the emails
+  for (let i = 0; i < orgs.length; i++) {
+    var result = await SendReportForOrgAsync(cfg, orgs[i].id, lastmonth);
+    results.push(result);
+  }
+
+  return results;
+};
+
 // Expose it
 module.exports = {
   GeneralReport,
-  GeneralReportAsync
+  GeneralReportAsync,
+  GetFullReportForOrgAsync,
+  SendReportForOrgAsync,
+  SendReportForAllOrgsAsync
 }

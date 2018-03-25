@@ -42,56 +42,84 @@ Organization.DeleteAll = function (cfg, cb) {
 
 /**
  * Figure out all the monthly reports prior to this month for all organizations
- * @param {*} cfg 
- * @param {*} cb 
+ * @param {*} cfg
+ * @param {*} cb
  */
-Organization.ComputeAllPreviousMonthlyReports = async function(cfg, cb) {
+Organization.ComputeAllPreviousMonthlyReports = async function (cfg) {
   var orgs = await Organization.GetAllAsync(cfg);
   if (orgs && orgs.length > 0) {
-    var monthList = [];
-    var currentMonth = moment();
-
-    // Build an array of months prior to this one with start and end dates
-    for (let i = 0; i < 12; i++) {
-      currentMonth.subtract(1, "month");
-      var startDay = currentMonth.clone().startOf("month");
-      var endDay = currentMonth.clone().endOf("month");
-      monthList.push({
-        monthStr: currentMonth.format("MMM"),
-        month: currentMonth.month(),
-        year: currentMonth.year(),
-        startDay: startDay.toDate(),
-        endDay: endDay.toDate()
-      });
-    }
-
     // Loop over the orgs and grab all their reports
     for (let i = 0; i < orgs.length; i++) {
-      let orgReports = await OrgReportCache.GetReportsForOrgAndTypeAsync(cfg, orgs[i].id, OrgReportCache.REPORT_TYPE.MONTHLY_SUMMARY);
-
-      // Now iterate over each month and see if we have it
-      for (let j = 0; j < monthList.length; j++) {        
-        let existingRep = orgReports.find((rep) => {
-          return rep.created_for_year == monthList[j].year && rep.created_for_month == monthList[j].month;
-        });
-        if (!existingRep) {
-          // We dont have it! Make one
-          var rep = await GeneralReport.GeneralReportAsync(cfg, orgs[i].id, monthList[j].startDay, monthList[j].endDay);
-          
-          // Save it in the DB
-          var finalRep = await OrgReportCache.CreateAsync(cfg, {
-            report: new Buffer(JSON.stringify(rep)),
-            report_type: OrgReportCache.REPORT_TYPE.MONTHLY_SUMMARY,
-            organization_id: orgs[i].id,
-            created_for_year: monthList[j].year,
-            created_for_month: monthList[j].month
-          });
-          orgReports.push(finalRep);
-        }
-      }
+      orgs[i].reports = await orgs[i].ComputeAllPreviousMonthlyReportsAsync(cfg);
     }
   }
   return orgs;
+};
+
+/**
+ * Compute all the previous month reports for this organization
+ * @param {*} cfg
+ * @param {*} cb
+ */
+Organization.prototype.ComputeAllPreviousMonthlyReportsAsync = async function (cfg) {
+  var monthList = [],
+    currentMonth = moment();
+
+  // Build an array of months prior to this one with start and end dates
+  for (let i = 0; i < 14; i++) {
+    currentMonth.subtract(1, "month");
+    var startDay = currentMonth
+      .clone()
+      .startOf("month");
+    var endDay = currentMonth
+      .clone()
+      .endOf("month");
+    monthList.push({
+      monthStr: currentMonth.format("MMM"),
+      month: currentMonth.month(),
+      year: currentMonth.year(),
+      startDay: startDay.toDate(),
+      endDay: endDay.toDate()
+    });
+  }
+
+  var orgReports = await OrgReportCache.GetReportsForOrgAndTypeAsync(cfg, this.id, OrgReportCache.REPORT_TYPE.MONTHLY_SUMMARY);
+
+  // Now iterate over each month and see if we have it
+  for (let j = 0; j < monthList.length; j++) {
+    let existingRep = orgReports.find((rep) => {
+      return rep.created_for_year == monthList[j].year && rep.created_for_month == monthList[j].month;
+    });
+    if (!existingRep) {
+      // We dont have it! Make one
+      var rep = await GeneralReport.GeneralReportAsync(cfg, this.id, monthList[j].startDay, monthList[j].endDay);
+
+      // Save it in the DB
+      var finalRep = await OrgReportCache.CreateAsync(cfg, {
+        report: new Buffer(JSON.stringify(rep)),
+        report_type: OrgReportCache.REPORT_TYPE.MONTHLY_SUMMARY,
+        organization_id: this.id,
+        created_for_year: monthList[j].year,
+        created_for_month: monthList[j].month
+      });
+      orgReports.push(finalRep);
+    }
+  }
+
+  // Grab it from the DB again
+  orgReports = orgReports.sort((a, b) => {
+    var ascore = (a.created_for_year * 12) + (a.created_for_month);
+    var bscore = (b.created_for_year * 12) + (b.created_for_month);
+    if (ascore < bscore) {
+      return 1;
+    } else if (ascore > bscore) {
+      return -1;
+    } else {
+      return 0;
+    }
+  });
+
+  return orgReports;
 };
 
 /**
@@ -239,7 +267,7 @@ Organization.GetAll = function (cfg, cb) {
 
 /**
  * Get all organizations (ASYNC)
- * @param {*} cfg 
+ * @param {*} cfg
  */
 Organization.GetAllAsync = function (cfg) {
   return new Promise((resolve, reject) => {
@@ -272,6 +300,23 @@ Organization.GetById = function (cfg, id, cb) {
 };
 
 /**
+ * Get an org by its ID
+ * @param {*} cfg 
+ * @param {*} id 
+ */
+Organization.GetByIdAsync = function (cfg, id) {
+  return new Promise((resolve, reject) => {
+    Organization.GetById(cfg, id, (err, org) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(org);
+      }
+    });
+  });
+};
+
+/**
 * Delete an org by its id
 */
 Organization.DeleteById = function (cfg, id, cb) {
@@ -298,8 +343,7 @@ Organization.Create = function (cfg, details, cb) {
       "Flexibility & customization", "Quality & performance", "Security & trust concerns", "Integration with other vendors", "Reporting and analytics"
     ],
     competitor_list: [
-      "Preloaded Competitor A",
-      "Preloaded Competitor B"
+      "Preloaded Competitor A", "Preloaded Competitor B"
     ],
     default_survey_template: 'bokehlight'
   };

@@ -118,5 +118,27 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
   });
 };
 
+/**
+ * Send an email (ASYNC)
+ * @param {*} cfg 
+ * @param {*} org 
+ * @param {*} from 
+ * @param {*} to 
+ * @param {*} template 
+ * @param {*} subject 
+ * @param {*} details 
+ */
+Email.prototype.sendAsync = function (cfg, org, from, to, template, subject, details) {
+  return new Promise((resolve, reject) => {
+    this.send(cfg, org, from, to, template, subject, details, (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+};
+
 // Expose it
 module.exports = Email;
