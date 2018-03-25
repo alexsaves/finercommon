@@ -6,6 +6,7 @@ const SurveyValueExtractor = require('../surveyvalueextractor');
 const ResponseCollection = require('../responsecollection');
 const Response = require('../response');
 const Respondent = require('../respondent');
+const Organization = require('../organization');
 const BuyX = require('../buyx');
 const Approval = require('../approval');
 const Survey = require('../survey');
@@ -42,7 +43,10 @@ var ShortCleanupOnLabels = function (str) {
  */
 var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
   // This will hold the final result
-  var resultObject = {};
+  var resultObject = {
+    startDate: startdate,
+    endDate: enddate
+  };
 
   // Set up a survey value extractor
   let exter = new SurveyValueExtractor();
@@ -828,8 +832,42 @@ var GeneralReportAsync = function (cfg, orgid, startdate, enddate) {
   });
 };
 
+/**
+ * Send a Report for an Org
+ * @param {*} cfg 
+ * @param {*} orgid 
+ * @param {Boolean} lastmonth Is this for the last month (true)? Or current (false)?
+ */
+var SendReportForOrg = async function(cfg, orgid, lastmonth) {
+  // First get the org
+  var org = await Organization.GetByIdAsync(cfg, orgid);
+
+  // Then run and retrieve the reports
+  var reports = org.ComputeAllPreviousMonthlyReportsAsync(cfg);
+
+  // Get the last report
+  var focusRep = JSON.parse(reports[reports.length - 1].report.toString());
+
+  if (!lastmonth) {
+    // The focus should be on this month
+    var currentMonth = moment();
+    var startDay = currentMonth
+      .clone()
+      .startOf("month");
+    var endDay = currentMonth
+      .clone()
+      .endOf("month");
+      focusRep = await GeneralReport.GeneralReportAsync(cfg, org.id, startDay, endDay);
+  } else {
+    reports.splice(-1,1);
+  }
+
+
+};
+
 // Expose it
 module.exports = {
   GeneralReport,
-  GeneralReportAsync
+  GeneralReportAsync,
+  SendReportForOrg
 }
