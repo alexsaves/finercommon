@@ -808,11 +808,12 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
       }
       if (cmt.anonymous) {
         delete cmt.amount;
+        cmt.title = "Anonymous";
       } else if (resp.approval && resp.approval.contact) {
         // Populate the contact info
         cmt.title = resp.approval.contact.Title;
         if (cmt.title == "NULL") {
-          delete cmt.title;
+          cmt.title = "Unknown Title";
         }
 
         // Figure out the winning vendor
@@ -821,6 +822,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
           cmt.winningVendor = winner;
         }
       }
+      cmt.whenStr = moment(cmt.when).format("MMMM Do, YYYY");
       commentList.push(cmt);
     }
   }
