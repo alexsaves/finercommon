@@ -6,10 +6,74 @@ mixin spacer
   div(style="font-size:1px;line-height:10px;") &nbsp;
 +hline
 +spacer
-div(style="font-weight:bold;font-size:16px;color:#424242;", color="#424242") Win/Loss Analysis
+mixin heading(contents)
+  div(style="font-weight:bold;font-size:16px;color:#424242;", color="#424242")= contents
+mixin paragraph(contents)
+  div(style="color:#727272;", color="#727272")= contents
+mixin reportlink(linkref, contents)
+  a(href=linkref)= contents
++heading('Win/Loss Analysis')
 +spacer
-div(style="color:#727272;", color="#727272") Over the last 30 days, the #1 reason why you lose deals is timeliness of delivery.
+
+if isRollingCurrentMonth
+  +paragraph('Over the last ' + daysInReport + ' days, the #1 reason why you lose deals is ' + reasonsForLoss[0].shortLabel.toLowerCase() + '.')
+else
+  +paragraph('In ' + monthName + ', the #1 reason why you lose deals is ' + reasonsForLoss[0].shortLabel.toLowerCase() + '.')
 +spacer
-a(href="") View Details
++reportlink('/', 'View Details')
 +spacer
 +hline
++spacer
++heading('Competition')
++spacer
++paragraph('Your toughest competition is ' + losingDealsTo[0].shortLabel + ' because of ' + losingDealsTo[0].reasons[0].shortLabel.toLowerCase() + '.')
++spacer
++reportlink('/', 'View Details')
++spacer
++hline
++spacer
++heading('BuyX Score®')
++spacer
++paragraph('Measures overall buying experience on a scale rating of 0 to 100.')
++spacer
++reportlink('/', 'View Details')
++spacer
++hline
++spacer
++heading('The biggest issue in your sales process is ' + salesProcess[0].shortLabel.toLowerCase())
++spacer
++paragraph('Order of priority is based on ranking importance and average rating.')
++spacer
++reportlink('/', 'View Details')
++spacer
++hline
++spacer
++heading('Overall Perception')
++spacer
++paragraph('What you\'re doing well:')
++spacer
++paragraph('What you need to do better:')
++spacer
++reportlink('/', 'View Details')
++spacer
++hline
++spacer
+if recommend.majorityWillingToReconnect
+  +heading('Good news: ' + recommend.willingToReconnect + '% are willing to reconnect')
+else
+  +heading('Only ' + recommend.willingToReconnect + '% are willing to reconnect')
++spacer
++reportlink('/', 'View Details')
++spacer
++hline
++spacer
++heading('Decision Makers')
++spacer
++paragraph('The most influential decision maker is ' + decisionMakers[0].name + '.')
++spacer
++reportlink('/', 'View Details')
++spacer
++hline
++spacer
+img(src=imagebase + "whatcustomersaresaying.png", alt="What customers are saying", style="width: 270px; height: 59px;", width="270", height="59", border="0", data-imagetype="External")
++spacer

@@ -30,6 +30,8 @@ var ShortCleanupOnLabels = function (str) {
       return "Features";
     } else if (str.indexOf("_No Vendor Chosen") > -1) {
       return "None";
+    } else if (str.toLowerCase().indexOf("understood business needs") > -1) {
+      return "Understanding business needs";
     }
   }
   return str;
@@ -43,11 +45,28 @@ var ShortCleanupOnLabels = function (str) {
  * @param {*} enddate
  */
 var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
+  // Is this date "up to today"?
+  var isTrailingDate = false;
+
+  // Set the enddate to no later than right now
+  var nowDate = new Date();
+  if (enddate >= nowDate) {
+    enddate = nowDate;
+    isTrailingDate = true;
+  }
+
   // This will hold the final result
   var resultObject = {
     startDate: startdate,
-    endDate: enddate
+    endDate: enddate,
+    isTrailingDate: isTrailingDate
   };
+
+  // Compute the days
+  let stD = moment(startdate);
+  let enD = moment(enddate);
+  resultObject.daysInReport = enD.diff(stD, 'days') + 1;
+  resultObject.monthName = stD.format('MMMM');
 
   // Set up a survey value extractor
   let exter = new SurveyValueExtractor();
@@ -662,12 +681,18 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
   var recommend = {
     totalAnswers: totalAnswers,
     netConnector: Math.round(netConnect * 1000) / 10,
+    willingToReconnect: Math.round((hotLead / (warmLead + coldLead)) * 1000)/10,
     futureLeadSentiment: {
       hotLead: hotLead,
       warmLead: warmLead,
       coldLead: coldLead
     }
   };
+  if (recommend.willingToReconnect > 50) {
+    recommend.majorityWillingToReconnect = true;
+  } else {
+    recommend.majorityWillingToReconnect = false;
+  }
 
   // Assign it
   resultObject.recommend = recommend;
@@ -890,6 +915,8 @@ var GetFullReportForOrgAsync = async function (cfg, orgid, lastmonth) {
   // Assign
   focusRep.previousBuyX = previousBuyX;
   focusRep.previousRecommend = previousRecommend;
+
+  focusRep.isRollingCurrentMonth = !lastmonth;
 
   return focusRep;
 };
