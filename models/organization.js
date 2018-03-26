@@ -1,12 +1,12 @@
-const dbcmd = require('../utils/dbcommand'),
-  md5 = require('md5'),
-  extend = require('extend'),
-  tablename = 'organizations',
-  CRMIntegrations = require('../models/crmintegrations'),
-  moment = require('moment'),
-  OrganizationAssociations = require('../models/organizationassociations'),
-  OrgReportCache = require('../models/orgreportcache'),
-  GeneralReport = require('../models/reports/general');
+const dbcmd = require('../utils/dbcommand');
+const md5 = require('md5');
+const extend = require('extend');
+const tablename = 'organizations';
+const CRMIntegrations = require('../models/crmintegrations');
+const moment = require('moment');
+const OrganizationAssociations = require('../models/organizationassociations');
+const OrgReportCache = require('../models/orgreportcache');
+const GeneralReport = require('../models/reports/general');
 
 /**
 * The organizations class
@@ -301,8 +301,8 @@ Organization.GetById = function (cfg, id, cb) {
 
 /**
  * Get an org by its ID
- * @param {*} cfg 
- * @param {*} id 
+ * @param {*} cfg
+ * @param {*} id
  */
 Organization.GetByIdAsync = function (cfg, id) {
   return new Promise((resolve, reject) => {

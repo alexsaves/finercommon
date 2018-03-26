@@ -1,8 +1,8 @@
-const dbcmd = require('../utils/dbcommand'),
-  md5 = require('md5'),
-  extend = require('extend'),
-  uuidV4 = require('uuid/v4'),
-  tablename = 'crm_integration_rules';
+const dbcmd = require('../utils/dbcommand');
+const md5 = require('md5');
+const extend = require('extend');
+const uuidV4 = require('uuid/v4');
+const tablename = 'crm_integration_rules';
 
 /**
 * The integration rules class
@@ -52,7 +52,9 @@ CRMIntegrationRules.prototype.commit = function (cfg, cb) {
 CRMIntegrationRules.prototype.listUsersWhoCanApprove = function (cfg, cb) {
   dbcmd
     .cmd(cfg.pool, 'SELECT approvers FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [this.id], function (results) {
-      results = results[0].approvers.toString();
+      results = results[0]
+        .approvers
+        .toString();
       if (results.length > 0) {
         if (results === `"*"`) {
           cb(null, results);
@@ -148,10 +150,10 @@ CRMIntegrationRules.GetForIntegration = function (cfg, integration_id, cb) {
 
 /**
  * Check to see if a user can approve with a rule set
- * @param {*} cfg 
- * @param {*} userid 
+ * @param {*} cfg
+ * @param {*} userid
  */
-CRMIntegrationRules.CanUserApproveWithTheseRules = async function(cfg, rules, userid) {
+CRMIntegrationRules.CanUserApproveWithTheseRules = async function (cfg, rules, userid) {
   var canthey = true;
   for (var i = 0; i < rules.length; i++) {
     var cantheysub = await rules[i].canUserApproveAsync(cfg, userid);
@@ -159,7 +161,7 @@ CRMIntegrationRules.CanUserApproveWithTheseRules = async function(cfg, rules, us
       return false;
     }
   }
-  return true;  
+  return true;
 };
 
 /**

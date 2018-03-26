@@ -1,7 +1,7 @@
-const dbcmd = require('../utils/dbcommand'),
-  md5 = require('md5'),
-  extend = require('extend'),
-  tablename = 'org_report_cache';
+const dbcmd = require('../utils/dbcommand');
+const md5 = require('md5');
+const extend = require('extend');
+const tablename = 'org_report_cache';
 
 /**
 * The OrgReportCache class

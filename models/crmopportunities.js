@@ -1,12 +1,12 @@
-const dbcmd = require('../utils/dbcommand'),
-  md5 = require('md5'),
-  extend = require('extend'),
-  uuidV4 = require('uuid/v4'),
-  utils = require('../utils/utils'),
-  CRMIntegrationRules = require('../models/crmintegrationrules'),
-  CRMIntegrations = require('../models/crmintegrations'),
-  CRMAccounts = require('../models/crmaccounts'),
-  tablename = 'crm_opportunities';
+const dbcmd = require('../utils/dbcommand');
+const md5 = require('md5');
+const extend = require('extend');
+const uuidV4 = require('uuid/v4');
+const utils = require('../utils/utils');
+const CRMIntegrationRules = require('../models/crmintegrationrules');
+const CRMIntegrations = require('../models/crmintegrations');
+const CRMAccounts = require('../models/crmaccounts');
+const tablename = 'crm_opportunities';
 
 /**
 * The crm opportunity class
@@ -62,11 +62,14 @@ CRMOpportunities.prototype.canUserApprove = function (cfg, userid, cb) {
       if (!rules || rules.length == 0) {
         cb(new Error("Missing Rules for Opportunity"));
       } else {
-        CRMIntegrationRules.CanUserApproveWithTheseRules(cfg, rules, userid).then((canthey) => {
-          cb(canthey);
-        }).catch((err) => {
-          cb(err);
-        });
+        CRMIntegrationRules
+          .CanUserApproveWithTheseRules(cfg, rules, userid)
+          .then((canthey) => {
+            cb(canthey);
+          })
+          .catch((err) => {
+            cb(err);
+          });
       }
     }
   })
@@ -331,9 +334,9 @@ CRMOpportunities.setApprovalStatusOnIdsAsync = function (cfg, ids) {
 
 /**
  * Get a collection of opportunities
- * @param {*} cfg 
- * @param {*} approvals 
- * @param {*} cb 
+ * @param {*} cfg
+ * @param {*} approvals
+ * @param {*} cb
  */
 CRMOpportunities.GetList = function (cfg, oppIds, cb) {
   cb = cb || function () {};
@@ -354,10 +357,10 @@ CRMOpportunities.GetList = function (cfg, oppIds, cb) {
 
 /**
  * Get a bunch of opportunities
- * @param {*} cfg 
- * @param {*} approvalIds 
+ * @param {*} cfg
+ * @param {*} approvalIds
  */
-CRMOpportunities.GetListAsync = function(cfg, oppIds) {
+CRMOpportunities.GetListAsync = function (cfg, oppIds) {
   return new Promise((resolve, reject) => {
     CRMOpportunities.GetList(cfg, oppIds, (err, opps) => {
       if (err) {

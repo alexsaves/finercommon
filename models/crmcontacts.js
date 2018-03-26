@@ -1,9 +1,9 @@
-const dbcmd = require('../utils/dbcommand'),
-  md5 = require('md5'),
-  extend = require('extend'),
-  uuidV4 = require('uuid/v4'),
-  utils = require('../utils/utils'),
-  tablename = 'crm_contacts';
+const dbcmd = require('../utils/dbcommand');
+const md5 = require('md5');
+const extend = require('extend');
+const uuidV4 = require('uuid/v4');
+const utils = require('../utils/utils');
+const tablename = 'crm_contacts';
 
 /**
 * The crm accounts class
@@ -32,8 +32,8 @@ CRMContacts.GetById = function (cfg, guid, cb) {
 
 /**
  * Get a CRM contact (ASYNC)
- * @param {*} cfg 
- * @param {*} guid 
+ * @param {*} cfg
+ * @param {*} guid
  */
 CRMContacts.GetByIdAsync = function (cfg, guid) {
   return new Promise((resolve, reject) => {

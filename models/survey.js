@@ -7,7 +7,6 @@ const shortid = require('shortid');
 const check = require('check-types');
 const utf8 = require('utf8');
 const fs = require('fs');
-const Org = require('../models/organization');
 const SurveyValueExtractor = require('../models/surveyvalueextractor');
 const Piper = require('../models/piper');
 
@@ -316,12 +315,13 @@ Survey.DeleteAll = function (cfg, cb) {
  * Make sure a survey exists for a particular opportunity and type
  */
 Survey.EnforceSurveyExistsForOpportunityAndType = function (cfg, opportunity_id, survey_type, organization_id, cb) {
+    const Orgn = require('../models/organization');
     Survey.GetForOpportunityAndType(cfg, opportunity_id, survey_type, (err, svs) => {
         if (err) {
             cb(err);
         } else {
             if (svs.length == 0) {
-                Org.GetById(cfg, organization_id, (err, org) => {
+                Orgn.GetById(cfg, organization_id, (err, org) => {
                     if (err) {
                         cb(err);
                     } else {

@@ -1,4 +1,5 @@
 const tablename = 'accounts';
+
 /**
  * The account class
  */

@@ -1,12 +1,12 @@
-const dbcmd = require('../utils/dbcommand'),
-    md5 = require('md5'),
-    extend = require('extend'),
-    tablename = 'accounts',
-    btoa = require('btoa'),
-    Organization = require('../models/organization'),
-    Survey = require('../models/survey'),
-    Email = require('../models/email'),
-    CRMIntegrations = require('../models/crmintegrations');
+const dbcmd = require('../utils/dbcommand');
+const md5 = require('md5');
+const extend = require('extend');
+const tablename = 'accounts';
+const btoa = require('btoa');
+const Organization = require('../models/organization');
+const Survey = require('../models/survey');
+const Email = require('../models/email');
+const CRMIntegrations = require('../models/crmintegrations');
 
 /**
  * The account class
@@ -39,9 +39,9 @@ Account.prototype.setNewPassword = function (cfg, pw, cb) {
 
 /**
  * Validate a secure token
- * @param {String} securetoken 
+ * @param {String} securetoken
  */
-Account.prototype.validationSecureIsValid = function(securetoken) {
+Account.prototype.validationSecureIsValid = function (securetoken) {
     if (securetoken && securetoken == md5(this.email + this.id + "_f437")) {
         return true;
     }
@@ -50,25 +50,28 @@ Account.prototype.validationSecureIsValid = function(securetoken) {
 
 /**
  * Send out a validation email
- * @param {*} cfg 
- * @param {*} cb 
+ * @param {*} cfg
+ * @param {*} cb
  */
-Account.prototype.sendValidationEmail = function(cfg, cb) {
-    var firstName = this.name.trim().split(' ')[0];    
+Account.prototype.sendValidationEmail = function (cfg, cb) {
+    var firstName = this
+        .name
+        .trim()
+        .split(' ')[0];
     // Invite updated! Send an updated email
     let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
     emailCtrl.send(cfg, 0, cfg.email.defaultFrom, this.email, 'validateemail', 'Validate your FinerInk account.', {
-      account: this,
-      firstName: firstName,
-      validateurl: cfg.portalUrl + "/checkvalidate/?id=" + encodeURIComponent(this.id) + "&secure=" + encodeURIComponent(md5(this.email + this.id + "_f437"))
+        account: this,
+        firstName: firstName,
+        validateurl: cfg.portalUrl + "/checkvalidate/?id=" + encodeURIComponent(this.id) + "&secure=" + encodeURIComponent(md5(this.email + this.id + "_f437"))
     }, function (err) {
-      if (err) {
-        console.log("Error sending validation email", err);
-        cb("Error sending validation email");
-      } else {
-        // Success
-        cb(null);
-      }
+        if (err) {
+            console.log("Error sending validation email", err);
+            cb("Error sending validation email");
+        } else {
+            // Success
+            cb(null);
+        }
     });
 }
 
@@ -255,8 +258,8 @@ Account.GetByEmail = function (cfg, e, cb) {
 
 /**
  * Get an account by its email
- * @param {*} cfg 
- * @param {*} e 
+ * @param {*} cfg
+ * @param {*} e
  */
 Account.GetByEmailAsync = function (cfg, e) {
     return new Promise((resolve, reject) => {
@@ -290,8 +293,8 @@ Account.GetById = function (cfg, id, cb) {
 
 /**
  * Get an account by its ID (ASYNC)
- * @param {*} cfg 
- * @param {*} id 
+ * @param {*} cfg
+ * @param {*} id
  */
 Account.GetByIdAsync = function (cfg, id) {
     return new Promise((resolve, reject) => {

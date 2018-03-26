@@ -1,5 +1,5 @@
-const utils = require('../utils/utils'),
-    bityProm = require('bity-promise');
+const utils = require('../utils/utils');
+const bityProm = require('bity-promise');
 
 /**
  * Holds a bunch of responses
