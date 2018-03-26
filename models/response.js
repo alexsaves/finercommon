@@ -1,14 +1,14 @@
-const dbcmd = require('../utils/dbcommand'),
-    md5 = require('md5'),
-    extend = require('extend'),
-    utils = require('../utils/utils'),
-    tablename = 'responses',
-    RESPONSE_STATES = {
-        NEW: 0,
-        COMMITTED: 1,
-        UPDATED: 2
-    },
-    ResponseCollection = require('../models/responsecollection');
+const dbcmd = require('../utils/dbcommand');
+const md5 = require('md5');
+const extend = require('extend');
+const utils = require('../utils/utils');
+const tablename = 'responses';
+const RESPONSE_STATES = {
+    NEW: 0,
+    COMMITTED: 1,
+    UPDATED: 2
+};
+const ResponseCollection = require('../models/responsecollection');
 
 /**
  * The Response class

@@ -1,10 +1,10 @@
-const dbcmd = require('../utils/dbcommand'),
-    utils = require('../utils/utils'),
-    md5 = require('md5'),
-    extend = require('extend'),
-    Response = require('../models/response'),
-    promise = require("bity-promise"),
-    tablename = 'respondents';
+const dbcmd = require('../utils/dbcommand');
+const utils = require('../utils/utils');
+const md5 = require('md5');
+const extend = require('extend');
+const Response = require('../models/response');
+const promise = require("bity-promise");
+const tablename = 'respondents';
 
 /**
  * The Respondent class

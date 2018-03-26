@@ -1,8 +1,8 @@
-const dbcmd = require('../utils/dbcommand'),
-  md5 = require('md5'),
-  extend = require('extend'),
-  uuidV4 = require('uuid/v4'),
-  tablename = 'file_uploads';
+const dbcmd = require('../utils/dbcommand');
+const md5 = require('md5');
+const extend = require('extend');
+const uuidV4 = require('uuid/v4');
+const tablename = 'file_uploads';
 
 /**
 * The organizations class
@@ -33,12 +33,12 @@ FileUploads.GetById = function (cfg, id, cb) {
  * Delete all
  */
 FileUploads.DeleteAll = function (cfg, cb) {
-    cb = cb || function () {};
-    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid != NULL', function () {
-        cb();
-    }, function (err) {
-        cb(err);
-    });
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid != NULL', function () {
+    cb();
+  }, function (err) {
+    cb(err);
+  });
 };
 
 /**
@@ -66,18 +66,19 @@ FileUploads.Create = function (cfg, details, cb) {
     params.push(_Defaults[valKeys[elm]]);
     count++;
   }
-  dbcmd.cmd(cfg.pool, query, params, function (result) {
-    FileUploads
-      .GetById(cfg, _Defaults.uid, function (err, org) {
-        if (err) {
-          cb(err);
-        } else {
-          cb(null, org);
-        }
-      });
-  }, function (err) {
-    cb(err);
-  });
+  dbcmd
+    .cmd(cfg.pool, query, params, function (result) {
+      FileUploads
+        .GetById(cfg, _Defaults.uid, function (err, org) {
+          if (err) {
+            cb(err);
+          } else {
+            cb(null, org);
+          }
+        });
+    }, function (err) {
+      cb(err);
+    });
 };
 
 /**

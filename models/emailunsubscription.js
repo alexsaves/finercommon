@@ -1,9 +1,9 @@
-const dbcmd = require('../utils/dbcommand'),
-  md5 = require('md5'),
-  extend = require('extend'),
-  uuidV4 = require('uuid/v4'),
-  tablename = 'email_unsubscriptions',
-  btoa = require('btoa');
+const dbcmd = require('../utils/dbcommand');
+const md5 = require('md5');
+const extend = require('extend');
+const uuidV4 = require('uuid/v4');
+const tablename = 'email_unsubscriptions';
+const btoa = require('btoa');
 
 /**
 * The organizations class
@@ -42,14 +42,17 @@ EmailUnsubscriptions.GetById = function (cfg, id, cb) {
   });
 };
 
-
 /**
 * Get an unsubscription by its email and org
 */
 EmailUnsubscriptions.GetByEmailAndOrg = function (cfg, email, org, cb) {
   cb = cb || function () {};
-  email = email.toLowerCase().trim();
-  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email_hash = ? AND organization_id = ?', [md5(email), org], function (result) {
+  email = email
+    .toLowerCase()
+    .trim();
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email_hash = ? AND organization_id = ?', [
+    md5(email), org
+  ], function (result) {
     cb(null, result.length > 0
       ? new EmailUnsubscriptions(result[0])
       : null);
@@ -59,16 +62,18 @@ EmailUnsubscriptions.GetByEmailAndOrg = function (cfg, email, org, cb) {
 };
 
 /**
-* Get all unsubscription by its email 
+* Get all unsubscription by its email
 */
 EmailUnsubscriptions.GetAllForEmail = function (cfg, email, cb) {
   cb = cb || function () {};
-  email = email.toLowerCase().trim();
+  email = email
+    .toLowerCase()
+    .trim();
   //console.log(email, md5(email));
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email_hash = ? ORDER BY organization_id ASC', [md5(email)], function (result) {
     var fn = [];
     for (var i = 0; i < result.length; i++) {
-      fn.push(new EmailUnsubscriptions(result[i]));      
+      fn.push(new EmailUnsubscriptions(result[i]));
     }
     cb(null, fn);
   }, function (err) {
@@ -85,9 +90,13 @@ EmailUnsubscriptions.EmailCanReceiveMessages = function (cfg, email, org, cb) {
     cb(null, false);
     return;
   }
-  email = email.toLowerCase().trim();
+  email = email
+    .toLowerCase()
+    .trim();
   //console.log(email, md5(email));
-  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email_hash = ? AND (organization_id = 0 OR organization_id = ?)', [md5(email), org], function (result) {    
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email_hash = ? AND (organization_id = 0 OR organization_id = ?)', [
+    md5(email), org
+  ], function (result) {
     cb(null, result.length === 0);
   }, function (err) {
     cb(err);
