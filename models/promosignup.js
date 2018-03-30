@@ -1,10 +1,10 @@
-const dbcmd = require('../utils/dbcommand'),
-  md5 = require('md5'),
-  extend = require('extend'),
-  ses = require('node-ses'),
-  fs = require('fs'),
-  _ = require('underscore'),
-  tablename = 'promo_signup';
+const dbcmd = require('../utils/dbcommand');
+const md5 = require('md5');
+const extend = require('extend');
+const ses = require('node-ses');
+const fs = require('fs');
+const _ = require('underscore');
+const tablename = 'promo_signup';
 
 /**
 * Module for signup on the promo page

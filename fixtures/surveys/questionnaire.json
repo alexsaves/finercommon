@@ -253,7 +253,8 @@
                     "subtitle": "Frequency of contact",
                     "low": "Not enough",
                     "high": "Too often",
-                    "required": true
+                    "required": true,
+                    "initialValue": 50
                 },
                 {
                     "type": "rating",
@@ -262,7 +263,8 @@
                     "subtitle": "Responsiveness",
                     "low": "Not responsive",
                     "high": "Very responsive",
-                    "required": true
+                    "required": true,
+                    "initialValue": 50
                 }
             ],
             "name": "responsivenessRating"

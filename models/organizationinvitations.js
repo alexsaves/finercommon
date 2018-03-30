@@ -1,13 +1,13 @@
-const dbcmd = require('../utils/dbcommand'),
-  md5 = require('md5'),
-  extend = require('extend'),
-  uuidV4 = require('uuid/v4'),
-  bityProm = require('bity-promise'),
-  Account = require('../models/account'),
-  OrgAssoc = require('../models/organizationassociations'),
-  email = require('../models/email'),
-  Org = require('../models/organization'),
-  tablename = 'org_invitations';
+const dbcmd = require('../utils/dbcommand');
+const md5 = require('md5');
+const extend = require('extend');
+const uuidV4 = require('uuid/v4');
+const bityProm = require('bity-promise');
+const Account = require('../models/account');
+const OrgAssoc = require('../models/organizationassociations');
+const email = require('../models/email');
+const Org = require('../models/organization');
+const tablename = 'org_invitations';
 
 /**
 * The organizations class

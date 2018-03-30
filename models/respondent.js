@@ -1,10 +1,10 @@
-const dbcmd = require('../utils/dbcommand'),
-    utils = require('../utils/utils'),
-    md5 = require('md5'),
-    extend = require('extend'),
-    Response = require('../models/response'),
-    promise = require("bity-promise"),
-    tablename = 'respondents';
+const dbcmd = require('../utils/dbcommand');
+const utils = require('../utils/utils');
+const md5 = require('md5');
+const extend = require('extend');
+const Response = require('../models/response');
+const promise = require("bity-promise");
+const tablename = 'respondents';
 
 /**
  * The Respondent class
@@ -74,7 +74,42 @@ Respondent.prototype.applyAnswersForSurvey = function (cfg, survey, data, cb) {
  */
 Respondent.GetBySurvey = function (cfg, guid, cb) {
     cb = cb || function () {};
-    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE guid = ?', [guid], function (result) {
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE survey_guid = ?', [guid], function (result) {
+        var res = [];
+        for (var i = 0; i < result.length; i++) {
+            res.push(new Respondent(result[i]));
+        }
+        cb(null, res);
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
+ * Get a list of respondents for a survey guid
+ * @param {*} cfg
+ * @param {*} guid
+ */
+Respondent.GetBySurveyAsync = function (cfg, guid) {
+    return new Promise((resolve, reject) => {
+        Respondent.GetBySurvey(cfg, guid, (err, resps) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(resps);
+            }
+        });
+    });
+};
+
+/**
+ * Get a list of respondents for a survey guid
+ */
+Respondent.GetBySurveyAndTimeRange = function (cfg, guid, startDate, endDate, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE survey_guid = ? AND created_at > ? AND created_at < ?', [
+        guid, startDate, endDate
+    ], function (result) {
         var res = [];
         for (var i = 0; i < result.length; i++) {
             res.push(new Respondent(result[i]));
@@ -88,18 +123,15 @@ Respondent.GetBySurvey = function (cfg, guid, cb) {
 /**
  * Get a list of respondents for a survey guid
  */
-Respondent.GetBySurveyAndTimeRange = function (cfg, guid, startDate, endDate, cb) {
-    cb = cb || function () {};
-    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE guid = ? AND created_at > ? AND created_at < ?', [
-        guid, startDate, endDate
-    ], function (result) {
-        var res = [];
-        for (var i = 0; i < result.length; i++) {
-            res.push(new Respondent(result[i]));
-        }
-        cb(null, res);
-    }, function (err) {
-        cb(err);
+Respondent.GetBySurveyAndTimeRangeAsync = function (cfg, guid, startDate, endDate) {
+    return new Promise((resolve, reject) => {
+        Respondent.GetBySurveyAndTimeRange(cfg, guid, startDate, endDate, (err, resp) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(resp);
+            }
+        });
     });
 };
 
@@ -198,7 +230,7 @@ Respondent.prototype.commit = function (cfg, cb) {
                 query += ', ';
             }
             query += valKeys[elm] + ' = ?';
-            if (typeof this[valKeys[elm]] == "object" && !(this[valKeys[elm]] instanceof Date)) {
+            if (typeof this[valKeys[elm]] == "object" && !(this[valKeys[elm]]instanceof Date)) {
                 params.push(new Buffer(JSON.stringify(this[valKeys[elm]])));
             } else {
                 params.push(this[valKeys[elm]]);

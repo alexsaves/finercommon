@@ -1,12 +1,12 @@
-const dbcmd = require('../utils/dbcommand'),
-  md5 = require('md5'),
-  extend = require('extend'),
-  tablename = 'approvals',
-  shortid = require('shortid'),
-  Organization = require('../models/organization'),
-  Email = require('../models/email'),
-  CRMIntegrations = require('../models/crmintegrations'),
-  CRMContacts = require('../models/crmcontacts');
+const dbcmd = require('../utils/dbcommand');
+const md5 = require('md5');
+const extend = require('extend');
+const tablename = 'approvals';
+const shortid = require('shortid');
+const Organization = require('../models/organization');
+const Email = require('../models/email');
+const CRMIntegrations = require('../models/crmintegrations');
+const CRMContacts = require('../models/crmcontacts');
 
 /**
 * The account class
@@ -148,7 +148,7 @@ Approval.GetForContacts = function (cfg, contacts, cb) {
   }, function (err) {
     cb(err);
   });
-}
+};
 
 /**
 * Get an approval by its oppportunity ID and contact
@@ -165,6 +165,46 @@ Approval.GetByOppAndContact = function (cfg, opportunity_id, crm_contact_id, cb)
     }
   }, function (err) {
     cb(err);
+  });
+};
+
+/**
+ * Get a collection of approvals
+ * @param {*} cfg
+ * @param {*} approvals
+ * @param {*} cb
+ */
+Approval.GetList = function (cfg, approvalIds, cb) {
+  cb = cb || function () {};
+  dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE guid IN (${approvalIds.map(c => '?').join(', ')})`, approvalIds, function (result) {
+    if (result && result.length > 0) {
+      var res = [];
+      for (var i = 0; i < result.length; i++) {
+        res.push(new Approval(result[i]));
+      }
+      cb(null, res);
+    } else {
+      cb();
+    }
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
+ * Get a bunch of approvals
+ * @param {*} cfg
+ * @param {*} approvalIds
+ */
+Approval.GetListAsync = function (cfg, approvalIds) {
+  return new Promise((resolve, reject) => {
+    Approval.GetList(cfg, approvalIds, (err, aprs) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(aprs);
+      }
+    });
   });
 };
 
@@ -193,7 +233,7 @@ Approval.GetByOppAndContacts = function (cfg, opportunity_id, crm_contact_ids, c
   }
   var cstr = crm_contact_ids.reduce(x => "'" + x + "',");
   cstr = cstr.substr(0, cstr.length - 1);
-  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE opportunity_id = ? AND crm_contact_id IN (' + cstr + ')', [opportunity_id], function (result) {
+  dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE opportunity_id = '${opportunity_id}' AND crm_contact_id IN (${crm_contact_ids.map(c => '?').join(', ')})`, crm_contact_ids, function (result) {
     if (result && result.length > 0) {
       var resset = [];
       for (let g = 0; g < result.length; g++) {
@@ -221,7 +261,7 @@ Approval.GetByOppAndContactsAsync = function (cfg, opportunity_id, crm_contact_i
       }
     });
   });
-}
+};
 
 /**
 * Delete all

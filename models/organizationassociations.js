@@ -146,6 +146,24 @@ OrganizationAssociations.GetAllForOrg = function (cfg, id, cb) {
 };
 
 /**
+ * Get all the associations for an org
+ * @param {*} cfg 
+ * @param {*} id 
+ * @param {*} cb 
+ */
+OrganizationAssociations.GetAllForOrgAsync = function (cfg, id) {
+  return new Promise((resolve, reject) => {
+    OrganizationAssociations.GetAllForOrg(cfg, id, (err, assocs) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(assocs);
+      }
+    });
+  });
+};
+
+/**
 * Create an association
 */
 OrganizationAssociations.Create = function (cfg, details, cb) {

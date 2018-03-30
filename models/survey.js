@@ -1,13 +1,14 @@
-const dbcmd = require('../utils/dbcommand'),
-    utils = require('../utils/utils'),
-    md5 = require('md5'),
-    extend = require('extend'),
-    tablename = 'surveys',
-    shortid = require('shortid'),
-    check = require('check-types'),
-    utf8 = require('utf8'),
-    fs = require('fs'),
-    Org = require('../models/organization');
+const dbcmd = require('../utils/dbcommand');
+const utils = require('../utils/utils');
+const md5 = require('md5');
+const extend = require('extend');
+const tablename = 'surveys';
+const shortid = require('shortid');
+const check = require('check-types');
+const utf8 = require('utf8');
+const fs = require('fs');
+const SurveyValueExtractor = require('../models/surveyvalueextractor');
+const Piper = require('../models/piper');
 
 // Fixtures
 var prospect_survey_fixture = JSON.parse(fs.readFileSync(__dirname + '/../fixtures/surveys/questionnaire.json').toString('utf-8'));
@@ -26,7 +27,8 @@ var Survey = function (details) {
  * The types of surveys
  */
 Survey.SURVEY_TYPES = {
-    PROSPECT: 0
+    PROSPECT: 0,
+    EMPLOYEE: 1
 };
 
 /**
@@ -74,6 +76,36 @@ Survey.prototype.getQuestionByName = function (name) {
         }
     }
     return;
+};
+
+/**
+ * Get a fully piped survey
+ * @param {*} respondent 
+ */
+Survey.prototype.getPipedModel = function(respondent) {
+    var finalModel = JSON.parse(JSON.stringify(this.survey_model));
+    let respVars = respondent.variables;
+    let exter = new SurveyValueExtractor();
+    let piper = new Piper();
+    finalModel.pages.forEach((pg) => {
+        pg.elements.forEach((elm) => {
+            if (elm.title) {
+                elm.title = piper.pipe(elm.title, respondent.answers, finalModel, respVars, {});
+            }
+            if (elm.subtitle) {
+                elm.subtitle = piper.pipe(elm.subtitle, respondent.answers, finalModel, respVars, {});
+            }
+            if (elm.choices) {
+                for (let b = 0; b < elm.choices.length; b++) {
+                    elm.choices[b] = piper.pipe(elm.choices[b], respondent.answers, finalModel, respVars, {});
+                    if (elm.choices[b] == null || elm.choices[b].length == 0) {
+                        elm.choices.splice(b--, 1);
+                    }
+                }
+            }
+        });
+    });
+    return finalModel;
 };
 
 /**
@@ -137,6 +169,41 @@ Survey.GetForOrganization = function (cfg, organization_id, cb) {
         cb(null, res);
     }, function (err) {
         cb(err);
+    });
+};
+
+
+/**
+ * Get surveys by the organization
+ */
+Survey.GetForOrganizationAndType = function (cfg, organization_id, SURVEY_TYPE, cb) {
+    cb = cb || function () {};
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND survey_type = ?', [organization_id, SURVEY_TYPE], function (result) {
+        var res = [];
+        for (var i = 0; i < result.length; i++) {
+            res.push(new Survey(result[i]));
+        }
+        cb(null, res);
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
+ * Get surveys by the organization
+ * @param {*} cfg 
+ * @param {*} organization_id 
+ * @param {*} SURVEY_TYPE 
+ */
+Survey.GetForOrganizationAndTypeAsync = function(cfg, organization_id, SURVEY_TYPE) {
+    return new Promise((resolve, reject) => {
+        Survey.GetForOrganizationAndType(cfg, organization_id, SURVEY_TYPE, (err, svs) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(svs);
+            }
+        });
     });
 };
 
@@ -215,6 +282,24 @@ Survey.GetForOpportunityAndType = function (cfg, opportunity_id, survey_type, cb
 };
 
 /**
+ * Get a survey by its opportunity ID and type ASYNC
+ * @param {*} cfg 
+ * @param {*} opportunity_id 
+ * @param {*} survey_type 
+ */
+Survey.GetForOpportunityAndTypeAsync = function (cfg, opportunity_id, survey_type) {
+    return new Promise((resolve, reject) => {
+        Survey.GetForOpportunityAndType(cfg, opportunity_id, survey_type, (err, svs) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(svs);
+            }
+        });
+    });
+};
+
+/**
  * Delete all
  */
 Survey.DeleteAll = function (cfg, cb) {
@@ -230,12 +315,13 @@ Survey.DeleteAll = function (cfg, cb) {
  * Make sure a survey exists for a particular opportunity and type
  */
 Survey.EnforceSurveyExistsForOpportunityAndType = function (cfg, opportunity_id, survey_type, organization_id, cb) {
+    const Orgn = require('../models/organization');
     Survey.GetForOpportunityAndType(cfg, opportunity_id, survey_type, (err, svs) => {
         if (err) {
             cb(err);
         } else {
             if (svs.length == 0) {
-                Org.GetById(cfg, organization_id, (err, org) => {
+                Orgn.GetById(cfg, organization_id, (err, org) => {
                     if (err) {
                         cb(err);
                     } else {
