@@ -24,7 +24,6 @@
     "colors": "^1.1.2",
     "connect-redis": "^3.2.0",
     "encoding": "^0.1.12",
-    "eslint": "^4.17.0",
     "extend": "^3.0.0",
     "gulp": "^3.9.1",
     "md5": "^2.2.1",
@@ -39,11 +38,17 @@
     "redis": "^2.8.0",
     "redis-lock": "^0.1.4",
     "shortid": "^2.2.8",
+    "svg2img": "^0.2.8",
     "underscore": "^1.8.3",
     "utf8": "^2.1.2",
     "uuid": "^3.0.1"
   },
   "devDependencies": {
-    "eslint-config-google": "^0.9.1"
+    "eslint": "^4.17.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-config-google": "^0.9.1",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.6.1"
   }
 }
