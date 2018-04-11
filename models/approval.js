@@ -3,7 +3,6 @@ const md5 = require('md5');
 const extend = require('extend');
 const tablename = 'approvals';
 const shortid = require('shortid');
-const Organization = require('../models/organization');
 const Email = require('../models/email');
 const CRMIntegrations = require('../models/crmintegrations');
 const CRMContacts = require('../models/crmcontacts');
@@ -27,6 +26,7 @@ Approval.SEND_STATES = {
  * Send SMS or Email if necessary
  */
 Approval.prototype.execute = function (cfg, cb) {
+  const Organization = require('../models/organization');
   if (this.sendState == Approval.SEND_STATES.UNSENT) {
     this.sendState = Approval.SEND_STATES.SENT;
     CRMContacts.GetById(cfg, this.crm_contact_id, (err, cntc) => {
