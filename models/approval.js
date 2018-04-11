@@ -134,20 +134,26 @@ Approval.GetByGuid = function (cfg, guid, cb) {
  */
 Approval.GetForContacts = function (cfg, contacts, cb) {
   cb = cb || function () {};
-  const contactIds = contacts.map(c => c.Id);
-  dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE crm_contact_id IN (${contactIds.map(c => '?').join(', ')})`, contactIds, function (result) {
-    if (result && result.length > 0) {
-      var res = [];
-      for (var i = 0; i < result.length; i++) {
-        res.push(new Approval(result[i]));
-      }
-      cb(null, res);
-    } else {
+  if (contacts.length === 0) {
+    process.nextTick(() => {
       cb();
-    }
-  }, function (err) {
-    cb(err);
-  });
+    });
+  } else {
+    const contactIds = contacts.map(c => c.Id);
+    dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE crm_contact_id IN (${contactIds.map(c => '?').join(', ')})`, contactIds, function (result) {
+      if (result && result.length > 0) {
+        var res = [];
+        for (var i = 0; i < result.length; i++) {
+          res.push(new Approval(result[i]));
+        }
+        cb(null, res);
+      } else {
+        cb();
+      }
+    }, function (err) {
+      cb(err);
+    });
+  }
 };
 
 /**
