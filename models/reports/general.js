@@ -319,7 +319,9 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
 
     // Now we have a sorted list
     var winningVendor = orgVotes[0];
-    winningVendor.Amount = !!theOpp ? theOpp.Amount : 0;
+    winningVendor.Amount = !!theOpp
+      ? theOpp.Amount
+      : 0;
     theOpp.winningVendor = winningVendor;
 
     // Merge with the master list
@@ -681,7 +683,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
   var recommend = {
     totalAnswers: totalAnswers,
     netConnector: Math.round(netConnect * 1000) / 10,
-    willingToReconnect: Math.round((hotLead / (warmLead + coldLead)) * 1000)/10,
+    willingToReconnect: Math.round((hotLead / (warmLead + coldLead)) * 1000) / 10,
     futureLeadSentiment: {
       hotLead: hotLead,
       warmLead: warmLead,
@@ -933,9 +935,6 @@ var SendReportForOrgAsync = async function (cfg, orgid, lastmonth) {
   // Get the Org NS
   const Organization = require('../../models/organization');
 
-  // Grab the Email namespace
-  const Email = require('../../models/email');
-
   // Get Account
   const Account = require('../account');
 
@@ -965,14 +964,30 @@ var SendReportForOrgAsync = async function (cfg, orgid, lastmonth) {
   }
 
   // Send all the emails
-  for (let i = 0; i < accounts.length; i++) {
+  for (let i = 0; i < accounts.length; i++) {}
 
-  }
-  
-  let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
-  var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, "alexei.white@gmail.com", 'generalreport', 'BLA, help ' + org.name + ' do better in the future!', report);
-
+  var result = await SendReportWithDataToRecipient(cfg, report, org, "alexei.white@gmail.com", true);
   return result;
+};
+
+/**
+ * Actually send the report email
+ * @param {*} cfg 
+ * @param {*} data 
+ * @param {*} org 
+ * @param {*} recipient 
+ */
+var SendReportWithDataToRecipient = async function(cfg, data, org, recipient, fakeSend) {
+  // Grab the Email namespace
+  const Email = require('../../models/email');
+  let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
+  if (data.respondents === 0) {
+    var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, recipient, 'generalreport_norespondents', 'BLA, help ' + org.name + ' do better in the future!', data, fakeSend);
+    return result;
+  } else {
+    var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, recipient, 'generalreport', 'BLA, help ' + org.name + ' do better in the future!', data, fakeSend);
+    return result;
+  }
 };
 
 /**
@@ -986,7 +1001,7 @@ var SendReportForAllOrgsAsync = async function (cfg, lastmonth) {
 
   // Then get the org
   var orgs = await Organization.GetAllAsync(cfg);
-  
+
   // Hold the results
   var results = [];
 

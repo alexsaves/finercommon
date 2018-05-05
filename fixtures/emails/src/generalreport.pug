@@ -10,13 +10,15 @@ mixin heading(contents)
   div(style="font-weight:bold;font-size:16px;color:#424242;", color="#424242")= contents
 mixin paragraph(contents)
   div(style="color:#727272;font-size:14px;", color="#727272")= contents
+mixin darkparagraph(contents)
+  div(style="color:#000000;font-size:14px;", color="#000000")= contents
 mixin reportlink(linkref, contents)
   a(href=linkref)= contents
 +heading('Win/Loss Analysis')
 +spacer
 
 if isRollingCurrentMonth
-  +paragraph('Over the last ' + daysInReport + ' days, the #1 reason why you lose deals is ' + reasonsForLoss[0].shortLabel.toLowerCase() + '.')
+  +paragraph('Over the last ' + daysInReport + ' days, the #1 reason why you lose deals is "' + reasonsForLoss[0].shortLabel.toLowerCase() + '".')
 else
   +paragraph('In ' + monthName + ', the #1 reason why you lose deals is ' + reasonsForLoss[0].shortLabel.toLowerCase() + '.')
 +spacer
@@ -79,7 +81,7 @@ each maker, index in decisionMakers
 +spacer
 +reportlink('/', 'View Details')
 mixin comment(cmt)
-  div(style="padding-left:20px;padding-right:20px;")
+  div(style="margin-bottom:1px;border-bottom:1px solid #eeeeee;padding-left:20px;padding-right:20px;background-color:rgba(244, 244, 244, 0.5);padding-top:20px;padding-bottom:20px;")
     table(cellpadding="0", cellspacing="0", border="0", width="100%")
       tr
         td(width="30")
@@ -95,8 +97,8 @@ mixin comment(cmt)
             span(color="#8fa4af", style="color: #8fa4af;") $#{cmt.amount} Deal
         if cmt.anonymous == false
           td(align="right", style="font-size:10px;color:#00cc00;font-weight:bold;", color="#00cc00") Won by #{cmt.winningVendor.label}
-    div 
-      +paragraph(cmt.text)
+    div
+      +darkparagraph(cmt.text)
     div(style="font-size:10px;color:#757575;", color="#757575") #{cmt.whenStr}
 if comments && comments.length > 0
   +spacer
@@ -104,9 +106,6 @@ if comments && comments.length > 0
   +spacer
   img(src=imagebase + "whatcustomersaresaying.png", alt="What customers are saying", style="width: 270px; height: 59px;", width="270", height="59", border="0", data-imagetype="External")
   each comment, index in comments
-    if (index > 0)
-      +hline
-      +spacer
     +comment(comment)
   +spacer
   +spacer
