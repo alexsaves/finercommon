@@ -319,7 +319,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
 
     // Now we have a sorted list
     var winningVendor = orgVotes[0];
-    winningVendor.Amount = theOpp.Amount;
+    winningVendor.Amount = !!theOpp ? theOpp.Amount : 0;
     theOpp.winningVendor = winningVendor;
 
     // Merge with the master list
