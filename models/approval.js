@@ -3,7 +3,6 @@ const md5 = require('md5');
 const extend = require('extend');
 const tablename = 'approvals';
 const shortid = require('shortid');
-const Organization = require('../models/organization');
 const Email = require('../models/email');
 const CRMIntegrations = require('../models/crmintegrations');
 const CRMContacts = require('../models/crmcontacts');
@@ -27,6 +26,7 @@ Approval.SEND_STATES = {
  * Send SMS or Email if necessary
  */
 Approval.prototype.execute = function (cfg, cb) {
+  const Organization = require('../models/organization');
   if (this.sendState == Approval.SEND_STATES.UNSENT) {
     this.sendState = Approval.SEND_STATES.SENT;
     CRMContacts.GetById(cfg, this.crm_contact_id, (err, cntc) => {
@@ -134,20 +134,26 @@ Approval.GetByGuid = function (cfg, guid, cb) {
  */
 Approval.GetForContacts = function (cfg, contacts, cb) {
   cb = cb || function () {};
-  const contactIds = contacts.map(c => c.Id);
-  dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE crm_contact_id IN (${contactIds.map(c => '?').join(', ')})`, contactIds, function (result) {
-    if (result && result.length > 0) {
-      var res = [];
-      for (var i = 0; i < result.length; i++) {
-        res.push(new Approval(result[i]));
-      }
-      cb(null, res);
-    } else {
+  if (contacts.length === 0) {
+    process.nextTick(() => {
       cb();
-    }
-  }, function (err) {
-    cb(err);
-  });
+    });
+  } else {
+    const contactIds = contacts.map(c => c.Id);
+    dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE crm_contact_id IN (${contactIds.map(c => '?').join(', ')})`, contactIds, function (result) {
+      if (result && result.length > 0) {
+        var res = [];
+        for (var i = 0; i < result.length; i++) {
+          res.push(new Approval(result[i]));
+        }
+        cb(null, res);
+      } else {
+        cb();
+      }
+    }, function (err) {
+      cb(err);
+    });
+  }
 };
 
 /**

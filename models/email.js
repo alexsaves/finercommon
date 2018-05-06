@@ -41,7 +41,7 @@ Email._extractEmailFromString = function (searchInThisString) {
 /**
  * Send an email
  */
-Email.prototype.send = function (cfg, org, from, to, template, subject, details, callback) {
+Email.prototype.send = function (cfg, org, from, to, template, subject, details, callback, fakeSend) {
   callback = callback || function () {};
   if (arguments.length < 8) {
     throw new Error("Email controller - missing callback");
@@ -60,18 +60,6 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
           imagebase: cfg.portalUrl + "/eml/",
           unsuburl: cfg.portalUrl + EmailUnsubscription.GenerateValidUnsubscribeLink(useremail, org)
         }, details);
-
-        /*let attachments = [];
-        let imagesdir = __dirname + "/../fixtures/emails/images/";
-        
-        fs.readdirSync(imagesdir).forEach(file => {
-          if (file.indexOf('.png') > -1) {
-            attachments.push({
-              cid: file.substr(0, file.indexOf(".")),              
-              contentType: 'image/png',
-            });
-          }          
-        });*/
         let basetemplatefile = fs
             .readFileSync(__dirname + '/../fixtures/emails/src/_base.pug', 'utf8')
             .toString(),
@@ -86,32 +74,40 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
             .toString();
         let richBaseTemplate = pug.compile(basetemplatefile, {});
         let richTemplate = pug.compile(templatefile, {});
+
         let baseResult = richBaseTemplate(details);
         let templateResult = richTemplate(details);
         templateResult = baseResult.replace(/\[\[main\]\]/i, templateResult);
         let rawtemplateObj = _.template(rawtemplatefile);
         let rawresult = rawtemplateObj(details);
 
-        var transporter = nodemailer.createTransport(sesTransport({region: this.server, accessKeyId: this.key, secretAccessKey: this.secret, rateLimit: 5}));
-        //console.log(details);
-        //console.log(templateResult);
-        //callback();
-        //return;
-        // Give SES the details and let it construct the message for you.
-        //callback(null, templateResult);
-        transporter.sendMail({
-          to: to,
-          from: from,
-          subject: subject,
-          html: templateResult,
-          text: rawresult,
-          //attachments: attachments
-        }, function (err, data, res) {
+        if (fakeSend) {
+          // We should not ACTUALLY send the email
           if (callback) {
-            //callback(null, templateResult);
-            callback(err, data);
+            process.nextTick(() => {
+              callback(err, {
+                fullEmail: templateResult
+              });
+            });
           }
-        });
+        } else {
+          var transporter = nodemailer.createTransport(sesTransport({region: this.server, accessKeyId: this.key, secretAccessKey: this.secret, rateLimit: 5}));
+
+          transporter.sendMail({
+            to: to,
+            from: from,
+            subject: subject,
+            html: templateResult,
+            text: rawresult
+          }, function (err, data, res) {
+            if (callback) {
+              if (!err) {
+                data.fullEmail = templateResult;
+              }
+              callback(err, data);
+            }
+          });
+        }
       }
     }
   });
@@ -119,15 +115,15 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
 
 /**
  * Send an email (ASYNC)
- * @param {*} cfg 
- * @param {*} org 
- * @param {*} from 
- * @param {*} to 
- * @param {*} template 
- * @param {*} subject 
- * @param {*} details 
+ * @param {*} cfg
+ * @param {*} org
+ * @param {*} from
+ * @param {*} to
+ * @param {*} template
+ * @param {*} subject
+ * @param {*} details
  */
-Email.prototype.sendAsync = function (cfg, org, from, to, template, subject, details) {
+Email.prototype.sendAsync = function (cfg, org, from, to, template, subject, details, fakeSend) {
   return new Promise((resolve, reject) => {
     this.send(cfg, org, from, to, template, subject, details, (err, result) => {
       if (err) {
@@ -135,7 +131,7 @@ Email.prototype.sendAsync = function (cfg, org, from, to, template, subject, det
       } else {
         resolve(result);
       }
-    });
+    }, !!fakeSend);
   });
 };
 
