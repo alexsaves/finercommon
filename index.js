@@ -3,8 +3,7 @@
  */
 var FinerCommon = {
   models: require('./models/all'),
-  ChartRenderer: require('./renderer'),
-  MockData: require('./mock-data.json')
+  Renderer: require('./renderer'),
 };
 
 // Expose it
