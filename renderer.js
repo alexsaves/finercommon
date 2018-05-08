@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer');
-const BarChart = require('./components/barchart');
+const BarChart = require('./components/lib/barchart');
 const React = require('react');
 const ReactDOMServer = require('react-dom/server');
 
