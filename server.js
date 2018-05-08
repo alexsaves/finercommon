@@ -1,7 +1,3 @@
-require('babel-register')({
-  presets: ['es2015', 'react'],
-});
-
 const Renderer = require('./renderer');
 const mockData = require('./mock-data.json');
 
