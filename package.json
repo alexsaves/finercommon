@@ -1,6 +1,6 @@
 {
   "name": "finercommon",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -22,6 +22,7 @@
   "dependencies": {
     "bity-promise": "0.0.6",
     "btoa": "^1.1.2",
+    "canvas": "^1.6.10",
     "check-types": "^7.1.5",
     "colors": "^1.1.2",
     "connect-redis": "^3.2.0",
