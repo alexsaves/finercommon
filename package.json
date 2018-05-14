@@ -38,6 +38,7 @@
     "nodemailer-ses-transport": "^1.5.1",
     "prop-types": "^15.6.0",
     "pug": "^2.0.0-rc.4",
+    "puppeteer": "^1.4.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "redis": "^2.8.0",
