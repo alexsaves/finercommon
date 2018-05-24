@@ -1,6 +1,6 @@
 {
   "name": "finercommon",
-  "version": "0.2.3",
+  "version": "0.2.7",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,6 @@
   "dependencies": {
     "bity-promise": "0.0.6",
     "btoa": "^1.1.2",
-    "canvas": "^1.6.10",
     "check-types": "^7.1.5",
     "colors": "^1.1.2",
     "connect-redis": "^3.2.0",
@@ -39,6 +38,7 @@
     "nodemailer-ses-transport": "^1.5.1",
     "prop-types": "^15.6.0",
     "pug": "^2.0.0-rc.4",
+    "puppeteer": "^1.4.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "redis": "^2.8.0",
@@ -60,7 +60,6 @@
     "eslint-config-google": "^0.9.1",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
-    "eslint-plugin-react": "^7.6.1",
-    "puppeteer": "^1.3.0"
+    "eslint-plugin-react": "^7.6.1"
   }
 }

@@ -206,6 +206,37 @@ CRMOpportunities.GetByAccountIdsWithDates = function (cfg, aids, startDate, endD
 };
 
 /**
+ * Get opportunities by an array owner ids
+ */
+CRMOpportunities.GetByOwnerIdsWithDates = function (cfg, oids, startDate, endDate, cb) {
+  // TODO: end date is not getting applied here, closeDate is not necesarrily accurate to be used as end date
+  cb = cb || function () {};
+  if (oids && oids.length > 0) {
+    var finalStr = "(";
+    for (var k = 0; k < oids.length; k++) {
+      if (k > 0) {
+        finalStr += ", ";
+      }
+      finalStr += "'" + oids[k] + "'";
+    }
+    finalStr += ")";
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE CloseDate >= ? AND OwnerId IN ' + finalStr, [
+      startDate
+    ], function (result) {
+      var res = [];
+      for (var i = 0; i < result.length; i++) {
+        res.push(new CRMOpportunities(result[i]));
+      }
+      cb(null, res);
+    }, function (err) {
+      cb(err);
+    });
+  } else {
+    cb(null, []);
+  }
+};
+
+/**
 * Get an opportunity by its id
 */
 CRMOpportunities.GetById = function (cfg, guid, cb) {
