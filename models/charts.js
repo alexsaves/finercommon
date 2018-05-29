@@ -1,10 +1,25 @@
 const streamToBuffer = require('stream-to-buffer');
-
+const fs = require('fs');
+const path = require('path');
 const fontFace = "Arial";
 const lightColor = "#f3f3f3";
 const darkerColorLight = "#424242";
 const darkerColor = "#757575";
 const darkGreen = "#4caf50";
+const dudeImageURI = "data:image/png;base64,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";
+
+var iconList = fs.readdirSync(__dirname + '/../assets/icons/');
+const finalIconList = {};
+for (let i = 0; i < iconList.length; i++) {
+  var ext = path.extname(iconList[i]);
+  if (ext == ".png") {
+    var iconname = iconList[i].substr(0, iconList[i].indexOf('.'));
+    finalIconList[iconname] = fs.readFileSync(__dirname + '/../assets/icons/' + iconList[i]);
+  }
+}
+
+// Get the lanyard image
+const lanyardImg = fs.readFileSync(__dirname + '/../assets/images/lanyard.png')
 
 /**
  * Charting class
@@ -14,6 +29,36 @@ class Charts {
    * Sets up a new charter
    */
   constructor() {}
+
+  /**
+   * Fit to size
+   * @param {Number} w 
+   * @param {Number} h 
+   * @param {Number} targetW 
+   * @param {Number} targetH 
+   */
+  _fitToSize(width, height, frame_width, frame_height) {
+    var rectRatio = width / height;
+    var boundsRatio = frame_width / frame_height;
+
+    var newDimensions = {
+      w: 0,
+      h: 0
+    };
+
+    // Rect is more landscape than bounds - fit to width
+    if (rectRatio > boundsRatio) {
+      newDimensions.w = frame_width;
+      newDimensions.h = height * (frame_width / rect.width);
+    }
+    // Rect is more portrait than bounds - fit to height
+    else {
+      newDimensions.w = width * (frame_height / height);
+      newDimensions.h = frame_height;
+    }
+
+    return newDimensions;
+  }
 
   /**
    * Draw a rounded rectangkle
@@ -422,7 +467,7 @@ class Charts {
      * @param {Position} pos 
      * @param {Object} dataItem 
      */
-    var drawLabelAtPosition = function(pos, dataItem) {
+    var drawLabelAtPosition = function (pos, dataItem) {
       let scoreLabel = dataItem.quantity.toString();
       if (scoreLabel.length > 4) {
         scoreLabel = scoreLabel.substr(0, 4);
@@ -442,11 +487,11 @@ class Charts {
         realX = Math.min(realX, x + w);
       }
       if (pos.valign == "top") {
-        realY -= textLabelHeight;        
+        realY -= textLabelHeight;
       }
       realY = Math.min(realY, y + h - textLabelHeight);
       realY = Math.max(y + fontSize, realY);
-      
+
       ctx.fillText(dataItem.label, realX, realY);
       ctx.fillText(scoreLabel, realX, realY + fontSize);
     };
@@ -473,7 +518,7 @@ class Charts {
         x: p3.x,
         y: p3.y,
         align: p3.x > 0 ? "right" : "left",
-        valign: p3.y > 0 ? "bottom": "top"
+        valign: p3.y > 0 ? "bottom" : "top"
       };
 
       drawLabelAtPosition(textPosition, data[i]);
@@ -586,6 +631,209 @@ class Charts {
 
     // Do the pie chart
     this._pieChart(ctx, rightColumnX, fontHeight * 1.2, columnWidth, h - fontHeight, data.sentimentPie, fontSize, generalScale);
+
+    return await this._canvasToPNGBufferAsync(canvas);
+  }
+  /**
+   * Draw the rating stack chart Asynchronously
+   * @param {Number} w 
+   * @param {Number} scoreMax 
+   * @param {Array} data 
+   */
+  async ratingStackAsync(w, scoreMax, data) {
+    const generalScale = w / 500;
+    const itemHeight = generalScale * 130;
+    const topTitleFontSize = generalScale * 60;
+    const padding = generalScale * 20;
+    const fontSize = Math.round(generalScale * 14);
+    const subFontSize = fontSize * 0.8;
+    const colStart = padding * 5;
+    const mainColWidth = w - padding - colStart;
+    const squarePadding = generalScale * 5;
+    const squareWidth = (mainColWidth - ((scoreMax - 1) * squarePadding)) / scoreMax
+    const squareHeight = squareWidth * 0.9;
+    const cornerRadius = generalScale * 7;
+
+    const Canvas = require('canvas');
+    var Image = Canvas.Image,
+      canvas = new Canvas(w, itemHeight * data.length),
+      ctx = canvas.getContext('2d');
+
+    if (arguments.length < 3) {
+      throw new Error("Missing arguments");
+    }
+
+    let topPosition = 0;
+    let isBackground = false;
+    let dudeImg = new Image();
+    dudeImg.src = dudeImageURI;
+
+    for (let i = 0; i < data.length; i++) {
+      let row = data[i];
+      if (isBackground) {
+        isBackground = false;
+      } else {
+        isBackground = true;
+      }
+      if (isBackground) {
+        ctx.fillStyle = lightColor;
+        ctx.fillRect(0, topPosition, w, itemHeight);
+      }
+
+      // Draw the number
+      ctx.fillStyle = darkerColorLight;
+      ctx.font = topTitleFontSize + "px " + fontFace;
+      ctx.textAlign = "left";
+      ctx.fillText((i + 1) + ".", padding, topPosition + padding + topTitleFontSize);
+
+      // Draw the label      
+      ctx.fillStyle = darkerColorLight;
+      ctx.font = "bold " + fontSize + "px " + fontFace;
+      ctx.textAlign = "left";
+      ctx.fillText(row.label, colStart, topPosition + padding + fontSize);
+
+      // Draw the n-count
+      if (row.n) {
+        ctx.fillStyle = darkerColor;
+        ctx.font = fontSize + "px " + fontFace;
+        ctx.textAlign = "right";
+        var res = ctx.measureText(row.n.toString());
+        ctx.fillText(row.n, w - padding, topPosition + padding + fontSize);
+
+        ctx.drawImage(dudeImg, w - padding - res.width - (fontSize * 1.1), topPosition + padding + (fontSize * 0.19), (fontSize * 0.8), (fontSize * 0.9));
+      }
+
+      // Do the value labels
+      ctx.fillStyle = darkerColor;
+      ctx.font = subFontSize + "px " + fontFace;
+      ctx.textAlign = "left";
+      ctx.fillText(row.lowLabel, colStart, topPosition + itemHeight - padding);
+      ctx.textAlign = "right";
+      ctx.fillText(row.highLabel, w - padding, topPosition + itemHeight - padding);
+
+      // Do the scale
+      let leftPosition = colStart;
+      for (var c = 0; c < scoreMax; c++) {
+        let rx = leftPosition;
+        let ry = (generalScale * 3) + topPosition + Math.round((itemHeight - squareHeight) / 2);
+        let rw = squareWidth;
+        let rh = squareHeight;
+        let percentSelected = 0;
+        if (c + 1 < row.score) {
+          percentSelected = 1;
+          if (c + 2 > row.score) {
+            percentSelected = 0.5;
+          }
+        }
+        var labelColor = "#ffffff";
+        if (percentSelected == 1) {
+          labelColor = "#ffffff";
+          this._roundedRectangle(ctx, darkGreen, rx, ry, rw, rh, cornerRadius);
+        } else if (percentSelected == 0) {
+          labelColor = darkGreen;
+          this._roundedRectangle(ctx, darkGreen, rx, ry, rw, rh, cornerRadius);
+          let pixPadding = Math.max(1, generalScale * 1);
+          this._roundedRectangle(ctx, lightColor, rx + pixPadding, ry + pixPadding, rw - (2 * pixPadding), rh - (2 * pixPadding), cornerRadius);
+        } else {
+          labelColor = darkGreen;
+          this._roundedRectangle(ctx, darkGreen, rx, ry, rw, rh, cornerRadius);
+          let pixPadding = Math.max(1, generalScale * 1);
+          this._roundedRectangle(ctx, "#A8DEB1", rx + pixPadding, ry + pixPadding, rw - (2 * pixPadding), rh - (2 * pixPadding), cornerRadius);
+        }
+        let labelSize = (squareHeight * 0.6);
+        let xoffset = 0;
+        if (c == 0) {
+          xoffset = (generalScale * 3);
+        }
+        this._centerText(ctx, "bold " + labelSize + "px " + fontFace, (c + 1), labelColor, rx - xoffset, ry + (labelSize * 0.85) + ((squareHeight - labelSize) / 2), rw);
+
+        leftPosition += squareWidth + squarePadding;
+      }
+
+      topPosition += itemHeight;
+    }
+
+    return await this._canvasToPNGBufferAsync(canvas);
+  }
+
+  /**
+   * Get a three-across lanyard chat asynchronously
+   * Example data:
+   * [{
+        icon: "customerservice",
+        label: "Customer service",
+        n: 10
+      },
+      {
+        icon: "responsiveness",
+        label: "Responsiveness",
+        n: 7
+      },
+      {
+        icon: "timeliness",
+        label: "Timeliness of delivery",
+        n: 1029
+      }
+    ]
+   * @param {Number} w 
+   * @param {Array} data 
+   */
+  async threeLanyardAsync(w, data) {
+    if (data.length != 3) {
+      throw new Error("Invalid number of lanyards (must be 3).");
+    }
+    if (arguments.length != 2) {
+      throw new Error("Invalid arguments");
+    }
+    const generalScale = w / 500;
+    const lanyardHeight = generalScale * 200;
+    const hasNCountLabel = !!data[0].n;
+    const h = hasNCountLabel ? lanyardHeight + (generalScale * 70) : lanyardHeight;
+    const padding = generalScale * 24;
+    const fontSize = Math.round(generalScale * 14);
+    const cols = data.length;
+    const colSize = ((w - ((cols - 1) * padding)) / cols);
+    const nlineWidth = Math.max(1, generalScale * 2);
+    const nlineHeight = generalScale * 10;
+    const Canvas = require('canvas');
+    var Image = Canvas.Image,
+      canvas = new Canvas(w, h),
+      ctx = canvas.getContext('2d');
+
+    const lanImg = new Image();
+    lanImg.src = lanyardImg;
+
+    let leftPosition = 0;
+    for (let c = 0; c < data.length; c++) {
+      let row = data[c];
+      let xoffset = c === 0 ? (generalScale * -2) : 0;
+      ctx.drawImage(lanImg, leftPosition, 0, colSize, lanyardHeight);
+      this._centerText(ctx, "bold " + fontSize + "px " + fontFace, (c + 1).toString(), darkerColorLight, leftPosition + xoffset, (generalScale * 5) + fontSize, colSize);
+
+      // Write the label
+      const labelY = (generalScale * 40) + fontSize;
+      this._centerText(ctx, "bold " + (fontSize * 0.85) + "px " + fontFace, row.label, darkerColorLight, leftPosition, labelY, colSize);
+
+      // Load the icon
+      var icn = finalIconList[row.icon];
+      var iconImg = new Image();
+      iconImg.src = icn;
+      var newSize = this._fitToSize(iconImg.width, iconImg.height, colSize - padding - padding, lanyardHeight - labelY - padding - padding - padding);
+      var iconX = ((colSize - newSize.w) / 2) + leftPosition;
+      var iconY = ((lanyardHeight - labelY - newSize.h) / 2) + labelY - (padding * 0.3);
+      ctx.drawImage(iconImg, iconX, iconY, newSize.w, newSize.h);
+
+      // If there is an N count, show it
+      if (hasNCountLabel) {
+        ctx.fillStyle = lightColor;
+        let lineypos = lanyardHeight + (padding);
+        ctx.fillRect(Math.round(leftPosition + ((colSize - nlineWidth) / 2)), Math.round(lineypos), Math.round(nlineWidth), Math.round(nlineHeight));
+        ctx.fillStyle = darkerColor;
+        this._centerText(ctx, fontSize + "px " + fontFace, row.n + " respondents", darkerColor, leftPosition, lineypos + nlineHeight + padding + (fontSize * 0.4), colSize);
+      }
+
+      leftPosition += colSize + padding;
+    }
 
     return await this._canvasToPNGBufferAsync(canvas);
   }
