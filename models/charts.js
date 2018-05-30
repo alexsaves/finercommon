@@ -31,6 +31,28 @@ class Charts {
   constructor() {}
 
   /**
+   * Get an icon name based on a label
+   */
+  getIconNameForLabel(label) {
+    var simpleStr = label.trim().toLowerCase();
+    var iconName = "analytics";
+    if (simpleStr.indexOf("business needs") > -1) {
+      iconName = "notmeetneeds";
+    } else if (simpleStr.indexOf("features") > -1) {
+      iconName = "features";
+    } else if (simpleStr.indexOf("external factors") > -1) { 
+      iconName = "externalfactors";
+    } else if (simpleStr.indexOf("external factors") > -1) { 
+      iconName = "tag";
+    } else {
+      console.log("ICON NOT KNOWN", simpleStr);
+    }
+
+
+    return iconName;
+  }
+
+  /**
    * Fit to size
    * @param {Number} w 
    * @param {Number} h 

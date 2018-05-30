@@ -13,6 +13,7 @@ const Survey = require('../survey');
 const CRMOpportunities = require('../crmopportunities');
 const CRMContacts = require('../crmcontacts');
 const moment = require('moment');
+const Charts = require('../charts');
 
 /**
  * Fix up labels to be more presentable
@@ -22,16 +23,19 @@ var ShortCleanupOnLabels = function (str) {
   if (str == "__other__") {
     return "Other";
   } else {
-    if (str.indexOf("External") > -1 && str.indexOf("(") > -1) {
+    let lcaseStr = str.trim().toLowerCase();
+    if (lcaseStr.indexOf("external") > -1 && str.indexOf("(") > -1) {
       return str
         .split("(")[0]
         .trim();
-    } else if (str.indexOf("features") > -1) {
+    } else if (lcaseStr.indexOf("features") > -1) {
       return "Features";
-    } else if (str.indexOf("_No Vendor Chosen") > -1) {
+    } else if (lcaseStr.indexOf("_no vendor chosen") > -1) {
       return "None";
-    } else if (str.toLowerCase().indexOf("understood business needs") > -1) {
-      return "Understanding business needs";
+    } else if (lcaseStr.indexOf("understood business needs") > -1) {
+      return "Understood business needs";
+    } else if (lcaseStr.indexOf("our business needs") > -1) {
+      return "Not meet business needs"
     }
   }
   return str;
@@ -111,7 +115,9 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
 
   // Bomb out if there are no respondents
   if (respondentArr.length == 0) {
-    return {respondents: 0};
+    return {
+      respondents: 0
+    };
   }
 
   // Add the respondents
@@ -155,10 +161,10 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
           }
           otherval.count++;
           let otheroo = answers.whyNotSelected.other;
-          if (typeof(otheroo) != "undefined" && otheroo.trim().length > 0) {
+          if (typeof (otheroo) != "undefined" && otheroo.trim().length > 0) {
             if (!otherval.responses.find((vl) => {
-              return vl == otheroo;
-            })) {
+                return vl == otheroo;
+              })) {
               otherval
                 .responses
                 .push(otheroo.trim());
@@ -278,10 +284,10 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
           }
           otherval.count++;
           let otheroo = vendorRankings.other;
-          if (typeof(otheroo) != "undefined" && otheroo.trim().length > 0) {
+          if (typeof (otheroo) != "undefined" && otheroo.trim().length > 0) {
             if (!otherval.responses.find((vl) => {
-              return vl == otheroo;
-            })) {
+                return vl == otheroo;
+              })) {
               otherval
                 .responses
                 .push(otheroo.trim());
@@ -319,9 +325,9 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
 
     // Now we have a sorted list
     var winningVendor = orgVotes[0];
-    winningVendor.Amount = !!theOpp
-      ? theOpp.Amount
-      : 0;
+    winningVendor.Amount = !!theOpp ?
+      theOpp.Amount :
+      0;
     theOpp.winningVendor = winningVendor;
 
     // Merge with the master list
@@ -337,8 +343,8 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
         // Merge the responses
         for (let g = 0; g < winningVendor.responses.length; g++) {
           if (!existingItem.responses.find((rp) => {
-            return rp == winningVendor.responses[g];
-          })) {
+              return rp == winningVendor.responses[g];
+            })) {
             existingItem
               .responses
               .push(winningVendor.responses[g]);
@@ -389,7 +395,11 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
 
       // Now create a tally object for those choices
       var choicesTallyObject = sampleReasons.map((sr) => {
-        return {label: sr, shortLabel: ShortCleanupOnLabels(sr), count: 0};
+        return {
+          label: sr,
+          shortLabel: ShortCleanupOnLabels(sr),
+          count: 0
+        };
       });
       var otherReason = {
         label: "__other__",
@@ -413,8 +423,8 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
               // Merge the actual other reason
               if (reasons.other && reasons.other.trim().length > 0) {
                 if (!otherReason.responses.find((rs) => {
-                  return rs == reasons.other;
-                })) {
+                    return rs == reasons.other;
+                  })) {
                   otherReason
                     .responses
                     .push(reasons.other);
@@ -490,22 +500,22 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
         if (orderVal == 9999) {
           // OTHER
           otherFactor.importanceScore += scoreVal;
-          otherFactor.topRatedCount += isInTop
-            ? 1
-            : 0;
+          otherFactor.topRatedCount += isInTop ?
+            1 :
+            0;
           if (mostImportantVendorCriteria.other) {
             if (!otherFactor.responses.find((rp) => {
-              return rp == mostImportantVendorCriteria.other;
-            })) {
+                return rp == mostImportantVendorCriteria.other;
+              })) {
               otherFactor
                 .responses
                 .push(mostImportantVendorCriteria.other);
             }
           }
         } else {
-          salesProcessImportTally[orderVal].topRatedCount += isInTop
-            ? 1
-            : 0;
+          salesProcessImportTally[orderVal].topRatedCount += isInTop ?
+            1 :
+            0;
           salesProcessImportTally[orderVal].importanceScore += scoreVal;
         }
 
@@ -584,11 +594,11 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
   // Now look at all the answers for this
   for (let s = 0; s < respondentArr.length; s++) {
     let resp = respondentArr[s];
-    if (typeof(resp.answers.frequencyRating) != "undefined") {
+    if (typeof (resp.answers.frequencyRating) != "undefined") {
       freqRating.score += resp.answers.frequencyRating;
       freqRating.count++;
     }
-    if (typeof(resp.answers.responsivenessRating) != "undefined") {
+    if (typeof (resp.answers.responsivenessRating) != "undefined") {
       responsivenessRating.score += resp.answers.responsivenessRating;
       responsivenessRating.count++;
     }
@@ -619,7 +629,12 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
   let rateWinningVendorQuestion = exter._locateQuestionObjectForName("rateWinningVendor", respondentArr[0].survey_model.pages);
   let rateWinningVendorDimensions = JSON.parse(JSON.stringify(rateWinningVendorQuestion.choices));
   var rateWinningVendorTallies = rateWinningVendorDimensions.map((dm) => {
-    return {label: dm, shortLabel: ShortCleanupOnLabels(dm), score: 0, count: 0};
+    return {
+      label: dm,
+      shortLabel: ShortCleanupOnLabels(dm),
+      score: 0,
+      count: 0
+    };
   });
 
   // Now gather all the responses
@@ -666,7 +681,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
   // Figure out recommend score
   for (let s = 0; s < respondentArr.length; s++) {
     let resp = respondentArr[s];
-    if (resp.answers && typeof(resp.answers.reconnect) != "undefined" && resp.answers.reconnect !== null) {
+    if (resp.answers && typeof (resp.answers.reconnect) != "undefined" && resp.answers.reconnect !== null) {
       totalAnswers++;
       if (resp.answers.reconnect >= 6) {
         hotLead++;
@@ -715,7 +730,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
         let q = elms.find((q) => {
           return q.name == srch;
         });
-        if (q && typeof(q.subtitle) != "undefined" && q.subtitle.length > 0 && q.subtitle.indexOf("(") > -1) {
+        if (q && typeof (q.subtitle) != "undefined" && q.subtitle.length > 0 && q.subtitle.indexOf("(") > -1) {
           let fullPersonNameTitle = q
             .subtitle
             .substr(q.subtitle.indexOf("(") + 1);
@@ -735,7 +750,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
               decisionMakers.push(decm);
             }
             // Now read the respondents scoring of this person
-            if (resp.answers && typeof(resp.answers[srch]) != "undefined") {
+            if (resp.answers && typeof (resp.answers[srch]) != "undefined") {
               decm.count++;
               decm.score += resp.answers[srch];
             }
@@ -798,12 +813,10 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
           .answers
           .onePieceAdvice
           .trim(),
-        anonymous: (resp.answers.anonymity && resp.answers.anonymity.response) === 1
-          ? true
-          : false,
-        amount: (resp.approval && resp.approval.opportunity && resp.approval.opportunity.Amount != "NULL")
-          ? resp.approval.opportunity.Amount
-          : 0
+        anonymous: (resp.answers.anonymity && resp.answers.anonymity.response) === 1 ?
+          true : false,
+        amount: (resp.approval && resp.approval.opportunity && resp.approval.opportunity.Amount != "NULL") ?
+          resp.approval.opportunity.Amount : 0
       };
       if (resp.buyX) {
         cmt.buyX = resp.buyX;
@@ -837,8 +850,8 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
 };
 
 /**
-* The general report class
-*/
+ * The general report class
+ */
 var GeneralReport = function (cfg, orgid, startdate, enddate, cb) {
   RunReportAsync(cfg, orgid, startdate, enddate).then((res) => {
     cb(null, res);
@@ -848,8 +861,8 @@ var GeneralReport = function (cfg, orgid, startdate, enddate, cb) {
 };
 
 /**
-* The general report class ASYNC
-*/
+ * The general report class ASYNC
+ */
 var GeneralReportAsync = function (cfg, orgid, startdate, enddate) {
   return new Promise((resolve, reject) => {
     GeneralReport(cfg, orgid, startdate, enddate, (err, rep) => {
@@ -909,9 +922,9 @@ var GetFullReportForOrgAsync = async function (cfg, orgid, lastmonth) {
 
   for (let i = 0; i < reports.length; i++) {
     var previousBuyXScore = reports[i].buyX || 0;
-    var previousConnectorScore = reports[i].recommend
-      ? reports[i].recommend.netConnector
-      : 0;
+    var previousConnectorScore = reports[i].recommend ?
+      reports[i].recommend.netConnector :
+      0;
     previousBuyX.push(previousBuyXScore);
     previousRecommend.push(previousConnectorScore);
   }
@@ -923,6 +936,35 @@ var GetFullReportForOrgAsync = async function (cfg, orgid, lastmonth) {
   focusRep.isRollingCurrentMonth = !lastmonth;
 
   return focusRep;
+};
+
+/**
+ * Get the list of charts for the email
+ * @param {Object} cfg 
+ * @param {Object} report 
+ */
+var GetImageSetForReport = function (cfg, report) {
+  return new Promise((resolve, reject) => {
+    var chrt = new Charts();
+    var finalChartSet = {};
+    const chartWidths = 1000;
+    // Start with the win/loss bar chart
+    var winLossChartData = [];
+    for (let i = 0; i < Math.min(3, report.reasonsForLoss.length); i++) {
+      winLossChartData.push({
+        label: report.reasonsForLoss[i].shortLabel,
+        n: report.reasonsForLoss[i].n,
+        icon: chrt.getIconNameForLabel(report.reasonsForLoss[i].shortLabel)
+      });
+    }
+    console.log(report);
+    chrt.threeLanyardAsync(chartWidths, winLossChartData).then((pngBuffer) => {
+      console.log(pngBuffer);
+      res.end(pngBuffer);
+    }).catch((e) => {
+      console.log("e", e);
+    });
+  });
 };
 
 /**
@@ -947,6 +989,9 @@ var SendReportForOrgAsync = async function (cfg, orgid, lastmonth) {
   // Now decide WHO gets to receive it
   var assocs = await OrganizationAssociations.GetAllForOrgAsync(cfg, orgid);
 
+  // Get the image set
+  var imageSet = await GetImageSetForReport(cfg, report);
+
   // Holds the accounds
   var accounts = [];
 
@@ -965,7 +1010,6 @@ var SendReportForOrgAsync = async function (cfg, orgid, lastmonth) {
 
   // Send all the emails
   for (let i = 0; i < accounts.length; i++) {}
-
   var result = await SendReportWithDataToRecipient(cfg, report, org, "alexei.white@gmail.com", true);
   return result;
 };
@@ -977,7 +1021,7 @@ var SendReportForOrgAsync = async function (cfg, orgid, lastmonth) {
  * @param {*} org 
  * @param {*} recipient 
  */
-var SendReportWithDataToRecipient = async function(cfg, data, org, recipient, fakeSend) {
+var SendReportWithDataToRecipient = async function (cfg, data, org, recipient, fakeSend) {
   // Grab the Email namespace
   const Email = require('../../models/email');
   let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);

@@ -26,6 +26,7 @@ var All = {
     BuyX: require('../models/buyx'),
     Daemon: require('../models/daemon'),
     Charts: require('../models/charts'),
+    EmailChart: require('../models/emailchart'),
     // TODO: update delete to include CRM entities
     DeleteAll: function (cfg, cb) {
         console.log("Deleting all...");
