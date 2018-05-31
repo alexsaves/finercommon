@@ -22,6 +22,9 @@ if isRollingCurrentMonth
 else
   +paragraph('In ' + monthName + ', the #1 reason why you lose deals is ' + reasonsForLoss[0].shortLabel.toLowerCase() + '.')
 +spacer
++spacer
+img(src=imagebase + "chrt?hash=" + images.winlossimage, style="width: 100%;")
++spacer
 +reportlink('/', 'View Details')
 +spacer
 +hline
@@ -29,6 +32,14 @@ else
 +heading('Competition')
 +spacer
 +paragraph('Your toughest competition is ' + losingDealsTo[0].shortLabel + ' because of ' + losingDealsTo[0].reasons[0].shortLabel.toLowerCase() + '.')
++spacer
++spacer
+img(src=imagebase + "chrt?hash=" + images.competition, style="width: 100%;")
++spacer
++paragraph('Top reasons why each competitor beats you:')
++spacer
++spacer
+img(src=imagebase + "chrt?hash=" + images.scorestrip, style="width: 100%;")
 +spacer
 +reportlink('/', 'View Details')
 +spacer
@@ -38,6 +49,11 @@ else
 +spacer
 +paragraph('Measures overall buying experience on a scale rating of 0 to 100.')
 +spacer
++spacer
+img(src=imagebase + "chrt?hash=" + images.buyx, style="width: 100%;")
++spacer
++paragraph(changeDesc)
++spacer
 +reportlink('/', 'View Details')
 +spacer
 +hline
@@ -45,6 +61,9 @@ else
 +heading('The biggest issue in your sales process is ' + salesProcess[0].shortLabel.toLowerCase())
 +spacer
 +paragraph('Order of priority is based on ranking importance and average rating.')
++spacer
++spacer
+img(src=imagebase + "chrt?hash=" + images.salesprocess, style="width: 100%;")
 +spacer
 +reportlink('/', 'View Details')
 +spacer

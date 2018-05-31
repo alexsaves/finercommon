@@ -58,9 +58,9 @@ EmailChart.Create = function (cfg, details, cb) {
     updated_at: new Date()
   };
   extend(_Defaults, details);
-  _Defaults.img_hash = md5(image_contents);
+  _Defaults.img_hash = md5(_Defaults.image_contents);
   EmailChart.GetByHash(cfg, _Defaults.img_hash, (err, res) => {
-    if (err) {
+    if (!res) {
       var valKeys = Object.keys(_Defaults),
         query = 'INSERT INTO ' + cfg.db.db + '.' + tablename + ' SET ',
         params = [],
@@ -89,7 +89,7 @@ EmailChart.Create = function (cfg, details, cb) {
     } else {
       // It already exists. Update the updated-at value
       dbcmd
-        .cmd(cfg.pool, 'INSERT INTO ' + cfg.db.db + '.' + tablename + ' SET updated_at = ? WHERE img_hash = ?', [new Date(), _Defaults.img_hash], function (result) {
+        .cmd(cfg.pool, 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET updated_at = ? WHERE img_hash = ?', [new Date(), _Defaults.img_hash], function (result) {
           cb(null, res);
         });
     }

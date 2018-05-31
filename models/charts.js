@@ -31,6 +31,32 @@ class Charts {
   constructor() {}
 
   /**
+   * Split a string into an array of smaller strings
+   * @param {String} str 
+   * @param {Number} words 
+   */
+  _splitStringIntoParts(str, words) {
+    var parts = [""];
+    var bits = str.split(' ');
+    var i = 0,
+      run = 1;
+    while (i < bits.length) {
+      parts[parts.length - 1] += bits[i] + " ";
+      if (run == words) {
+        parts[parts.length - 1] = parts[parts.length - 1].trim();
+        run = 0;
+        parts.push("");
+      }
+      run++;
+      i++;
+    }
+    if (parts[parts.length - 1] == "") {
+      parts.splice(parts.length - 1, 1);
+    }
+    return parts;
+  }
+
+  /**
    * Get an icon name based on a label
    */
   getIconNameForLabel(label) {
@@ -39,11 +65,23 @@ class Charts {
     if (simpleStr.indexOf("business needs") > -1) {
       iconName = "notmeetneeds";
     } else if (simpleStr.indexOf("features") > -1) {
-      iconName = "features";
-    } else if (simpleStr.indexOf("external factors") > -1) { 
+      iconName = "analytics";
+    } else if (simpleStr.indexOf("external factors") > -1) {
       iconName = "externalfactors";
-    } else if (simpleStr.indexOf("external factors") > -1) { 
+    } else if (simpleStr.indexOf("price") > -1) {
       iconName = "tag";
+    } else if (simpleStr.indexOf("customer service") > -1) {
+      iconName = "customerservice";
+    } else if (simpleStr.indexOf("timeliness") > -1) {
+      iconName = "timeliness";
+    } else if (simpleStr.indexOf("budget") > -1) {
+      iconName = "price";
+    } else if (simpleStr.indexOf("other") > -1) {
+      iconName = "other";
+    } else if (simpleStr.indexOf("restructuring") > -1) {
+      iconName = "connections";
+    } else if (simpleStr.indexOf("frequency") > -1) {
+      iconName = "frequency";
     } else {
       console.log("ICON NOT KNOWN", simpleStr);
     }
@@ -71,7 +109,7 @@ class Charts {
     // Rect is more landscape than bounds - fit to width
     if (rectRatio > boundsRatio) {
       newDimensions.w = frame_width;
-      newDimensions.h = height * (frame_width / rect.width);
+      newDimensions.h = height * (frame_width / width);
     }
     // Rect is more portrait than bounds - fit to height
     else {
@@ -269,7 +307,10 @@ class Charts {
       } else {
         ctx.fillStyle = darkerColor;
       }
-      let miniBarHeight = Math.round(Math.min(1, Math.max(0, ((data.monthOverMonthScores[i] + 100) / 200))) * barHeight);
+      let miniBarHeight = 0;
+      if (data.monthOverMonthScores[i] > -1000) {
+        miniBarHeight = Math.round(Math.min(1, Math.max(0, ((data.monthOverMonthScores[i] + 100) / 200))) * barHeight);
+      }
       ctx.fillRect(leftPosition, barY + (barHeight - miniBarHeight), barWidth, miniBarHeight);
 
       leftPosition += barWidth + barWidth;
@@ -834,10 +875,22 @@ class Charts {
 
       // Write the label
       const labelY = (generalScale * 40) + fontSize;
-      this._centerText(ctx, "bold " + (fontSize * 0.85) + "px " + fontFace, row.label, darkerColorLight, leftPosition, labelY, colSize);
+      const labelparts = this._splitStringIntoParts(row.label, 2);
+      if (labelparts.length == 1) {
+        this._centerText(ctx, "bold " + (fontSize * 0.85) + "px " + fontFace, labelparts[0], darkerColorLight, leftPosition, labelY, colSize);
+      } else {
+        let yofs = -(fontSize / 2);
+        for (let p = 0; p < labelparts.length; p++) {
+          this._centerText(ctx, "bold " + (fontSize * 0.85) + "px " + fontFace, labelparts[p], darkerColorLight, leftPosition, labelY + yofs, colSize);
+          yofs += (fontSize);
+        }
+      }
 
       // Load the icon
       var icn = finalIconList[row.icon];
+      if (!icn) {
+        throw new Error("Invalid icon: " + row.icon);
+      }
       var iconImg = new Image();
       iconImg.src = icn;
       var newSize = this._fitToSize(iconImg.width, iconImg.height, colSize - padding - padding, lanyardHeight - labelY - padding - padding - padding);

@@ -14,6 +14,7 @@ const CRMOpportunities = require('../crmopportunities');
 const CRMContacts = require('../crmcontacts');
 const moment = require('moment');
 const Charts = require('../charts');
+const EmailChart = require('../emailchart');
 
 /**
  * Fix up labels to be more presentable
@@ -116,7 +117,9 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
   // Bomb out if there are no respondents
   if (respondentArr.length == 0) {
     return {
-      respondents: 0
+      respondents: 0,
+      startDate: startdate,
+      endDate: enddate
     };
   }
 
@@ -921,7 +924,7 @@ var GetFullReportForOrgAsync = async function (cfg, orgid, lastmonth) {
   var previousRecommend = [];
 
   for (let i = 0; i < reports.length; i++) {
-    var previousBuyXScore = reports[i].buyX || 0;
+    var previousBuyXScore = reports[i].buyX || -9999;
     var previousConnectorScore = reports[i].recommend ?
       reports[i].recommend.netConnector :
       0;
@@ -929,10 +932,29 @@ var GetFullReportForOrgAsync = async function (cfg, orgid, lastmonth) {
     previousRecommend.push(previousConnectorScore);
   }
 
-  // Assign
-  focusRep.previousBuyX = previousBuyX;
-  focusRep.previousRecommend = previousRecommend;
+  var changeDesc = "";
+  if (focusRep.buyX < -1000) {
+    changeDesc = "Not enough data this period to make a comparison.";
+  } else {
+    if (previousBuyX[0] < -1000) {
+      changeDesc = "There isn't enough data in your prior period to make a comparison. Stick with it!";
+    } else {
+      var mdif = Math.round((focusRep.buyX - previousBuyX[0]) * 10) / 10;
+      if (previousBuyX[0] < focusRep.buyX) {
+        changeDesc = "Your buyer journey has improved by +" + mdif + " compared to prior period.  Keep up the good work!";
+      } else {
+        changeDesc = "Your buyer journey has decreased by -" + -mdif + " compared to prior period.";
+      }
+    }
+  }
 
+  // Assign
+  focusRep.changeDesc = changeDesc;
+
+  // Assign
+  focusRep.previousBuyX = previousBuyX.reverse();
+  focusRep.previousRecommend = previousRecommend.reverse();
+  focusRep.previousReports = reports.reverse();
   focusRep.isRollingCurrentMonth = !lastmonth;
 
   return focusRep;
@@ -943,7 +965,7 @@ var GetFullReportForOrgAsync = async function (cfg, orgid, lastmonth) {
  * @param {Object} cfg 
  * @param {Object} report 
  */
-var GetImageSetForReport = function (cfg, report) {
+var GetImageSetForReport = function (cfg, report, org_id) {
   return new Promise((resolve, reject) => {
     var chrt = new Charts();
     var finalChartSet = {};
@@ -953,16 +975,125 @@ var GetImageSetForReport = function (cfg, report) {
     for (let i = 0; i < Math.min(3, report.reasonsForLoss.length); i++) {
       winLossChartData.push({
         label: report.reasonsForLoss[i].shortLabel,
-        n: report.reasonsForLoss[i].n,
+        n: report.reasonsForLoss[i].count,
         icon: chrt.getIconNameForLabel(report.reasonsForLoss[i].shortLabel)
       });
     }
     console.log(report);
     chrt.threeLanyardAsync(chartWidths, winLossChartData).then((pngBuffer) => {
-      console.log(pngBuffer);
-      res.end(pngBuffer);
+      EmailChart.Create(cfg, {
+        content_type: "image/png",
+        image_contents: pngBuffer,
+        organization_id: org_id
+      }, (err, chrtinst) => {
+        finalChartSet.winlossimage = chrtinst.img_hash;
+        // Do the competition chart
+        var competitionInfo = [];
+        var competitionReasons = [];
+        var totalAmount = 0;
+        for (let j = 0; j < report.losingDealsTo.length; j++) {
+          totalAmount += report.losingDealsTo[j].Amount;
+        }
+        for (let j = 0; j < Math.min(3, report.losingDealsTo.length); j++) {
+          competitionInfo.push({
+            title: report.losingDealsTo[j].shortLabel,
+            subTitle: "won $" + Math.round(report.losingDealsTo[j].Amount / 1000) + "K",
+            dataLabel: (Math.round((report.losingDealsTo[j].Amount / totalAmount) * 1000) / 10) + "%",
+            quantityFilled: (report.losingDealsTo[j].Amount / totalAmount)
+          });
+          var compReasons = [];
+          var compMax = 0;
+          for (let f = 0; f < report.losingDealsTo[j].reasons.length; f++) {
+            compMax += report.losingDealsTo[j].reasons[f].count;
+          }
+          for (let f = 0; f < Math.min(3, report.losingDealsTo[j].reasons.length); f++) {
+            compReasons.push({
+              label: report.losingDealsTo[j].reasons[f].shortLabel,
+              score: Math.round((report.losingDealsTo[j].reasons[f].count / compMax) * 5)
+            });
+          }
+          competitionReasons.push(compReasons);
+        }
+        chrt.barChartAsync(chartWidths, 500, competitionInfo).then((pngBuffer) => {
+          EmailChart.Create(cfg, {
+            content_type: "image/png",
+            image_contents: pngBuffer,
+            organization_id: org_id
+          }, (err, chrtinst) => {
+            finalChartSet.competition = chrtinst.img_hash;
+
+            // Do the score strip
+            chrt.scoreStripsAsync(chartWidths, 5, competitionReasons).then((pngBuffer) => {
+              EmailChart.Create(cfg, {
+                content_type: "image/png",
+                image_contents: pngBuffer,
+                organization_id: org_id
+              }, (err, chrtinst) => {
+                finalChartSet.scorestrip = chrtinst.img_hash;
+                var startofyear = moment().startOf('year').toDate();
+                var howManyLastYear = 0;
+                for (var g = report.previousReports.length - 1; g > 0; g--) {
+                  if (new Date(report.previousReports[g].endDate) < startofyear) {
+                    howManyLastYear++;
+                  }
+                }
+                // BuyX
+                chrt.buyXScoreAsync(chartWidths, 290, {
+                  leftLabel: report.isRollingCurrentMonth ? "This Month" : "Last Month",
+                  leftScore: report.buyX,
+                  subTitle: report.previousBuyX[0] > -1000 ? report.buyX > report.previousBuyX[0] ? "+" + (report.buyX - report.previousBuyX[0]) + " in " + report.monthName : "-" + -(report.buyX - report.previousBuyX[0]) + " in " + report.monthName : "",
+                  rightLabel: "BuyX Score® Trend",
+                  startDateLabel: moment(report.startDate).format('DD/MM/YYYY'),
+                  endDateLabel: moment(report.endDate).format('DD/MM/YYYY'),
+                  monthOverMonthScores: report.previousBuyX,
+                  scoresInLastYear: howManyLastYear
+                }).then((pngBuffer) => {
+                  EmailChart.Create(cfg, {
+                    content_type: "image/png",
+                    image_contents: pngBuffer,
+                    organization_id: org_id
+                  }, (err, chrtinst) => {
+                    finalChartSet.buyx = chrtinst.img_hash;
+
+                    // The sales process rating stack
+                    var salesProcessIssues = [];
+                    for (var t = 0; t < Math.min(3, report.salesProcess.length); t++) {
+                      salesProcessIssues.push({
+                        label: report.salesProcess[t].shortLabel,
+                        score: report.salesProcess[t].ratingScore,
+                        lowLabel: "Poor",
+                        highLabel: "Excellent",
+                        n: report.respondents
+                      });
+                    }
+                    chrt.ratingStackAsync(chartWidths, 7, salesProcessIssues).then((pngBuffer) => {
+                      EmailChart.Create(cfg, {
+                        content_type: "image/png",
+                        image_contents: pngBuffer,
+                        organization_id: org_id
+                      }, (err, chrtinst) => {
+                        finalChartSet.salesprocess = chrtinst.img_hash;
+
+                        resolve(finalChartSet);
+                      });
+                    }).catch((e) => {
+                      reject(e);
+                    });
+                  });
+                }).catch((e) => {
+                  reject(e);
+                });
+              });
+            }).catch((e) => {
+              reject(e);
+            });
+          });
+        }).catch((e) => {
+          reject(e);
+        });
+      });
     }).catch((e) => {
-      console.log("e", e);
+      reject(e);
     });
   });
 };
@@ -990,7 +1121,10 @@ var SendReportForOrgAsync = async function (cfg, orgid, lastmonth) {
   var assocs = await OrganizationAssociations.GetAllForOrgAsync(cfg, orgid);
 
   // Get the image set
-  var imageSet = await GetImageSetForReport(cfg, report);
+  var imageSet = await GetImageSetForReport(cfg, report, orgid);
+
+  // Assign the images to the report so we can access them in the email
+  report.images = imageSet;
 
   // Holds the accounds
   var accounts = [];
