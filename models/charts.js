@@ -31,6 +31,20 @@ class Charts {
   constructor() {}
 
   /**
+   * Trim long strings
+   * @param {String} str 
+   * @param {Number} maxlen 
+   */
+  _trimLongStringsMiddle(str, maxlen) {
+    if (str.length > maxlen) {
+      var lendiff = str.length - maxlen - 3;
+      var distFromEdge = Math.floor((str.length - lendiff) / 2);
+      return str.substr(0, distFromEdge) + "..." + str.substr(str.length - distFromEdge);
+    }
+    return str;
+  }
+
+  /**
    * Split a string into an array of smaller strings
    * @param {String} str 
    * @param {Number} words 
@@ -54,6 +68,23 @@ class Charts {
       parts.splice(parts.length - 1, 1);
     }
     return parts;
+  }
+
+  /**
+   * Make smart decisions about shortening a string
+   * @param {String} str 
+   */
+  _smartShortenString(str) {
+    if (str.indexOf("business") > -1) {
+      str = str.replace(/business/g, '');
+    }
+    if (str.indexOf("relationship") > -1) {
+      str = str.replace(/relationship/g, 'rltnshp.');
+    }
+    if (str.indexOf("Trusted") > -1) {
+      str = str.replace(/Trusted/g, 'Trstd.');
+    }
+    return str.trim();
   }
 
   /**
@@ -211,7 +242,7 @@ class Charts {
     ctx.fillStyle = darkerColorLight;
     ctx.strokeStyle = darkerColorLight;
     ctx.textAlign = "left";
-    ctx.fillText(rowData.label, x, y + fontHeight - (fontHeight * 0.3), (w / 2));
+    ctx.fillText(this._smartShortenString(rowData.label), x, y + fontHeight - (fontHeight * 0.3), (w / 2));
     const barZoneWidth = w / 2;
     const padding = barZoneWidth / 40;
     const barWidth = (barZoneWidth - ((maxScore - 1) * padding)) / maxScore;
@@ -465,7 +496,7 @@ class Charts {
       this._roundedRectangle(ctx, barColors[c], Math.round(leftPosition), barHeight - thisBarHeight, Math.round(colSize), thisBarHeight, Math.round(cornerRadius));
       this._centerText(ctx, (fontSize * 1.2) + "px " + fontFace, data[c].dataLabel, darkerColor, leftPosition, (fontHeight * 1.5), colSize);
       this._centerText(ctx, fontSize + "px " + fontFace, data[c].subTitle, darkerColor, leftPosition, h - spaceFromBottom, colSize);
-      this._centerText(ctx, "bold " + fontSize + "px " + fontFace, data[c].title, darkerColorLight, leftPosition, h - fontHeight - spaceFromBottom, colSize);
+      this._centerText(ctx, "bold " + fontSize + "px " + fontFace, this._trimLongStringsMiddle(data[c].title, 18), darkerColorLight, leftPosition, h - fontHeight - spaceFromBottom, colSize);
       ctx.fillStyle = lightColor;
       ctx.fillRect(Math.round(leftPosition + ((colSize - spacerSize.w) / 2)), ((h - (fontHeight * 2) - barHeight - spacerSize.h + (generalScale * 8)) / 2) + barHeight, spacerSize.w, spacerSize.h);
       leftPosition += colSize + padding;

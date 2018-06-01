@@ -1,4 +1,5 @@
 const Surveyvalueextractor = require('../models/surveyvalueextractor');
+const md5 = require('md5');
 
 /**
  * All the weightings for BuyX
@@ -59,6 +60,9 @@ module.exports = {
         return;
       }
       overallScore += (runningtally / itemsInGroup) * weighting.weight;
+    }
+    if (isNaN(overallScore)) {
+      throw new Error("Invalid BuyX Score");
     }
     return overallScore;
   }

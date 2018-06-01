@@ -110,7 +110,7 @@ mixin comment(cmt)
     table(cellpadding="0", cellspacing="0", border="0", width="100%")
       tr
         td(style="font-size:10px;") 
-          span(color="#00cc00", style="color:#00cc00;font-weight:bold;") #{Math.round(cmt.buyX*10)/10}
+          span(color="#00cc00", style="color:#00cc00;font-weight:bold;") #{cmt.buyXStr}
           if cmt.anonymous == false
             span &nbsp;&nbsp;&nbsp;::&nbsp;&nbsp;&nbsp;
             span(color="#8fa4af", style="color: #8fa4af;") $#{cmt.amount} Deal

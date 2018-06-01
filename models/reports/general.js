@@ -823,6 +823,10 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
       };
       if (resp.buyX) {
         cmt.buyX = resp.buyX;
+        cmt.buyXStr = "Can't compute buyX";
+        if (!isNaN(cmt.buyX)) {
+          cmt.buyXStr = Math.round(cmt.buyX * 10) / 10;
+        }
       }
       if (cmt.anonymous) {
         delete cmt.amount;
