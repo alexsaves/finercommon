@@ -113,6 +113,20 @@ class Charts {
       iconName = "connections";
     } else if (simpleStr.indexOf("frequency") > -1) {
       iconName = "frequency";
+    } else if (simpleStr.indexOf("responsiveness") > -1) {
+      iconName = "responsiveness";
+    } else if (simpleStr.indexOf("valued partner") > -1) {
+      iconName = "valuedpartner";
+    } else if (simpleStr.indexOf("leadership") > -1) {
+      iconName = "industryleader";
+    } else if (simpleStr.indexOf("ease of doing business") > -1) {
+      iconName = "connections";
+    } else if (simpleStr.indexOf("long term success") > -1) {
+      iconName = "success";
+    } else if (simpleStr.indexOf("promises") > -1 || simpleStr.indexOf("commitments") > -1) {
+      iconName = "promises";
+    } else if (simpleStr.indexOf("quality") > -1) {
+      iconName = "award";
     } else {
       console.log("ICON NOT KNOWN", simpleStr);
     }
@@ -485,8 +499,8 @@ class Charts {
     const barHeight = h - (padding * 4);
     const spaceFromBottom = generalScale * 3;
     const spacerSize = {
-      w: Math.max(2, (generalScale * 3)),
-      h: (padding * 0.6)
+      w: Math.max(2, (generalScale * 2)),
+      h: (padding * 0.5)
     };
     let leftPosition = 0;
 

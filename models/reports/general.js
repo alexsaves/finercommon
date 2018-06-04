@@ -971,10 +971,12 @@ var GetFullReportForOrgAsync = async function (cfg, orgid, lastmonth) {
  */
 var GetImageSetForReport = function (cfg, report, org_id) {
   return new Promise((resolve, reject) => {
+    console.log(report);
+
     var chrt = new Charts();
     var finalChartSet = {};
     const chartWidths = 1000;
-    // Start with the win/loss bar chart
+    // Start with the reasons for loss Lanyard chart
     var winLossChartData = [];
     for (let i = 0; i < Math.min(3, report.reasonsForLoss.length); i++) {
       winLossChartData.push({
@@ -983,7 +985,6 @@ var GetImageSetForReport = function (cfg, report, org_id) {
         icon: chrt.getIconNameForLabel(report.reasonsForLoss[i].shortLabel)
       });
     }
-    console.log(report);
     chrt.threeLanyardAsync(chartWidths, winLossChartData).then((pngBuffer) => {
       EmailChart.Create(cfg, {
         content_type: "image/png",
@@ -1078,7 +1079,85 @@ var GetImageSetForReport = function (cfg, report, org_id) {
                       }, (err, chrtinst) => {
                         finalChartSet.salesprocess = chrtinst.img_hash;
 
-                        resolve(finalChartSet);
+                        // Now do the perceptions positive chart
+                        var perceptionsPositive = [],
+                          perceptionsNegative = [];
+                        for (let i = 0; i < Math.min(3, report.perceptions.length); i++) {
+                          perceptionsPositive.push({
+                            label: report.perceptions[i].shortLabel,
+                            n: report.perceptions[i].count,
+                            icon: chrt.getIconNameForLabel(report.perceptions[i].shortLabel)
+                          });
+                        }
+                        let percepReverse = report.perceptions.reverse();
+                        for (let i = 0; i < Math.min(3, percepReverse.length); i++) {
+                          perceptionsNegative.push({
+                            label: percepReverse[i].shortLabel,
+                            n: percepReverse[i].count,
+                            icon: chrt.getIconNameForLabel(percepReverse[i].shortLabel)
+                          });
+                        }
+
+                        chrt.threeLanyardAsync(chartWidths, perceptionsPositive).then((pngBuffer) => {
+                          EmailChart.Create(cfg, {
+                            content_type: "image/png",
+                            image_contents: pngBuffer,
+                            organization_id: org_id
+                          }, (err, chrtinst) => {
+                            finalChartSet.perceptionsPositive = chrtinst.img_hash;
+
+                            // Now right away do the other one
+                            chrt.threeLanyardAsync(chartWidths, perceptionsNegative).then((pngBuffer) => {
+                              EmailChart.Create(cfg, {
+                                content_type: "image/png",
+                                image_contents: pngBuffer,
+                                organization_id: org_id
+                              }, (err, chrtinst) => {
+                                finalChartSet.perceptionsNegative = chrtinst.img_hash;
+                                var totalCount = report.recommend.futureLeadSentiment.hotLead + report.recommend.futureLeadSentiment.warmLead + report.recommend.futureLeadSentiment.coldLead;
+                                if (totalCount === 0) {
+                                  totalCount = 0.01;
+                                }
+                                var connectDiff = (report.recommend.netConnector - report.previousRecommend[0]);
+                                chrt.netConnectorChartAsync(1000, 380, {
+                                  leftLabel: "Net Connector Score®",
+                                  rightLabel: "Future Lead Sentiment",
+                                  leftSubLabel: "This month",
+                                  leftDiffLabel: (connectDiff > 0 ? "+" + connectDiff : connectDiff) + " than previous",
+                                  leftScore: report.recommend.netConnector,
+                                  sentimentPie: [{
+                                      label: "Hot",
+                                      quantity: report.recommend.futureLeadSentiment.hotLead === 0 ? 0 : Math.round((report.recommend.futureLeadSentiment.hotLead / totalCount) * 100)
+                                    },
+                                    {
+                                      label: "Warm",
+                                      quantity: report.recommend.futureLeadSentiment.warmLead === 0 ? 0 : Math.round((report.recommend.futureLeadSentiment.warmLead / totalCount) * 100)
+                                    },
+                                    {
+                                      label: "Cold",
+                                      quantity: report.recommend.futureLeadSentiment.coldLead === 0 ? 0 : Math.round((report.recommend.futureLeadSentiment.coldLead / totalCount) * 100)
+                                    }
+                                  ]
+                                }).then((pngBuffer) => {
+                                  EmailChart.Create(cfg, {
+                                    content_type: "image/png",
+                                    image_contents: pngBuffer,
+                                    organization_id: org_id
+                                  }, (err, chrtinst) => {
+                                    finalChartSet.netConnectorChart = chrtinst.img_hash;
+                                    resolve(finalChartSet);
+                                  });
+                                }).catch((e) => {
+                                  reject(e);
+                                });
+                              });
+                            }).catch((e) => {
+                              reject(e);
+                            });
+                          });
+                        }).catch((e) => {
+                          reject(e);
+                        });
                       });
                     }).catch((e) => {
                       reject(e);

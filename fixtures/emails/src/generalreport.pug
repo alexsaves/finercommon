@@ -73,7 +73,13 @@ img(src=imagebase + "chrt?hash=" + images.salesprocess, style="width: 100%;")
 +spacer
 +paragraph('What you\'re doing well:')
 +spacer
++spacer
+img(src=imagebase + "chrt?hash=" + images.perceptionsPositive, style="width: 100%;")
++spacer
 +paragraph('What you need to do better:')
++spacer
++spacer
+img(src=imagebase + "chrt?hash=" + images.perceptionsNegative, style="width: 100%;")
 +spacer
 +reportlink('/', 'View Details')
 +spacer
@@ -83,6 +89,9 @@ if recommend.majorityWillingToReconnect
   +heading('Good news: ' + recommend.willingToReconnect + '% are willing to reconnect')
 else
   +heading('Only ' + recommend.willingToReconnect + '% are willing to reconnect')
++spacer
++spacer
+img(src=imagebase + "chrt?hash=" + images.netConnectorChart, style="width: 100%;")
 +spacer
 +reportlink('/', 'View Details')
 +spacer
