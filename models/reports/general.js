@@ -695,7 +695,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
       }
     }
   }
-  var netConnect = ((hotLead / totalAnswers) - ((coldLead + warmLead) / totalAnswers));
+  var netConnect = ((hotLead / totalAnswers) - (coldLead / totalAnswers));
 
   // Calculate the answers
   var recommend = {

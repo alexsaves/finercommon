@@ -4,8 +4,7 @@ const md5 = require('md5');
 /**
  * All the weightings for BuyX
  */
-const BuyXWeightings = [
-  {
+const BuyXWeightings = [{
     segment: "Overall",
     questions: ["buyXRating"],
     weight: 0.25
@@ -35,7 +34,7 @@ module.exports = {
   /**
    * Get a response from a list of responses
    */
-  GetResponse: function(qname, resps, surveydef) {
+  GetResponse: function (qname, resps, surveydef) {
     var res = ValueExtractor.getSurveyQuestionValue(qname, resps, surveydef, {}, {});
     return res;
   },
@@ -43,7 +42,7 @@ module.exports = {
   /**
    * Get a buyX Score. -1 is no score possible
    */
-  CalculateBuyXFromResponses: function(surveydef, responses) {
+  CalculateBuyXFromResponses: function (surveydef, responses) {
     let overallScore = 0;
     for (let i = 0; i < BuyXWeightings.length; i++) {
       let weighting = BuyXWeightings[i];
@@ -54,7 +53,7 @@ module.exports = {
         if (ans != null) {
           itemsInGroup++;
           runningtally += ans;
-        }        
+        }
       }
       if (itemsInGroup == 0) {
         return;
@@ -64,6 +63,6 @@ module.exports = {
     if (isNaN(overallScore)) {
       throw new Error("Invalid BuyX Score");
     }
-    return overallScore;
+    return ((overallScore - 1) / 6) * 100;
   }
 };
