@@ -1226,8 +1226,10 @@ var SendReportForOrgAsync = async function (cfg, orgid, lastmonth) {
   }
 
   // Send all the emails
-  for (let i = 0; i < accounts.length; i++) {}
-  var result = await SendReportWithDataToRecipient(cfg, report, org, "alexei.white@gmail.com", true);
+  var result;
+  for (let i = 0; i < accounts.length; i++) {
+    result = await SendReportWithDataToRecipient(cfg, report, org, accounts[i].email, false);
+  }
   return result;
 };
 
