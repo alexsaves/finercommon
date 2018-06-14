@@ -2,8 +2,8 @@
  * Set up an object to expose
  */
 var FinerCommon = {
-  models: require('./models/all'),
-  Renderer: require('./renderer'),
+  version: require('./package.json').version,
+  models: require('./models/all')
 };
 
 // Expose it
