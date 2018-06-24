@@ -48,6 +48,34 @@ CRMContacts.GetByIdAsync = function (cfg, guid) {
 };
 
 /**
+ * Get CRMContacts by an array of ids
+ */
+CRMContacts.GetByIds = function (cfg, oids, cb) {
+  cb = cb || function () {};
+  if (oids && oids.length > 0) {
+    var finalStr = "(";
+    for (var k = 0; k < oids.length; k++) {
+      if (k > 0) {
+        finalStr += ", ";
+      }
+      finalStr += "'" + oids[k] + "'";
+    }
+    finalStr += ")";
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE Id IN ' + finalStr, function (result) {
+      var res = [];
+      for (var i = 0; i < result.length; i++) {
+        res.push(new CRMContacts(result[i]));
+      }
+      cb(null, res);
+    }, function (err) {
+      cb(err);
+    });
+  } else {
+    cb(null, []);
+  }
+};
+
+/**
  * Get contacts by an array of ids
  */
 CRMContacts.GetByAccountIds = function (cfg, aids, cb) {
