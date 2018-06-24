@@ -6,10 +6,11 @@ const shortid = require('shortid');
 const Email = require('../models/email');
 const CRMIntegrations = require('../models/crmintegrations');
 const CRMContacts = require('../models/crmcontacts');
+const CRMUsers = require('../models/crmusers');
 
 /**
-* The account class
-*/
+ * The account class
+ */
 var Approval = function (details) {
   extend(this, details || {});
 };
@@ -29,31 +30,56 @@ Approval.prototype.execute = function (cfg, cb) {
   const Organization = require('../models/organization');
   if (this.sendState == Approval.SEND_STATES.UNSENT) {
     this.sendState = Approval.SEND_STATES.SENT;
-    CRMContacts.GetById(cfg, this.crm_contact_id, (err, cntc) => {
+    Organization.GetById(cfg, this.organization_id, (err, org) => {
       if (err) {
         cb(err);
       } else {
-        Organization.GetById(cfg, this.organization_id, (err, org) => {
-          if (err) {
-            cb(err);
-          } else {
-            // Invite updated! Send an updated email
-            let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
-            emailCtrl.send(cfg, org.id, cfg.email.defaultFrom, cntc.Email, 'inviteprospectsurvey', cntc.FirstName + ', help ' + org.name + ' do better in the future!', {
-              contact: cntc,
-              org: org,
-              surveyurl: cfg.surveyUrl + "/s/" + encodeURIComponent(this.survey_guid) + "/2?p=" + encodeURIComponent(this.guid)
-            }, (err) => {
-              if (err) {
-                console.log("Error sending invitation email", err);
-                cb("Error sending invitation email");
-              } else {
-                // Success
-                this.commit(cfg, cb);
-              }
-            });
-          }
-        });
+        if (this.crm_contact_id) {
+          CRMContacts.GetById(cfg, this.crm_contact_id, (err, cntc) => {
+            if (err) {
+              cb(err);
+            } else {
+              // Invite updated! Send an updated email
+              let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
+              emailCtrl.send(cfg, org.id, cfg.email.defaultFrom, cntc.Email, 'inviteprospectsurvey', cntc.FirstName + ', help ' + org.name + ' do better in the future!', {
+                contact: cntc,
+                org: org,
+                surveyurl: cfg.surveyUrl + "/s/" + encodeURIComponent(this.survey_guid) + "/2?p=" + encodeURIComponent(this.guid)
+              }, (err) => {
+                if (err) {
+                  console.log("Error sending invitation email", err);
+                  cb("Error sending invitation email");
+                } else {
+                  // Success
+                  this.commit(cfg, cb);
+                }
+              });
+            }
+          });
+        } else {
+          // Sales person
+          CRMUsers.GetById(cfg, this.crm_user_id, (err, cntc) => {
+            if (err) {
+              cb(err);
+            } else {
+              // Invite updated! Send an updated email
+              let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
+              emailCtrl.send(cfg, org.id, cfg.email.defaultFrom, cntc.Email, 'inviteprospectsurvey', cntc.FirstName + ', help ' + org.name + ' do better in the future!', {
+                contact: cntc,
+                org: org,
+                surveyurl: cfg.surveyUrl + "/s/" + encodeURIComponent(this.survey_guid) + "/2?p=" + encodeURIComponent(this.guid)
+              }, (err) => {
+                if (err) {
+                  console.log("Error sending invitation email", err);
+                  cb("Error sending invitation email");
+                } else {
+                  // Success
+                  this.commit(cfg, cb);
+                }
+              });
+            }
+          });
+        }
       }
     });
   } else {
@@ -66,7 +92,7 @@ Approval.prototype.execute = function (cfg, cb) {
  * @param {*} cfg
  */
 Approval.prototype.executeAsync = async function (cfg) {
-  await(() => {
+  await (() => {
     return new Promise(resolve => {
       this.execute(cfg, (err) => {
         resolve(err);
@@ -76,8 +102,8 @@ Approval.prototype.executeAsync = async function (cfg) {
 };
 
 /**
-* Save any changes to the DB row
-*/
+ * Save any changes to the DB row
+ */
 Approval.prototype.commit = function (cfg, cb) {
   cb = cb || function () {};
   var excludes = [
@@ -109,18 +135,17 @@ Approval.prototype.commit = function (cfg, cb) {
 };
 
 /**
-* Get an approval by its id
-*/
+ * Get an approval by its id
+ */
 Approval.GetByGuid = function (cfg, guid, cb) {
   cb = cb || function () {};
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE guid = ?', [guid], function (result) {
-    cb(result.length === 0
-      ? {
+    cb(result.length === 0 ? {
         message: "No approval found."
-      }
-      : null, result.length > 0
-      ? new Approval(result[0])
-      : null);
+      } :
+      null, result.length > 0 ?
+      new Approval(result[0]) :
+      null);
   }, function (err) {
     cb(err);
   });
@@ -157,8 +182,8 @@ Approval.GetForContacts = function (cfg, contacts, cb) {
 };
 
 /**
-* Get an approval by its oppportunity ID and contact
-*/
+ * Get an approval by its oppportunity ID and contact
+ */
 Approval.GetByOppAndContact = function (cfg, opportunity_id, crm_contact_id, cb) {
   cb = cb || function () {};
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE opportunity_id = ? AND crm_contact_id = ? LIMIT 1', [
@@ -215,8 +240,8 @@ Approval.GetListAsync = function (cfg, approvalIds) {
 };
 
 /**
-* Get an approval by its oppportunity ID and contacts (array)
-*/
+ * Get an approval by its oppportunity ID and contacts (array)
+ */
 Approval.GetByOppAndContacts = function (cfg, opportunity_id, crm_contact_ids, cb) {
   cb = cb || function () {};
   if (!crm_contact_ids || crm_contact_ids.length == 0) {
@@ -255,8 +280,8 @@ Approval.GetByOppAndContacts = function (cfg, opportunity_id, crm_contact_ids, c
 };
 
 /**
-* Get an approval by its oppportunity ID and contacts (array)
-*/
+ * Get an approval by its oppportunity ID and contacts (array)
+ */
 Approval.GetByOppAndContactsAsync = function (cfg, opportunity_id, crm_contact_ids) {
   return new Promise((resolve, reject) => {
     Approval.GetByOppAndContacts(cfg, opportunity_id, crm_contact_ids, (err, apprvs) => {
@@ -270,8 +295,8 @@ Approval.GetByOppAndContactsAsync = function (cfg, opportunity_id, crm_contact_i
 };
 
 /**
-* Delete all
-*/
+ * Delete all
+ */
 Approval.DeleteAll = function (cfg, cb) {
   cb = cb || function () {};
   dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE guid NOT NULL', function () {
@@ -282,8 +307,8 @@ Approval.DeleteAll = function (cfg, cb) {
 };
 
 /**
-* Create an approval
-*/
+ * Create an approval
+ */
 Approval.Create = function (cfg, details, cb) {
   cb = cb || function () {};
   details = details || {};

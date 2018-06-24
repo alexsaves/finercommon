@@ -39,7 +39,7 @@ CRMContacts.IsIDAContactAsync = function(cfg, guid) {
   return new Promise((resolve, reject) => {
     CRMContacts.GetById(cfg, guid, (err, cnt) => {
       if (err) {
-        reject(false);
+        resolve(false);
       } else {
         resolve(!!cnt);
       }

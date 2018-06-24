@@ -1,0 +1,3 @@
+We noticed that you were involved in the sales process for prospect %<= org.name %> in a potential deal. Please help us find out how we can do better next time.
+
+Start it here: <%= surveyurl %>
