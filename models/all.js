@@ -14,6 +14,7 @@ var All = {
     CRMIntegrations: require('../models/crmintegrations'),
     CRMAccounts: require('../models/crmaccounts'),
     CRMContacts: require('../models/crmcontacts'),
+    CRMOpportunityRoles: require('../models/crmopportunityroles'),
     CRMUsers: require('../models/crmusers'),
     CRMOrganizations: require('../models/crmorganizations'),
     CRMOpportunities: require('../models/crmopportunities'),
