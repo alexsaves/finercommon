@@ -64,7 +64,7 @@ Approval.prototype.execute = function (cfg, cb) {
             } else {
               // Invite updated! Send an updated email
               let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
-              emailCtrl.send(cfg, org.id, cfg.email.defaultFrom, cntc.Email, 'inviteprospectsurvey', cntc.FirstName + ', help ' + org.name + ' do better in the future!', {
+              emailCtrl.send(cfg, org.id, cfg.email.defaultFrom, cntc.Email, 'inviteusersurvey', cntc.FirstName + ', help ' + org.name + ' do better in the future!', {
                 contact: cntc,
                 org: org,
                 surveyurl: cfg.surveyUrl + "/s/" + encodeURIComponent(this.survey_guid) + "/2?p=" + encodeURIComponent(this.guid)
