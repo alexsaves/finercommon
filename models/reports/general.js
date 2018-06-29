@@ -78,6 +78,8 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
 
   // First get all the customer surveys
   let svs = await survey.GetForOrganizationAndTypeAsync(cfg, orgid, survey.SURVEY_TYPES.PROSPECT);
+  let esvs = await survey.GetForOrganizationAndTypeAsync(cfg, orgid, survey.SURVEY_TYPES.EMPLOYEE);
+  svs = svs.concat(esvs);
 
   // A flat array of respondents with their surveys
   let respondentArr = [];
@@ -236,6 +238,8 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
 
     // Iterate over the surveys for this opportunity
     let surveysForOpp = await Survey.GetForOpportunityAndTypeAsync(cfg, theOpp.id, Survey.SURVEY_TYPES.PROSPECT);
+    let surveysForOppEmp = await Survey.GetForOpportunityAndTypeAsync(cfg, theOpp.id, Survey.SURVEY_TYPES.EMPLOYEE);
+    surveysForOpp = surveysForOpp.concat(surveysForOppEmp);
     theOpp.surveys = surveysForOpp;
 
     // Get all the respondents for each opportunity
@@ -327,11 +331,13 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     });
 
     // Now we have a sorted list
-    var winningVendor = orgVotes[0];
-    winningVendor.Amount = !!theOpp ?
-      theOpp.Amount :
-      0;
-    theOpp.winningVendor = winningVendor;
+    if (orgVotes.length > 0) {
+      var winningVendor = orgVotes[0];
+      winningVendor.Amount = !!theOpp ?
+        theOpp.Amount :
+        0;
+      theOpp.winningVendor = winningVendor;
+    }
 
     // Merge with the master list
     var existingItem = competitorInfo.find((og) => {
