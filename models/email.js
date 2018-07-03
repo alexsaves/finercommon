@@ -53,10 +53,12 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
       callback(err);
     } else {
       if (!canit) {
+        console.log(`[${(new Date()).toString()}] CANNOT SEND EMAIL TO ${useremail} DUE TO UNSUBSCRIBE.`);
         console.log("NOT SENDING EMAIL TO ", useremail);
         callback();
       } else {
         details = extend({
+          portalbase: cfg.portalUrl,
           imagebase: cfg.portalUrl + "/eml/",
           unsuburl: cfg.portalUrl + EmailUnsubscription.GenerateValidUnsubscribeLink(useremail, org)
         }, details);
@@ -66,6 +68,7 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
           baserawtemplatefile = fs
             .readFileSync(__dirname + '/../fixtures/emails/src/_base_raw.txt', 'utf8')
             .toString();
+        //let pfiles = fs.readdirSync(__dirname + '/../fixtures/emails/src/');
         let templatefile = fs
             .readFileSync(__dirname + '/../fixtures/emails/src/' + template + '.pug', 'utf8')
             .toString(),
@@ -92,7 +95,7 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
           }
         } else {
           var transporter = nodemailer.createTransport(sesTransport({region: this.server, accessKeyId: this.key, secretAccessKey: this.secret, rateLimit: 5}));
-
+          console.log(`[${(new Date()).toString()}] SENDING EMAIL TO ${to} WITH SUBJECT ${subject}.`);
           transporter.sendMail({
             to: to,
             from: from,

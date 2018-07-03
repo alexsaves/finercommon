@@ -887,8 +887,8 @@ class Charts {
    * @param {Array} data 
    */
   async threeLanyardAsync(w, data) {
-    if (data.length != 3) {
-      throw new Error("Invalid number of lanyards (must be 3).");
+    while (data.length < 3) {
+      data.push(null);
     }
     if (arguments.length != 2) {
       throw new Error("Invalid arguments");
@@ -914,6 +914,9 @@ class Charts {
     let leftPosition = 0;
     for (let c = 0; c < data.length; c++) {
       let row = data[c];
+      if (row === null) {
+        continue;
+      }
       let xoffset = c === 0 ? (generalScale * -2) : 0;
       ctx.drawImage(lanImg, leftPosition, 0, colSize, lanyardHeight);
       this._centerText(ctx, "bold " + fontSize + "px " + fontFace, (c + 1).toString(), darkerColorLight, leftPosition + xoffset, (generalScale * 5) + fontSize, colSize);
