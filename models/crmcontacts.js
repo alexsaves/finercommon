@@ -31,6 +31,23 @@ CRMContacts.GetById = function (cfg, guid, cb) {
 };
 
 /**
+ * Is this ID a CRM contact?
+ * @param {Object} cfg 
+ * @param {String} guid 
+ */
+CRMContacts.IsIDAContactAsync = function(cfg, guid) {
+  return new Promise((resolve, reject) => {
+    CRMContacts.GetById(cfg, guid, (err, cnt) => {
+      if (err) {
+        resolve(false);
+      } else {
+        resolve(!!cnt);
+      }
+    });
+  });
+}
+
+/**
  * Get a CRM contact (ASYNC)
  * @param {*} cfg
  * @param {*} guid
@@ -45,6 +62,34 @@ CRMContacts.GetByIdAsync = function (cfg, guid) {
       }
     });
   });
+};
+
+/**
+ * Get CRMContacts by an array of ids
+ */
+CRMContacts.GetByIds = function (cfg, oids, cb) {
+  cb = cb || function () {};
+  if (oids && oids.length > 0) {
+    var finalStr = "(";
+    for (var k = 0; k < oids.length; k++) {
+      if (k > 0) {
+        finalStr += ", ";
+      }
+      finalStr += "'" + oids[k] + "'";
+    }
+    finalStr += ")";
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE Id IN ' + finalStr, function (result) {
+      var res = [];
+      for (var i = 0; i < result.length; i++) {
+        res.push(new CRMContacts(result[i]));
+      }
+      cb(null, res);
+    }, function (err) {
+      cb(err);
+    });
+  } else {
+    cb(null, []);
+  }
 };
 
 /**

@@ -378,6 +378,15 @@ Organization.Create = function (cfg, details, cb) {
 };
 
 /**
+ * Get all the users for this org
+ * @param {Object} cfg 
+ */
+Organization.prototype.getAllUsersOfOrgAsync = async function(cfg) {
+  let assocs = await OrganizationAssociations.GetAllForOrgAsync(cfg, this.id);
+  return assocs;
+};
+
+/**
  * Save any changes to the DB row
  */
 Organization.prototype.commit = function (cfg, cb) {

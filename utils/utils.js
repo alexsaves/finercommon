@@ -85,7 +85,7 @@ var utils = {
                 if (data[desc.name]) {
                     valueSet.push(`${data[desc.name]}`);
                 } else {
-                    valueSet.push('NULL');
+                    valueSet.push(null);
                 }
             }
             params = params

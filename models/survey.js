@@ -11,7 +11,8 @@ const SurveyValueExtractor = require('../models/surveyvalueextractor');
 const Piper = require('../models/piper');
 
 // Fixtures
-var prospect_survey_fixture = JSON.parse(fs.readFileSync(__dirname + '/../fixtures/surveys/questionnaire.json').toString('utf-8'));
+const prospect_survey_fixture = JSON.parse(fs.readFileSync(__dirname + '/../fixtures/surveys/questionnaire.json').toString('utf-8'));
+const internal_survey_fixture = JSON.parse(fs.readFileSync(__dirname + '/../fixtures/surveys/salesquestionnaire.json').toString('utf-8'));
 
 /**
  * The survey class
@@ -133,6 +134,8 @@ Survey.getSurveyFixture = function (SURVEY_TYPE) {
     switch (SURVEY_TYPE) {
         case Survey.SURVEY_TYPES.PROSPECT:
             return JSON.parse(JSON.stringify(prospect_survey_fixture));
+        case Survey.SURVEY_TYPES.EMPLOYEE:
+            return JSON.parse(JSON.stringify(internal_survey_fixture));
         default:
             throw new Error("Missing Survey Fixture Type");
     }
