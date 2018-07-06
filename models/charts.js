@@ -124,7 +124,7 @@ class Charts {
     } else if (simpleStr.indexOf("long term success") > -1) {
       iconName = "success";
     } else if (simpleStr.indexOf("promises") > -1 || simpleStr.indexOf("commitments") > -1) {
-      iconName = "promises";
+      iconName = "promise";
     } else if (simpleStr.indexOf("quality") > -1) {
       iconName = "award";
     } else {
