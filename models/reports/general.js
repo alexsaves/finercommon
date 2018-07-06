@@ -1250,10 +1250,10 @@ var SendReportWithDataToRecipient = async function (cfg, data, org, recipient, f
   const Email = require('../../models/email');
   let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
   if (data.respondents === 0) {
-    var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, recipient, 'generalreport_norespondents', 'Help ' + org.name + ' do better in the future!', data, fakeSend);
+    var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, recipient, 'generalreport_norespondents', 'FinerInk summary report for ' + org.name, data, fakeSend);
     return result;
   } else {
-    var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, recipient, 'generalreport', 'Help ' + org.name + ' do better in the future!', data, fakeSend);
+    var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, recipient, 'generalreport', 'FinerInk summary report for ' + org.name, data, fakeSend);
     return result;
   }
 };

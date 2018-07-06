@@ -75,6 +75,7 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
           rawtemplatefile = fs
             .readFileSync(__dirname + '/../fixtures/emails/src/' + template + '_raw.txt', 'utf8')
             .toString();
+        console.log("EMAIL RENDERING TEMPLATE " + template);
         let richBaseTemplate = pug.compile(basetemplatefile, {});
         let richTemplate = pug.compile(templatefile, {});
 
