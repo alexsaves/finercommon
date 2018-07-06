@@ -17,7 +17,7 @@ br
 br
 +paragraph('These surveys are ready to go. What should we do with them?')
 br
-div(style="font-size:14px;") Take action: #[a(href=portalbase + '/app/surveylog/approvals#action=cancelall&state=' + approvalUIData) Cancel all] | #[a(href=portalbase + '/app/surveylog/approvals#action=approveall&state=' + approvalUIData) Approve all]
+div(style="font-size:14px;") Take action: #[a(href=portalbase + '/app/surveylog/approvals?action=cancelall&state=' + approvalUIData) Cancel all] | #[a(href=portalbase + '/app/surveylog/approvals?action=approveall&state=' + approvalUIData) Approve all]
 br
 +paragraph('Or, you can deal with them individually:')
 br
@@ -32,4 +32,4 @@ table(width="100%")
       td(style="font-size:14px;")= val.account.Name
       td(style="font-size:14px;")= val.amount
       td(style="font-size:14px;")= val.daysDiff
-      td(style="font-size:14px;") #[a(href=portalbase + '/app/surveylog/approvals#action=acton&opp=' + val.id + '&account=' + val.account.Id + '&state=' + approvalUIData) Need action]
+      td(style="font-size:14px;") #[a(href=portalbase + '/app/surveylog/approvals?action=acton&opp=' + val.id + '&account=' + val.account.Id + '&state=' + approvalUIData) Need action]
