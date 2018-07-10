@@ -1,5 +1,5 @@
 br
-div(align="center",style="line-height: 28px; font-size: 24px;font-weight:bold;text-align:center;color:#424242;", color="#424242") Your Monthly Update on Win / Loss Analysis
+div(align="center",style="line-height: 28px; font-size: 24px;font-weight:bold;text-align:center;color:#424242;padding-left:45px; padding-right: 45px;", color="#424242")= reportTitle
 mixin hline
   img(src=imagebase + "greybox.png", style="width: 100%; height: 1px;", width="100%", height="1", border="0", data-imagetype="External")
 mixin spacer
@@ -13,8 +13,9 @@ mixin paragraph(contents)
 mixin darkparagraph(contents)
   div(style="color:#000000;font-size:14px;", color="#000000")= contents
 mixin reportlink(linkref, contents)
-  a(href=linkref)= contents
-+heading('Win/Loss Analysis')
+  span
+  //a(href=linkref)= contents
++heading('Primary Reason for Loss')
 +spacer
 
 if isRollingCurrentMonth
@@ -29,7 +30,7 @@ img(src=imagebase + "chrt?hash=" + images.winlossimage, style="width: 100%;")
 +spacer
 +hline
 +spacer
-+heading('Competition')
++heading('Top competitors and their reasons for winning')
 +spacer
 +paragraph('Your toughest competition is ' + losingDealsTo[0].shortLabel + ' because of ' + losingDealsTo[0].reasons[0].shortLabel.toLowerCase() + '.')
 +spacer

@@ -1,5 +1,4 @@
 const dbcmd = require('../utils/dbcommand');
-const md5 = require('md5');
 const extend = require('extend');
 const tablename = 'organizations';
 const CRMIntegrations = require('../models/crmintegrations');
@@ -50,7 +49,9 @@ Organization.ComputeAllPreviousMonthlyReports = async function (cfg) {
   if (orgs && orgs.length > 0) {
     // Loop over the orgs and grab all their reports
     for (let i = 0; i < orgs.length; i++) {
-      orgs[i].reports = await orgs[i].ComputeAllPreviousMonthlyReportsAsync(cfg);
+      if (orgs[i].daysAlive() > 5) {
+        orgs[i].reports = await orgs[i].ComputeAllPreviousMonthlyReportsAsync(cfg);
+      }
     }
   }
   return orgs;
@@ -147,6 +148,14 @@ Organization.prototype.getOwnerAccount = function (cfg, cb) {
       }
     }
   });
+};
+
+/**
+ * How long has this org been around?
+ */
+Organization.prototype.daysAlive = function () {
+  var cat = moment(this.created_at);
+  return moment().diff(cat, 'days');
 };
 
 /**
@@ -379,9 +388,9 @@ Organization.Create = function (cfg, details, cb) {
 
 /**
  * Get all the users for this org
- * @param {Object} cfg 
+ * @param {Object} cfg The DB Configuration
  */
-Organization.prototype.getAllUsersOfOrgAsync = async function(cfg) {
+Organization.prototype.getAllUsersOfOrgAsync = async function (cfg) {
   let assocs = await OrganizationAssociations.GetAllForOrgAsync(cfg, this.id);
   return assocs;
 };
