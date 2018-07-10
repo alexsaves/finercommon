@@ -388,7 +388,7 @@ Organization.Create = function (cfg, details, cb) {
 
 /**
  * Get all the users for this org
- * @param {Object} cfg
+ * @param {Object} cfg The DB Configuration
  */
 Organization.prototype.getAllUsersOfOrgAsync = async function (cfg) {
   let assocs = await OrganizationAssociations.GetAllForOrgAsync(cfg, this.id);

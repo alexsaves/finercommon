@@ -709,6 +709,9 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
       coldLead: coldLead
     }
   };
+  if (recommend.willingToReconnect === Infinity) {
+    recommend = 100;
+  }
   if (recommend.willingToReconnect > 50) {
     recommend.majorityWillingToReconnect = true;
   } else {
@@ -1230,9 +1233,13 @@ var SendReportForOrgAsync = async function (cfg, orgid, lastmonth) {
     report.comments.length = 3;
   }
 
+  // Set the report title
+  report.reportTitle = "Your " + report.monthName + " Win/Loss Report";
+
   // Send all the emails
   var result;
   for (let i = 0; i < accounts.length; i++) {
+    //accounts[i].email = "alexei.white@gmail.com";
     result = await SendReportWithDataToRecipient(cfg, report, org, accounts[i].email, false);
   }
   return result;
@@ -1250,10 +1257,10 @@ var SendReportWithDataToRecipient = async function (cfg, data, org, recipient, f
   const Email = require('../../models/email');
   let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
   if (data.respondents === 0) {
-    var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, recipient, 'generalreport_norespondents', 'FinerInk summary report for ' + org.name, data, fakeSend);
+    var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, recipient, 'generalreport_norespondents', 'Your ' + data.monthName + ' Win/Loss Report for ' + org.name, data, fakeSend);
     return result;
   } else {
-    var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, recipient, 'generalreport', 'FinerInk summary report for ' + org.name, data, fakeSend);
+    var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, recipient, 'generalreport', 'Your ' + data.monthName  + ' Win/Loss Report for ' + org.name, data, fakeSend);
     return result;
   }
 };
