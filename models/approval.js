@@ -165,7 +165,7 @@ Approval.GetForContacts = function (cfg, contacts, cb) {
     });
   } else {
     const contactIds = contacts.map(c => c.Id);
-    dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE crm_contact_id IN (${contactIds.map(c => '?').join(', ')})`, contactIds, function (result) {
+    dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE crm_contact_id IN (${contactIds.map(c => '?').join(', ')}) OR crm_user_id IN (${contactIds.map(c => '?').join(', ')})`, contactIds.concat(contactIds), function (result) {
       if (result && result.length > 0) {
         var res = [];
         for (var i = 0; i < result.length; i++) {

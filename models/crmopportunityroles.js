@@ -3,6 +3,7 @@ const md5 = require('md5');
 const extend = require('extend');
 const uuidV4 = require('uuid/v4');
 const utils = require('../utils/utils');
+const CRMContacts = require('../models/crmcontacts');
 const tablename = 'crm_opportunity_roles ';
 
 /**
@@ -19,16 +20,50 @@ var CRMOpportunityRoles = function (details) {
 CRMOpportunityRoles.GetByOpportunityId = function (cfg, opportunity_id, cb) {
   cb = cb || function () {};
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE OpportunityId = ?', [opportunity_id], function (result) {
+    var rescol = [];
+    for (let i = 0; i < result.length; i++) {
+      rescol.push(new CRMOpportunityRoles(result[i]));
+    }
     cb(result.length === 0
       ? {
         message: "No approval found."
       }
       : null, result.length > 0
-      ? new CRMOpportunityRoles(result[0])
+      ? rescol
       : null);
   }, function (err) {
     cb(err);
   });
+};
+
+/**
+ * Get all Contact by their opportunity with prepolulated contacts
+ * @param {*} cfg 
+ * @param {*} opportunity_id 
+ * @param {*} cb 
+ */
+CRMOpportunityRoles.GetByOpportunityIdWithContacts = function (cfg, opportunity_id, cb) {
+  CRMOpportunityRoles.GetByOpportunityId(cfg, opportunity_id, (err, clist) => {
+    if (err) {
+      cb(err);
+    } else {
+      let contactids = clist.map((c) => {
+        return c.ContactId;
+      });
+      CRMContacts.GetByIds(cfg, contactids, (err, contactlist) => {
+        if (err) {
+          cb(err);
+        } else {
+          clist.forEach((c) => {
+            c.contact = contactlist.find((cl) => {
+              return cl.Id == c.ContactId;
+            });
+          });
+          cb(null, clist);
+        }
+      });
+    }
+  })
 };
 
 /**
