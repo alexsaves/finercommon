@@ -72,7 +72,7 @@ Account.prototype.sendValidationEmail = function (cfg, cb) {
             // Success
             cb(null);
         }
-    });
+    }, false, true);
 }
 
 /**

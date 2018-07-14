@@ -41,7 +41,7 @@ Email._extractEmailFromString = function (searchInThisString) {
 /**
  * Send an email
  */
-Email.prototype.send = function (cfg, org, from, to, template, subject, details, callback, fakeSend) {
+Email.prototype.send = function (cfg, org, from, to, template, subject, details, callback, fakeSend, sendplain = false) {
   callback = callback || function () {};
   if (arguments.length < 8) {
     throw new Error("Email controller - missing callback");
@@ -97,13 +97,17 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
         } else {
           var transporter = nodemailer.createTransport(sesTransport({region: this.server, accessKeyId: this.key, secretAccessKey: this.secret, rateLimit: 5}));
           console.log(`[${(new Date()).toString()}] SENDING EMAIL TO ${to} WITH SUBJECT ${subject}.`);
-          transporter.sendMail({
+          const emailobj = {
             to: to,
             from: from,
             subject: subject,
             html: templateResult,
             text: rawresult
-          }, function (err, data, res) {
+          };
+          if (sendplain) {
+            delete emailobj.html;
+          }
+          transporter.sendMail(emailobj, function (err, data, res) {
             if (callback) {
               if (!err) {
                 data.fullEmail = templateResult;

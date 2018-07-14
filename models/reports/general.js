@@ -181,7 +181,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
               existingEntry = {
                 label: val,
                 shortLabel: ShortCleanupOnLabels(val),
-                count: 0
+                count: 1
               };
               reasonsForLoss.push(existingEntry);
             }
@@ -564,6 +564,10 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     let maxPerc = proc.importanceScore / salesProcessMaxImportance;
     let ratingPerc = 1 - ((proc.ratingScore - 1) / 6);
     proc.importanceOpportunityScore = (ratingPerc + maxPerc) / 2;
+    if (proc.topRatedCount === 0) {
+      proc.importanceOpportunityScore = 0;
+      proc.importanceScore = 0;
+    }
   }
 
   // Sort by importance
@@ -853,7 +857,6 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     }
   }
 
-  // Assign it
   resultObject.comments = commentList;
 
   // Return the result array

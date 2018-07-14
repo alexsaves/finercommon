@@ -567,8 +567,6 @@ class Charts {
     if (data.length > 3) {
       data.length = 3;
     }
-    //ctx.fillStyle = darkerColorLight;
-    //ctx.fillRect(x, y, w, h);
 
     /**
      * Draw a label
@@ -742,6 +740,7 @@ class Charts {
 
     return await this._canvasToPNGBufferAsync(canvas);
   }
+  
   /**
    * Draw the rating stack chart Asynchronously
    * @param {Number} w 
