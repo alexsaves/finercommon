@@ -741,13 +741,16 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
         let q = elms.find((q) => {
           return q.name == srch;
         });
-        if (q && typeof (q.subtitle) != "undefined" && q.subtitle.length > 0 && q.subtitle.indexOf("(") > -1) {
-          let fullPersonNameTitle = q
-            .subtitle
-            .substr(q.subtitle.indexOf("(") + 1);
-          fullPersonNameTitle = fullPersonNameTitle
-            .substr(0, fullPersonNameTitle.length - 1)
-            .trim();
+        if (q && typeof (q.subtitle) != "undefined" && q.subtitle.length > 0) {
+          let fullPersonNameTitle = q.subtitle;
+          if (q.subtitle.indexOf('(') > -1) {
+            fullPersonNameTitle = q
+              .subtitle
+              .substr(q.subtitle.indexOf("(") + 1);
+            fullPersonNameTitle = fullPersonNameTitle
+              .substr(0, fullPersonNameTitle.length - 1)
+              .trim();
+          }
           if (fullPersonNameTitle != "NULL" && fullPersonNameTitle.trim().length > 0) {
             var decm = decisionMakers.find((dm) => {
               return dm.name == fullPersonNameTitle;
@@ -1263,7 +1266,7 @@ var SendReportWithDataToRecipient = async function (cfg, data, org, recipient, f
     var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, recipient, 'generalreport_norespondents', 'Your ' + data.monthName + ' Win/Loss Report for ' + org.name, data, fakeSend);
     return result;
   } else {
-    var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, recipient, 'generalreport', 'Your ' + data.monthName  + ' Win/Loss Report for ' + org.name, data, fakeSend);
+    var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, recipient, 'generalreport', 'Your ' + data.monthName + ' Win/Loss Report for ' + org.name, data, fakeSend);
     return result;
   }
 };
