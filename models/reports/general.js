@@ -706,7 +706,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
   var recommend = {
     totalAnswers: totalAnswers,
     netConnector: Math.round(netConnect * 1000) / 10,
-    willingToReconnect: Math.round((hotLead / (warmLead + coldLead)) * 1000) / 10,
+    willingToReconnect: Math.round((hotLead / (warmLead + coldLead + hotLead)) * 1000) / 10,
     futureLeadSentiment: {
       hotLead: hotLead,
       warmLead: warmLead,
@@ -1059,8 +1059,8 @@ var GetImageSetForReport = function (cfg, report, org_id) {
                     leftScore: report.buyX,
                     subTitle: report.previousBuyX[0] > -1000 ? report.buyX > report.previousBuyX[0] ? "+" + (report.buyX - report.previousBuyX[0]) + " in " + report.monthName : "-" + -(report.buyX - report.previousBuyX[0]) + " in " + report.monthName : "",
                     rightLabel: "BuyX Score® Trend",
-                    startDateLabel: moment(report.startDate).format('DD/MM/YYYY'),
-                    endDateLabel: moment(report.endDate).format('DD/MM/YYYY'),
+                    startDateLabel: moment(report.startDate).format('MM/DD/YYYY'),
+                    endDateLabel: moment(report.endDate).format('MM/DD/YYYY'),
                     monthOverMonthScores: report.previousBuyX,
                     scoresInLastYear: howManyLastYear
                   }).then((pngBuffer) => {
