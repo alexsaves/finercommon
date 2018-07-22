@@ -27,7 +27,7 @@
                       "External factors (nothing to do with ${companyName})"
                   ],
                   "name": "whyNotSelected",
-                  "title": "Select the main reasons why ${companyName} did not pick your company.",
+                  "title": "Select the main reasons why ${prospectName} did not pick your company.",
                   "instructions": "Pick up to three.",
                   "limits": {
                       "max": 3

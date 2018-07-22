@@ -24,13 +24,7 @@ CRMOpportunityRoles.GetByOpportunityId = function (cfg, opportunity_id, cb) {
     for (let i = 0; i < result.length; i++) {
       rescol.push(new CRMOpportunityRoles(result[i]));
     }
-    cb(result.length === 0
-      ? {
-        message: "No approval found."
-      }
-      : null, result.length > 0
-      ? rescol
-      : null);
+    cb(null, rescol);
   }, function (err) {
     cb(err);
   });
