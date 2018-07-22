@@ -14,7 +14,7 @@ mixin darkparagraph(contents)
   div(style="color:#000000;font-size:14px;", color="#000000")= contents
 mixin reportlink(linkref, contents)
   span
-  //a(href=linkref)= contents
+  a(href=portalbase + '/app/launchwithstate/?route=' + encodeURIComponent(linkref) + "&org=" + org)= contents
 +heading('Primary Reason for Loss')
 +spacer
 
@@ -124,7 +124,7 @@ mixin comment(cmt)
           if cmt.anonymous == false
             span &nbsp;&nbsp;&nbsp;::&nbsp;&nbsp;&nbsp;
             span(color="#8fa4af", style="color: #8fa4af;") $#{cmt.amount} Deal
-        if cmt.anonymous == false
+        if cmt.anonymous == false && !!cmt.winningVendor
           td(align="right", style="font-size:10px;color:#00cc00;font-weight:bold;", color="#00cc00") Won by #{cmt.winningVendor.label}
     div
       +darkparagraph(cmt.text)
@@ -138,5 +138,5 @@ if comments && comments.length > 0
     +comment(comment)
   +spacer
   +spacer
-  +reportlink('/', 'See More Comments')
+  +reportlink('/app/dashboards/openends', 'See More Comments')
   +spacer

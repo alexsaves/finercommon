@@ -133,7 +133,8 @@ var All = {
             })
     },
     reports: {
-        general: require('../models/reports/general')
+        general: require('../models/reports/general'),
+        openends: require('../models/reports/openends')
     }
 };
 

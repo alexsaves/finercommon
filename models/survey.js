@@ -175,6 +175,23 @@ Survey.GetForOrganization = function (cfg, organization_id, cb) {
     });
 };
 
+/**
+ * 
+ * @param {DB Config} cfg 
+ * @param {Number} organization_id 
+ */
+Survey.GetForOrganizationAsync = function (cfg, organization_id) {
+    return new Promise((resolve, reject) => {
+        Survey.GetForOrganization(cfg, organization_id, (err, svs) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(svs);
+            }
+        });
+    });
+};
+
 
 /**
  * Get surveys by the organization

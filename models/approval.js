@@ -207,6 +207,9 @@ Approval.GetByOppAndContact = function (cfg, opportunity_id, crm_contact_id, cb)
  */
 Approval.GetList = function (cfg, approvalIds, cb) {
   cb = cb || function () {};
+  if (!approvalIds || approvalIds.length === 0) {
+    return cb(null, []);
+  }
   dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE guid IN (${approvalIds.map(c => '?').join(', ')})`, approvalIds, function (result) {
     if (result && result.length > 0) {
       var res = [];
