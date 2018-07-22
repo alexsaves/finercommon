@@ -59,7 +59,8 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
   var resultObject = {
     startDate: startdate,
     endDate: enddate,
-    isTrailingDate: isTrailingDate
+    isTrailingDate: isTrailingDate,
+    org: orgid
   };
 
   // Compute the days

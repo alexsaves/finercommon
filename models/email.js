@@ -54,7 +54,7 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
     } else {
       if (!canit) {
         console.log(`[${(new Date()).toString()}] CANNOT SEND EMAIL TO ${useremail} DUE TO UNSUBSCRIBE.`);
-        console.log("NOT SENDING EMAIL TO ", useremail);
+        console.log("NOT SENDING EMAIL TO ", useremail);        
         callback();
       } else {
         details = extend({
@@ -97,6 +97,7 @@ Email.prototype.send = function (cfg, org, from, to, template, subject, details,
         } else {
           var transporter = nodemailer.createTransport(sesTransport({region: this.server, accessKeyId: this.key, secretAccessKey: this.secret, rateLimit: 5}));
           console.log(`[${(new Date()).toString()}] SENDING EMAIL TO ${to} WITH SUBJECT ${subject}.`);
+          console.log(details);
           const emailobj = {
             to: to,
             from: from,

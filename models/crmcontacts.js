@@ -93,6 +93,23 @@ CRMContacts.GetByIds = function (cfg, oids, cb) {
 };
 
 /**
+ * Get the list of contacts
+ * @param {Object} cfg 
+ * @param {Array} oids 
+ */
+CRMContacts.GetByIdsAsync = function(cfg, oids) {
+  return new Promise((resolve, reject) => {
+    CRMContacts.GetByIds(cfg, oids, (err, ids) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(ids);
+      }
+    });
+  }); 
+};
+
+/**
  * Get contacts by an array of ids
  */
 CRMContacts.GetByAccountIds = function (cfg, aids, cb) {

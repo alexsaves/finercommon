@@ -136,6 +136,52 @@ Respondent.GetBySurveyAndTimeRangeAsync = function (cfg, guid, startDate, endDat
 };
 
 /**
+ * Get a list of respondents for a set of survey guids
+ */
+Respondent.GetBySurveysAndTimeRange = function (cfg, guids, startDate, endDate, cb) {
+    cb = cb || function () {};
+    if (guids.length === 0) {
+        return cb(null, []);
+    }
+    let guiStrArr = ['('];
+    let finalArgList = [];
+    for (var i = 0; i < guids.length; i++) {
+        if (i > 0) {
+            guiStrArr.push(',');
+        }
+        guiStrArr.push("?");
+        finalArgList.push(guids[i]);
+    }
+    guiStrArr.push(")");
+    finalArgList.push(startDate);
+    finalArgList.push(endDate);
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE survey_guid IN ' + guiStrArr.join('') + ' AND created_at > ? AND created_at < ?', finalArgList, function (result) {
+        var res = [];
+        for (var i = 0; i < result.length; i++) {
+            res.push(new Respondent(result[i]));
+        }
+        cb(null, res);
+    }, function (err) {
+        cb(err);
+    });
+};
+
+/**
+ * Get a list of respondents for a set of survey guids
+ */
+Respondent.GetBySurveysAndTimeRangeAsync = function (cfg, guids, startDate, endDate) {
+    return new Promise((resolve, reject) => {
+        Respondent.GetBySurveysAndTimeRange(cfg, guids, startDate, endDate, (err, resps) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(resps);
+            }
+        });
+    });
+};
+
+/**
  * Get a list of respondents for a survey guid
  */
 Respondent.GetByOrgAndTimeRange = function (cfg, organization_id, startDate, endDate, cb) {

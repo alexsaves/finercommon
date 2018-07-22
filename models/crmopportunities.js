@@ -148,6 +148,23 @@ CRMOpportunities.GetByIds = function (cfg, oids, cb) {
 };
 
 /**
+ * Get the opportunities async by ids
+ * @param {Object} cfg 
+ * @param {Array} aids 
+ */
+CRMOpportunities.GetByIdsAsync = function(cfg, oids) {
+  return new Promise((resolve, reject) => {
+    CRMOpportunities.GetByIds(cfg, oids, (err, opps) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(opps);
+      }
+    });
+  });
+};
+
+/**
  * Get opportunities by an array of ids
  */
 CRMOpportunities.GetByAccountIds = function (cfg, aids, cb) {
@@ -173,6 +190,23 @@ CRMOpportunities.GetByAccountIds = function (cfg, aids, cb) {
   } else {
     cb(null, []);
   }
+};
+
+/**
+ * Get the opportunities async by account ids
+ * @param {Object} cfg 
+ * @param {Array} aids 
+ */
+CRMOpportunities.GetByAccountIdsAsync = function(cfg, aids) {
+  return new Promise((resolve, reject) => {
+    CRMOpportunities.GetByAccountIds(cfg, aids, (err, opps) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(opps);
+      }
+    });
+  });
 };
 
 /**
