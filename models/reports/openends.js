@@ -10,6 +10,11 @@ const CRMOpportunities = require('../crmopportunities');
 const CRMUsers = require('../crmusers');
 const CRMContacts = require('../crmcontacts');
 const moment = require('moment');
+const TimeAgo = require('javascript-time-ago');
+const TimeAgoEn = require('javascript-time-ago/locale/en');
+TimeAgo.locale(TimeAgoEn);
+// Create relative date/time formatter.
+const timeAgo = new TimeAgo('en-US');
 
 /**
  * Get the open ends report
@@ -172,7 +177,9 @@ const ConvertRespondentToOpenEndObject = function (rsp) {
         id: rsp.id,
         survey_guid: rsp.survey_guid,
         when: rsp.created_at,
+        whents: rsp.created_at.getTime(),
         whenstr: moment(rsp.created_at).format("dd, MMM Do YYYY"),
+        agostr: timeAgo.format(rsp.created_at),
         buyXRating: rsp.answers.buyXRating,
         oe: [],
         anon: true,

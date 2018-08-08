@@ -1264,7 +1264,7 @@ var SendReportWithDataToRecipient = async function (cfg, data, org, recipient, f
   const Email = require('../../models/email');
   let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
   if (data.respondents === 0) {
-    var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, recipient, 'generalreport_norespondents', 'Your ' + data.monthName + ' Win/Loss Report for ' + org.name, data, fakeSend);
+    var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, recipient, 'generalreport_norespondents', 'Your Win/Loss Report for ' + org.name, data, fakeSend);
     return result;
   } else {
     var result = await emailCtrl.sendAsync(cfg, org.id, cfg.email.defaultFrom, recipient, 'generalreport', 'Your ' + data.monthName + ' Win/Loss Report for ' + org.name, data, fakeSend);

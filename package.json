@@ -1,6 +1,6 @@
 {
   "name": "finercommon",
-  "version": "0.2.25",
+  "version": "0.2.26",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -25,10 +25,12 @@
     "eslint": "^4.19.1",
     "express": "^4.16.3",
     "extend": "^3.0.1",
+    "javascript-time-ago": "^1.0.31",
     "md5": "^2.2.1",
     "moment": "^2.22.1",
     "mysql": "^2.15.0",
     "node-ses": "^2.1.0",
+    "node-time-ago": "^1.0.0",
     "nodemailer": "^4.6.5",
     "nodemailer-ses-transport": "^1.5.1",
     "prop-types": "^15.6.1",
