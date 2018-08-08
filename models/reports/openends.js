@@ -84,6 +84,7 @@ const OpenEndsReportAsync = async function (cfg, orgid, startdate, enddate, deal
         } else {
             r.isProspect = false;
         }
+        r.buyX = BuyX.CalculateBuyXFromResponses(sv, r.answers);
     });
 
     // Convert to respondents
@@ -180,7 +181,7 @@ const ConvertRespondentToOpenEndObject = function (rsp) {
         whents: rsp.created_at.getTime(),
         whenstr: moment(rsp.created_at).format("dd, MMM Do YYYY"),
         agostr: timeAgo.format(rsp.created_at),
-        buyXRating: rsp.answers.buyXRating,
+        buyX: rsp.buyX,
         oe: [],
         anon: true,
         isProspect: rsp.isProspect
