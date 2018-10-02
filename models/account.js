@@ -88,7 +88,7 @@ Account.prototype.sendNewAccountAlert = function (cfg, cb) {
     // Invite updated! Send an updated email
     let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
     let emailList = 'le.margaret@gmail.com, alexei.white@gmail.com, amoshg@gmail.com';
-    emailList = 'alexei@finer.ink, alexei.white@gmail.com';
+    //emailList = 'alexei@finer.ink, alexei.white@gmail.com';
     emailCtrl.send(cfg, 0, cfg.email.defaultFrom, emailList, 'newaccountalert', 'Activate ' + firstName + '\'s FinerInk account.', {
         account: this,
         firstName: firstName,
