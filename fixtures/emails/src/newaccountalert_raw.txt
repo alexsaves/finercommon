@@ -1,0 +1,3 @@
+Hey team. Someone has created an account! We need to validate them.
+
+Please welcome <%= account.name %> (<%= account.email %>).

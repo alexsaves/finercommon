@@ -76,6 +76,34 @@ Account.prototype.sendValidationEmail = function (cfg, cb) {
 }
 
 /**
+ * Send an alert email to the team
+ * @param {*} cfg
+ * @param {*} cb
+ */
+Account.prototype.sendNewAccountAlert = function (cfg, cb) {
+    var firstName = this
+        .name
+        .trim()
+        .split(' ')[0];
+    // Invite updated! Send an updated email
+    let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
+    let emailList = 'le.margaret@gmail.com, alexei.white@gmail.com, amoshg@gmail.com';
+    //emailList = 'alexei@finer.ink, alexei.white@gmail.com';
+    emailCtrl.send(cfg, 0, cfg.email.defaultFrom, emailList, 'newaccountalert', 'Activate ' + firstName + '\'s FinerInk account.', {
+        account: this,
+        firstName: firstName,
+    }, function (err) {
+        if (err) {
+            console.log("Error sending validation email", err);
+            cb("Error sending validation email");
+        } else {
+            // Success
+            cb(null);
+        }
+    }, false, true);
+}
+
+/**
  * Save any changes to the DB row
  */
 Account.prototype.commit = function (cfg, cb) {
@@ -332,7 +360,8 @@ Account.Create = function (cfg, details, cb) {
         updated_at: new Date(),
         email: "",
         pw_md5: md5(''),
-        emailverified: false
+        emailverified: false,
+        is_active: 0
     };
     if (details.password) {
         details.pw_md5 = md5(details.password);
