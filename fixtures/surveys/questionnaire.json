@@ -487,7 +487,7 @@
                     "type": "rating",
                     "modifier": "buttons",
                     "name": "reconnect",
-                    "title": "How likely are you consider ${companyName} in the future?",
+                    "title": "How likely are you to consider ${companyName} in the future?",
                     "low": "Not likely",
                     "high": "Very likely",
                     "required": true
