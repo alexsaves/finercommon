@@ -1158,6 +1158,87 @@ async function SalesProcessAsync(cfg, chrt, report, org_id, chartWidths) {
 }
 
 /**
+ * Do positive perception async
+ */
+async function PerceptionsPositiveAsync(cfg, chrt, report, org_id, chartWidths) {
+  var perceptionsPositive = [],
+    perceptionsNegative = [];
+  for (let i = 0; i < Math.min(3, report.perceptions.length); i++) {
+    perceptionsPositive.push({
+      label: report.perceptions[i].shortLabel,
+      n: report.perceptions[i].count,
+      icon: chrt.getIconNameForLabel(report.perceptions[i].shortLabel)
+    });
+  }
+  let percepReverse = report.perceptions.reverse();
+  for (let i = 0; i < Math.min(3, percepReverse.length); i++) {
+    perceptionsNegative.push({
+      label: percepReverse[i].shortLabel,
+      n: percepReverse[i].count,
+      icon: chrt.getIconNameForLabel(percepReverse[i].shortLabel)
+    });
+  }
+
+  return await chrt.threeLanyardAsync(chartWidths, perceptionsNegative);
+}
+
+/**
+ * Do negative perception async
+ */
+async function PerceptionsNegativeAsync(cfg, chrt, report, org_id, chartWidths) {
+  var perceptionsPositive = [],
+    perceptionsNegative = [];
+  for (let i = 0; i < Math.min(3, report.perceptions.length); i++) {
+    perceptionsPositive.push({
+      label: report.perceptions[i].shortLabel,
+      n: report.perceptions[i].count,
+      icon: chrt.getIconNameForLabel(report.perceptions[i].shortLabel)
+    });
+  }
+  let percepReverse = report.perceptions.reverse();
+  for (let i = 0; i < Math.min(3, percepReverse.length); i++) {
+    perceptionsNegative.push({
+      label: percepReverse[i].shortLabel,
+      n: percepReverse[i].count,
+      icon: chrt.getIconNameForLabel(percepReverse[i].shortLabel)
+    });
+  }
+
+  return await chrt.threeLanyardAsync(chartWidths, perceptionsNegative);
+}
+
+/**
+ * Do reconnnections chart async
+ */
+async function ReconnectAsync(cfg, chrt, report, org_id, chartWidths) {
+  var totalCount = report.recommend.futureLeadSentiment.hotLead + report.recommend.futureLeadSentiment.warmLead + report.recommend.futureLeadSentiment.coldLead;
+  if (totalCount === 0) {
+    totalCount = 0.01;
+  }
+  var connectDiff = (report.recommend.netConnector - report.previousRecommend[0]);
+  return await chrt.netConnectorChartAsync(chartWidths, Math.round(0.38 * chartWidths), {
+    leftLabel: "Net Connector Score®",
+    rightLabel: "Future Lead Sentiment",
+    leftSubLabel: "This month",
+    leftDiffLabel: (connectDiff > 0 ? "+" + connectDiff : connectDiff) + " than previous",
+    leftScore: report.recommend.netConnector,
+    sentimentPie: [{
+      label: "Hot",
+      quantity: report.recommend.futureLeadSentiment.hotLead === 0 ? 0 : Math.round((report.recommend.futureLeadSentiment.hotLead / totalCount) * 100)
+    },
+    {
+      label: "Warm",
+      quantity: report.recommend.futureLeadSentiment.warmLead === 0 ? 0 : Math.round((report.recommend.futureLeadSentiment.warmLead / totalCount) * 100)
+    },
+    {
+      label: "Cold",
+      quantity: report.recommend.futureLeadSentiment.coldLead === 0 ? 0 : Math.round((report.recommend.futureLeadSentiment.coldLead / totalCount) * 100)
+    }
+    ]
+  });
+}
+
+/**
  * Get the list of charts for the email
  * @param {Object} cfg 
  * @param {Object} report 
@@ -1213,25 +1294,7 @@ var GetImageSetForReport = function (cfg, report, org_id, chartWidths = 1000) {
                           finalChartSet.salesprocess = chrtinst.img_hash;
 
                           // Now do the perceptions positive chart
-                          var perceptionsPositive = [],
-                            perceptionsNegative = [];
-                          for (let i = 0; i < Math.min(3, report.perceptions.length); i++) {
-                            perceptionsPositive.push({
-                              label: report.perceptions[i].shortLabel,
-                              n: report.perceptions[i].count,
-                              icon: chrt.getIconNameForLabel(report.perceptions[i].shortLabel)
-                            });
-                          }
-                          let percepReverse = report.perceptions.reverse();
-                          for (let i = 0; i < Math.min(3, percepReverse.length); i++) {
-                            perceptionsNegative.push({
-                              label: percepReverse[i].shortLabel,
-                              n: percepReverse[i].count,
-                              icon: chrt.getIconNameForLabel(percepReverse[i].shortLabel)
-                            });
-                          }
-
-                          chrt.threeLanyardAsync(chartWidths, perceptionsPositive).then((pngBuffer) => {
+                          PerceptionsPositiveAsync(cfg, chrt, report, org_id, chartWidths).then((pngBuffer) => {
                             EmailChart.Create(cfg, {
                               content_type: "image/png",
                               image_contents: pngBuffer,
@@ -1240,38 +1303,14 @@ var GetImageSetForReport = function (cfg, report, org_id, chartWidths = 1000) {
                               finalChartSet.perceptionsPositive = chrtinst.img_hash;
 
                               // Now right away do the other one
-                              chrt.threeLanyardAsync(chartWidths, perceptionsNegative).then((pngBuffer) => {
+                              PerceptionsNegativeAsync(cfg, chrt, report, org_id, chartWidths).then((pngBuffer) => {
                                 EmailChart.Create(cfg, {
                                   content_type: "image/png",
                                   image_contents: pngBuffer,
                                   organization_id: org_id
                                 }, (err, chrtinst) => {
                                   finalChartSet.perceptionsNegative = chrtinst.img_hash;
-                                  var totalCount = report.recommend.futureLeadSentiment.hotLead + report.recommend.futureLeadSentiment.warmLead + report.recommend.futureLeadSentiment.coldLead;
-                                  if (totalCount === 0) {
-                                    totalCount = 0.01;
-                                  }
-                                  var connectDiff = (report.recommend.netConnector - report.previousRecommend[0]);
-                                  chrt.netConnectorChartAsync(1000, 380, {
-                                    leftLabel: "Net Connector Score®",
-                                    rightLabel: "Future Lead Sentiment",
-                                    leftSubLabel: "This month",
-                                    leftDiffLabel: (connectDiff > 0 ? "+" + connectDiff : connectDiff) + " than previous",
-                                    leftScore: report.recommend.netConnector,
-                                    sentimentPie: [{
-                                      label: "Hot",
-                                      quantity: report.recommend.futureLeadSentiment.hotLead === 0 ? 0 : Math.round((report.recommend.futureLeadSentiment.hotLead / totalCount) * 100)
-                                    },
-                                    {
-                                      label: "Warm",
-                                      quantity: report.recommend.futureLeadSentiment.warmLead === 0 ? 0 : Math.round((report.recommend.futureLeadSentiment.warmLead / totalCount) * 100)
-                                    },
-                                    {
-                                      label: "Cold",
-                                      quantity: report.recommend.futureLeadSentiment.coldLead === 0 ? 0 : Math.round((report.recommend.futureLeadSentiment.coldLead / totalCount) * 100)
-                                    }
-                                    ]
-                                  }).then((pngBuffer) => {
+                                  ReconnectAsync(cfg, chrt, report, org_id, chartWidths).then((pngBuffer) => {
                                     EmailChart.Create(cfg, {
                                       content_type: "image/png",
                                       image_contents: pngBuffer,
@@ -1430,5 +1469,8 @@ module.exports = {
   TopCompetitionChartAsync,
   TopCompetitionChartReasonsAsync,
   BuyXOverviewAsync,
-  SalesProcessAsync
+  SalesProcessAsync,
+  PerceptionsPositiveAsync,
+  PerceptionsNegativeAsync,
+  ReconnectAsync
 }
