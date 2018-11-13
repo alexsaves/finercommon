@@ -28,7 +28,7 @@ class Charts {
   /**
    * Sets up a new charter
    */
-  constructor() {}
+  constructor() { }
 
   /**
    * Trim long strings
@@ -321,17 +321,19 @@ class Charts {
     ctx.fillStyle = darkerColorLight;
     ctx.textAlign = "left";
     ctx.fillText(data.leftLabel, 0, titleFontHeight, columnWidth);
-    ctx.fillText(data.rightLabel, rightColumnX, titleFontHeight, columnWidth);
-
+    if (data.scoresInLastYear) {
+      ctx.fillText(data.rightLabel, rightColumnX, titleFontHeight, columnWidth);
+    }
     // Do sub-labels
     ctx.font = subtitleFont + "px " + fontFace;
     ctx.fillStyle = darkerColorLight;
     ctx.textAlign = "left";
     ctx.fillText(data.subTitle, 0, h - (generalScale * subtitleFont * 0.1), columnWidth);
-    ctx.fillText(data.startDateLabel, rightColumnX, h - (generalScale * subtitleFont * 0.1), columnWidth);
-    ctx.textAlign = "right";
-    ctx.fillText(data.endDateLabel, w, h - (generalScale * subtitleFont * 0.1), columnWidth);
-
+    if (data.scoresInLastYear) {
+      ctx.fillText(data.startDateLabel, rightColumnX, h - (generalScale * subtitleFont * 0.1), columnWidth);
+      ctx.textAlign = "right";
+      ctx.fillText(data.endDateLabel, w, h - (generalScale * subtitleFont * 0.1), columnWidth);
+    }
     // Do the score
     let leftScoreStr = data.leftScore.toString();
     if (leftScoreStr.length > 4) {
@@ -740,7 +742,7 @@ class Charts {
 
     return await this._canvasToPNGBufferAsync(canvas);
   }
-  
+
   /**
    * Draw the rating stack chart Asynchronously
    * @param {Number} w 

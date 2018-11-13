@@ -164,8 +164,8 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
           let otheroo = answers.whyNotSelected.other;
           if (typeof (otheroo) != "undefined" && otheroo.trim().length > 0) {
             if (!otherval.responses.find((vl) => {
-                return vl == otheroo;
-              })) {
+              return vl == otheroo;
+            })) {
               otherval
                 .responses
                 .push(otheroo.trim());
@@ -289,8 +289,8 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
           let otheroo = vendorRankings.other;
           if (typeof (otheroo) != "undefined" && otheroo.trim().length > 0) {
             if (!otherval.responses.find((vl) => {
-                return vl == otheroo;
-              })) {
+              return vl == otheroo;
+            })) {
               otherval
                 .responses
                 .push(otheroo.trim());
@@ -348,8 +348,8 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
         // Merge the responses
         for (let g = 0; g < winningVendor.responses.length; g++) {
           if (!existingItem.responses.find((rp) => {
-              return rp == winningVendor.responses[g];
-            })) {
+            return rp == winningVendor.responses[g];
+          })) {
             existingItem
               .responses
               .push(winningVendor.responses[g]);
@@ -428,8 +428,8 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
               // Merge the actual other reason
               if (reasons.other && reasons.other.trim().length > 0) {
                 if (!otherReason.responses.find((rs) => {
-                    return rs == reasons.other;
-                  })) {
+                  return rs == reasons.other;
+                })) {
                   otherReason
                     .responses
                     .push(reasons.other);
@@ -510,8 +510,8 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
             0;
           if (mostImportantVendorCriteria.other) {
             if (!otherFactor.responses.find((rp) => {
-                return rp == mostImportantVendorCriteria.other;
-              })) {
+              return rp == mostImportantVendorCriteria.other;
+            })) {
               otherFactor
                 .responses
                 .push(mostImportantVendorCriteria.other);
@@ -883,11 +883,69 @@ var GeneralReport = function (cfg, orgid, startdate, enddate, cb) {
  */
 var GeneralReportAsync = function (cfg, orgid, startdate, enddate) {
   return new Promise((resolve, reject) => {
-    GeneralReport(cfg, orgid, startdate, enddate, (err, rep) => {
+    var lessThan15Days = Math.abs(Date.now() - enddate) < (1000 * 60 * 60 * 24 * 15);
+
+    GeneralReport(cfg, orgid, startdate, enddate, (err, focusRep) => {
       if (err) {
         reject(err);
       } else {
-        resolve(rep);
+        if (lessThan15Days) {
+          // Get the Org NS
+          const Organization = require('../../models/organization');
+
+          // First get the org
+          Organization.GetByIdAsync(cfg, orgid).then((org) => {
+            // Then run and retrieve the reports
+            org.ComputeAllPreviousMonthlyReportsAsync(cfg).then((reports) => {
+              // Convert them all to POJO's
+              for (let i = 0; i < reports.length; i++) {
+                reports[i] = JSON.parse(reports[i].report.toString());
+              }
+
+              // Build the histograms for past BuyX scores and past Likelihood to Recommend
+              // Scores
+              var previousBuyX = [];
+              var previousRecommend = [];
+
+              for (let i = 0; i < reports.length; i++) {
+                var previousBuyXScore = reports[i].buyX || -9999;
+                var previousConnectorScore = reports[i].recommend ?
+                  reports[i].recommend.netConnector :
+                  0;
+                previousBuyX.push(previousBuyXScore);
+                previousRecommend.push(previousConnectorScore);
+              }
+
+              var changeDesc = "";
+              if (focusRep.buyX < -1000) {
+                changeDesc = "Not enough data this period to make a comparison.";
+              } else {
+                if (previousBuyX[0] < -1000) {
+                  changeDesc = "There isn't enough data in your prior period to make a comparison. Stick with it!";
+                } else {
+                  var mdif = Math.round((focusRep.buyX - previousBuyX[0]) * 10) / 10;
+                  if (previousBuyX[0] < focusRep.buyX) {
+                    changeDesc = "Your buyer journey has improved by +" + mdif + " compared to prior period.  Keep up the good work!";
+                  } else {
+                    changeDesc = "Your buyer journey has decreased by -" + -mdif + " compared to prior period.";
+                  }
+                }
+              }
+
+              // Assign
+              focusRep.changeDesc = changeDesc;
+
+              // Assign
+              focusRep.previousBuyX = previousBuyX.reverse();
+              focusRep.previousRecommend = previousRecommend.reverse();
+              focusRep.previousReports = reports.reverse();
+              resolve(focusRep);
+            });
+          });
+
+        } else {
+          resolve(focusRep);
+        }
       }
     });
   });
@@ -976,28 +1034,225 @@ var GetFullReportForOrgAsync = async function (cfg, orgid, lastmonth) {
 };
 
 /**
+ * Do the primary reasons for loss chart
+ */
+async function PrimaryReasonsForLossChartAsync(cfg, chrt, report, org_id, chartWidths) {
+  let winLossChartData = [];
+  for (let i = 0; i < Math.min(3, report.reasonsForLoss.length); i++) {
+    winLossChartData.push({
+      label: report.reasonsForLoss[i].shortLabel,
+      n: report.reasonsForLoss[i].count,
+      icon: chrt.getIconNameForLabel(report.reasonsForLoss[i].shortLabel)
+    });
+  }
+  return await chrt.threeLanyardAsync(chartWidths, winLossChartData);
+}
+
+/**
+ * Do the top competition chart
+ */
+async function TopCompetitionChartAsync(cfg, chrt, report, org_id, chartWidths) {
+  var competitionInfo = [];
+  var competitionReasons = [];
+  var totalAmount = 0;
+  for (let j = 0; j < report.losingDealsTo.length; j++) {
+    totalAmount += report.losingDealsTo[j].Amount;
+  }
+  for (let j = 0; j < Math.min(3, report.losingDealsTo.length); j++) {
+    competitionInfo.push({
+      title: report.losingDealsTo[j].shortLabel,
+      subTitle: "won $" + Math.round(report.losingDealsTo[j].Amount / 1000) + "K",
+      dataLabel: (Math.round((report.losingDealsTo[j].Amount / totalAmount) * 1000) / 10) + "%",
+      quantityFilled: (report.losingDealsTo[j].Amount / totalAmount)
+    });
+    var compReasons = [];
+    var compMax = 0;
+    for (let f = 0; f < report.losingDealsTo[j].reasons.length; f++) {
+      compMax += report.losingDealsTo[j].reasons[f].count;
+    }
+    for (let f = 0; f < Math.min(3, report.losingDealsTo[j].reasons.length); f++) {
+      compReasons.push({
+        label: report.losingDealsTo[j].reasons[f].shortLabel,
+        score: Math.round((report.losingDealsTo[j].reasons[f].count / compMax) * 5)
+      });
+    }
+    competitionReasons.push(compReasons);
+  }
+  return await chrt.barChartAsync(chartWidths, 500, competitionInfo);
+};
+
+/**
+ * Do the top competition reasons chart
+ */
+async function TopCompetitionChartReasonsAsync(cfg, chrt, report, org_id, chartWidths) {
+  var competitionInfo = [];
+  var competitionReasons = [];
+  var totalAmount = 0;
+  for (let j = 0; j < report.losingDealsTo.length; j++) {
+    totalAmount += report.losingDealsTo[j].Amount;
+  }
+  for (let j = 0; j < Math.min(3, report.losingDealsTo.length); j++) {
+    competitionInfo.push({
+      title: report.losingDealsTo[j].shortLabel,
+      subTitle: "won $" + Math.round(report.losingDealsTo[j].Amount / 1000) + "K",
+      dataLabel: (Math.round((report.losingDealsTo[j].Amount / totalAmount) * 1000) / 10) + "%",
+      quantityFilled: (report.losingDealsTo[j].Amount / totalAmount)
+    });
+    var compReasons = [];
+    var compMax = 0;
+    for (let f = 0; f < report.losingDealsTo[j].reasons.length; f++) {
+      compMax += report.losingDealsTo[j].reasons[f].count;
+    }
+    for (let f = 0; f < Math.min(3, report.losingDealsTo[j].reasons.length); f++) {
+      compReasons.push({
+        label: report.losingDealsTo[j].reasons[f].shortLabel,
+        score: Math.round((report.losingDealsTo[j].reasons[f].count / compMax) * 5)
+      });
+    }
+    competitionReasons.push(compReasons);
+  }
+  return await chrt.scoreStripsAsync(chartWidths, 5, competitionReasons);
+}
+
+/**
+ * Do the buyx overview chart
+ */
+async function BuyXOverviewAsync(cfg, chrt, report, org_id, chartWidths) {
+  var startofyear = moment().startOf('year').toDate();
+  var howManyLastYear = 0;
+  if (report.previousReports && report.previousReports.length > 0) {
+    for (var g = report.previousReports.length - 1; g > 0; g--) {
+      if (new Date(report.previousReports[g].endDate) < startofyear) {
+        howManyLastYear++;
+      }
+    }
+  }
+  // BuyX
+  return await chrt.buyXScoreAsync(chartWidths, 290, {
+    leftLabel: typeof report.isRollingCurrentMonth == "undefined" ? "Average" : report.isRollingCurrentMonth ? "This Month" : "Last Month",
+    leftScore: report.buyX,
+    subTitle: !!report.previousBuyX ? report.previousBuyX[0] > -1000 ? report.buyX > report.previousBuyX[0] ? "+" + (report.buyX - report.previousBuyX[0]) + " in " + report.monthName : "-" + -(report.buyX - report.previousBuyX[0]) + " in " + report.monthName : "" : "",
+    rightLabel: "BuyX Score® Trend",
+    startDateLabel: moment(report.startDate).format('MM/DD/YYYY'),
+    endDateLabel: moment(report.endDate).format('MM/DD/YYYY'),
+    monthOverMonthScores: !!report.previousBuyX ? report.previousBuyX : [],
+    scoresInLastYear: howManyLastYear
+  });
+}
+
+/**
+ * Do sales process asynchronously
+ */
+async function SalesProcessAsync(cfg, chrt, report, org_id, chartWidths) {
+  var salesProcessIssues = [];
+  for (var t = 0; t < Math.min(3, report.salesProcess.length); t++) {
+    salesProcessIssues.push({
+      label: report.salesProcess[t].shortLabel,
+      score: report.salesProcess[t].ratingScore,
+      lowLabel: "Poor",
+      highLabel: "Excellent",
+      n: report.respondents
+    });
+  }
+  return await chrt.ratingStackAsync(chartWidths, 7, salesProcessIssues);
+}
+
+/**
+ * Do positive perception async
+ */
+async function PerceptionsPositiveAsync(cfg, chrt, report, org_id, chartWidths) {
+  var perceptionsPositive = [],
+    perceptionsNegative = [];
+  for (let i = 0; i < Math.min(3, report.perceptions.length); i++) {
+    perceptionsPositive.push({
+      label: report.perceptions[i].shortLabel,
+      n: report.perceptions[i].count,
+      icon: chrt.getIconNameForLabel(report.perceptions[i].shortLabel)
+    });
+  }
+  let percepReverse = report.perceptions.reverse();
+  for (let i = 0; i < Math.min(3, percepReverse.length); i++) {
+    perceptionsNegative.push({
+      label: percepReverse[i].shortLabel,
+      n: percepReverse[i].count,
+      icon: chrt.getIconNameForLabel(percepReverse[i].shortLabel)
+    });
+  }
+
+  return await chrt.threeLanyardAsync(chartWidths, perceptionsNegative);
+}
+
+/**
+ * Do negative perception async
+ */
+async function PerceptionsNegativeAsync(cfg, chrt, report, org_id, chartWidths) {
+  var perceptionsPositive = [],
+    perceptionsNegative = [];
+  for (let i = 0; i < Math.min(3, report.perceptions.length); i++) {
+    perceptionsPositive.push({
+      label: report.perceptions[i].shortLabel,
+      n: report.perceptions[i].count,
+      icon: chrt.getIconNameForLabel(report.perceptions[i].shortLabel)
+    });
+  }
+  let percepReverse = report.perceptions.reverse();
+  for (let i = 0; i < Math.min(3, percepReverse.length); i++) {
+    perceptionsNegative.push({
+      label: percepReverse[i].shortLabel,
+      n: percepReverse[i].count,
+      icon: chrt.getIconNameForLabel(percepReverse[i].shortLabel)
+    });
+  }
+
+  return await chrt.threeLanyardAsync(chartWidths, perceptionsNegative);
+}
+
+/**
+ * Do reconnnections chart async
+ */
+async function ReconnectAsync(cfg, chrt, report, org_id, chartWidths) {
+  var totalCount = report.recommend.futureLeadSentiment.hotLead + report.recommend.futureLeadSentiment.warmLead + report.recommend.futureLeadSentiment.coldLead;
+  if (totalCount === 0) {
+    totalCount = 0.01;
+  }
+  var connectDiff = (report.recommend.netConnector - report.previousRecommend[0]);
+  return await chrt.netConnectorChartAsync(chartWidths, Math.round(0.38 * chartWidths), {
+    leftLabel: "Net Connector Score®",
+    rightLabel: "Future Lead Sentiment",
+    leftSubLabel: "This month",
+    leftDiffLabel: (connectDiff > 0 ? "+" + connectDiff : connectDiff) + " than previous",
+    leftScore: report.recommend.netConnector,
+    sentimentPie: [{
+      label: "Hot",
+      quantity: report.recommend.futureLeadSentiment.hotLead === 0 ? 0 : Math.round((report.recommend.futureLeadSentiment.hotLead / totalCount) * 100)
+    },
+    {
+      label: "Warm",
+      quantity: report.recommend.futureLeadSentiment.warmLead === 0 ? 0 : Math.round((report.recommend.futureLeadSentiment.warmLead / totalCount) * 100)
+    },
+    {
+      label: "Cold",
+      quantity: report.recommend.futureLeadSentiment.coldLead === 0 ? 0 : Math.round((report.recommend.futureLeadSentiment.coldLead / totalCount) * 100)
+    }
+    ]
+  });
+}
+
+/**
  * Get the list of charts for the email
  * @param {Object} cfg 
  * @param {Object} report 
  */
-var GetImageSetForReport = function (cfg, report, org_id) {
+var GetImageSetForReport = function (cfg, report, org_id, chartWidths = 1000) {
   return new Promise((resolve, reject) => {
-    console.log(report);
+    //console.log(report);
 
     var chrt = new Charts();
     var finalChartSet = {};
-    const chartWidths = 1000;
-    // Start with the reasons for loss Lanyard chart
-    var winLossChartData = [];
+
+    // Start with the reasons for loss Lanyard chart    
     if (report.reasonsForLoss) {
-      for (let i = 0; i < Math.min(3, report.reasonsForLoss.length); i++) {
-        winLossChartData.push({
-          label: report.reasonsForLoss[i].shortLabel,
-          n: report.reasonsForLoss[i].count,
-          icon: chrt.getIconNameForLabel(report.reasonsForLoss[i].shortLabel)
-        });
-      }
-      chrt.threeLanyardAsync(chartWidths, winLossChartData).then((pngBuffer) => {
+      PrimaryReasonsForLossChartAsync(cfg, chrt, report, org_id, chartWidths).then((pngBuffer) => {
         EmailChart.Create(cfg, {
           content_type: "image/png",
           image_contents: pngBuffer,
@@ -1005,33 +1260,7 @@ var GetImageSetForReport = function (cfg, report, org_id) {
         }, (err, chrtinst) => {
           finalChartSet.winlossimage = chrtinst.img_hash;
           // Do the competition chart
-          var competitionInfo = [];
-          var competitionReasons = [];
-          var totalAmount = 0;
-          for (let j = 0; j < report.losingDealsTo.length; j++) {
-            totalAmount += report.losingDealsTo[j].Amount;
-          }
-          for (let j = 0; j < Math.min(3, report.losingDealsTo.length); j++) {
-            competitionInfo.push({
-              title: report.losingDealsTo[j].shortLabel,
-              subTitle: "won $" + Math.round(report.losingDealsTo[j].Amount / 1000) + "K",
-              dataLabel: (Math.round((report.losingDealsTo[j].Amount / totalAmount) * 1000) / 10) + "%",
-              quantityFilled: (report.losingDealsTo[j].Amount / totalAmount)
-            });
-            var compReasons = [];
-            var compMax = 0;
-            for (let f = 0; f < report.losingDealsTo[j].reasons.length; f++) {
-              compMax += report.losingDealsTo[j].reasons[f].count;
-            }
-            for (let f = 0; f < Math.min(3, report.losingDealsTo[j].reasons.length); f++) {
-              compReasons.push({
-                label: report.losingDealsTo[j].reasons[f].shortLabel,
-                score: Math.round((report.losingDealsTo[j].reasons[f].count / compMax) * 5)
-              });
-            }
-            competitionReasons.push(compReasons);
-          }
-          chrt.barChartAsync(chartWidths, 500, competitionInfo).then((pngBuffer) => {
+          TopCompetitionChartAsync(cfg, chrt, report, org_id, chartWidths).then((pngBuffer) => {
             EmailChart.Create(cfg, {
               content_type: "image/png",
               image_contents: pngBuffer,
@@ -1040,31 +1269,14 @@ var GetImageSetForReport = function (cfg, report, org_id) {
               finalChartSet.competition = chrtinst.img_hash;
 
               // Do the score strip
-              chrt.scoreStripsAsync(chartWidths, 5, competitionReasons).then((pngBuffer) => {
+              TopCompetitionChartReasonsAsync(cfg, chrt, report, org_id, chartWidths).then((pngBuffer) => {
                 EmailChart.Create(cfg, {
                   content_type: "image/png",
                   image_contents: pngBuffer,
                   organization_id: org_id
                 }, (err, chrtinst) => {
                   finalChartSet.scorestrip = chrtinst.img_hash;
-                  var startofyear = moment().startOf('year').toDate();
-                  var howManyLastYear = 0;
-                  for (var g = report.previousReports.length - 1; g > 0; g--) {
-                    if (new Date(report.previousReports[g].endDate) < startofyear) {
-                      howManyLastYear++;
-                    }
-                  }
-                  // BuyX
-                  chrt.buyXScoreAsync(chartWidths, 290, {
-                    leftLabel: report.isRollingCurrentMonth ? "This Month" : "Last Month",
-                    leftScore: report.buyX,
-                    subTitle: report.previousBuyX[0] > -1000 ? report.buyX > report.previousBuyX[0] ? "+" + (report.buyX - report.previousBuyX[0]) + " in " + report.monthName : "-" + -(report.buyX - report.previousBuyX[0]) + " in " + report.monthName : "",
-                    rightLabel: "BuyX Score® Trend",
-                    startDateLabel: moment(report.startDate).format('MM/DD/YYYY'),
-                    endDateLabel: moment(report.endDate).format('MM/DD/YYYY'),
-                    monthOverMonthScores: report.previousBuyX,
-                    scoresInLastYear: howManyLastYear
-                  }).then((pngBuffer) => {
+                  BuyXOverviewAsync(cfg, chrt, report, org_id, chartWidths).then((pngBuffer) => {
                     EmailChart.Create(cfg, {
                       content_type: "image/png",
                       image_contents: pngBuffer,
@@ -1073,17 +1285,7 @@ var GetImageSetForReport = function (cfg, report, org_id) {
                       finalChartSet.buyx = chrtinst.img_hash;
 
                       // The sales process rating stack
-                      var salesProcessIssues = [];
-                      for (var t = 0; t < Math.min(3, report.salesProcess.length); t++) {
-                        salesProcessIssues.push({
-                          label: report.salesProcess[t].shortLabel,
-                          score: report.salesProcess[t].ratingScore,
-                          lowLabel: "Poor",
-                          highLabel: "Excellent",
-                          n: report.respondents
-                        });
-                      }
-                      chrt.ratingStackAsync(chartWidths, 7, salesProcessIssues).then((pngBuffer) => {
+                      SalesProcessAsync(cfg, chrt, report, org_id, chartWidths).then((pngBuffer) => {
                         EmailChart.Create(cfg, {
                           content_type: "image/png",
                           image_contents: pngBuffer,
@@ -1092,25 +1294,7 @@ var GetImageSetForReport = function (cfg, report, org_id) {
                           finalChartSet.salesprocess = chrtinst.img_hash;
 
                           // Now do the perceptions positive chart
-                          var perceptionsPositive = [],
-                            perceptionsNegative = [];
-                          for (let i = 0; i < Math.min(3, report.perceptions.length); i++) {
-                            perceptionsPositive.push({
-                              label: report.perceptions[i].shortLabel,
-                              n: report.perceptions[i].count,
-                              icon: chrt.getIconNameForLabel(report.perceptions[i].shortLabel)
-                            });
-                          }
-                          let percepReverse = report.perceptions.reverse();
-                          for (let i = 0; i < Math.min(3, percepReverse.length); i++) {
-                            perceptionsNegative.push({
-                              label: percepReverse[i].shortLabel,
-                              n: percepReverse[i].count,
-                              icon: chrt.getIconNameForLabel(percepReverse[i].shortLabel)
-                            });
-                          }
-
-                          chrt.threeLanyardAsync(chartWidths, perceptionsPositive).then((pngBuffer) => {
+                          PerceptionsPositiveAsync(cfg, chrt, report, org_id, chartWidths).then((pngBuffer) => {
                             EmailChart.Create(cfg, {
                               content_type: "image/png",
                               image_contents: pngBuffer,
@@ -1119,38 +1303,14 @@ var GetImageSetForReport = function (cfg, report, org_id) {
                               finalChartSet.perceptionsPositive = chrtinst.img_hash;
 
                               // Now right away do the other one
-                              chrt.threeLanyardAsync(chartWidths, perceptionsNegative).then((pngBuffer) => {
+                              PerceptionsNegativeAsync(cfg, chrt, report, org_id, chartWidths).then((pngBuffer) => {
                                 EmailChart.Create(cfg, {
                                   content_type: "image/png",
                                   image_contents: pngBuffer,
                                   organization_id: org_id
                                 }, (err, chrtinst) => {
                                   finalChartSet.perceptionsNegative = chrtinst.img_hash;
-                                  var totalCount = report.recommend.futureLeadSentiment.hotLead + report.recommend.futureLeadSentiment.warmLead + report.recommend.futureLeadSentiment.coldLead;
-                                  if (totalCount === 0) {
-                                    totalCount = 0.01;
-                                  }
-                                  var connectDiff = (report.recommend.netConnector - report.previousRecommend[0]);
-                                  chrt.netConnectorChartAsync(1000, 380, {
-                                    leftLabel: "Net Connector Score®",
-                                    rightLabel: "Future Lead Sentiment",
-                                    leftSubLabel: "This month",
-                                    leftDiffLabel: (connectDiff > 0 ? "+" + connectDiff : connectDiff) + " than previous",
-                                    leftScore: report.recommend.netConnector,
-                                    sentimentPie: [{
-                                        label: "Hot",
-                                        quantity: report.recommend.futureLeadSentiment.hotLead === 0 ? 0 : Math.round((report.recommend.futureLeadSentiment.hotLead / totalCount) * 100)
-                                      },
-                                      {
-                                        label: "Warm",
-                                        quantity: report.recommend.futureLeadSentiment.warmLead === 0 ? 0 : Math.round((report.recommend.futureLeadSentiment.warmLead / totalCount) * 100)
-                                      },
-                                      {
-                                        label: "Cold",
-                                        quantity: report.recommend.futureLeadSentiment.coldLead === 0 ? 0 : Math.round((report.recommend.futureLeadSentiment.coldLead / totalCount) * 100)
-                                      }
-                                    ]
-                                  }).then((pngBuffer) => {
+                                  ReconnectAsync(cfg, chrt, report, org_id, chartWidths).then((pngBuffer) => {
                                     EmailChart.Create(cfg, {
                                       content_type: "image/png",
                                       image_contents: pngBuffer,
@@ -1302,5 +1462,15 @@ module.exports = {
   GeneralReportAsync,
   GetFullReportForOrgAsync,
   SendReportForOrgAsync,
-  SendReportForAllOrgsAsync
+  SendReportForAllOrgsAsync,
+
+  // Charts
+  PrimaryReasonsForLossChartAsync,
+  TopCompetitionChartAsync,
+  TopCompetitionChartReasonsAsync,
+  BuyXOverviewAsync,
+  SalesProcessAsync,
+  PerceptionsPositiveAsync,
+  PerceptionsNegativeAsync,
+  ReconnectAsync
 }
