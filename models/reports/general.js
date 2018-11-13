@@ -1141,6 +1141,23 @@ async function BuyXOverviewAsync(cfg, chrt, report, org_id, chartWidths) {
 }
 
 /**
+ * Do sales process asynchronously
+ */
+async function SalesProcessAsync(cfg, chrt, report, org_id, chartWidths) {
+  var salesProcessIssues = [];
+  for (var t = 0; t < Math.min(3, report.salesProcess.length); t++) {
+    salesProcessIssues.push({
+      label: report.salesProcess[t].shortLabel,
+      score: report.salesProcess[t].ratingScore,
+      lowLabel: "Poor",
+      highLabel: "Excellent",
+      n: report.respondents
+    });
+  }
+  return await chrt.ratingStackAsync(chartWidths, 7, salesProcessIssues);
+}
+
+/**
  * Get the list of charts for the email
  * @param {Object} cfg 
  * @param {Object} report 
@@ -1187,17 +1204,7 @@ var GetImageSetForReport = function (cfg, report, org_id, chartWidths = 1000) {
                       finalChartSet.buyx = chrtinst.img_hash;
 
                       // The sales process rating stack
-                      var salesProcessIssues = [];
-                      for (var t = 0; t < Math.min(3, report.salesProcess.length); t++) {
-                        salesProcessIssues.push({
-                          label: report.salesProcess[t].shortLabel,
-                          score: report.salesProcess[t].ratingScore,
-                          lowLabel: "Poor",
-                          highLabel: "Excellent",
-                          n: report.respondents
-                        });
-                      }
-                      chrt.ratingStackAsync(chartWidths, 7, salesProcessIssues).then((pngBuffer) => {
+                      SalesProcessAsync(cfg, chrt, report, org_id, chartWidths).then((pngBuffer) => {
                         EmailChart.Create(cfg, {
                           content_type: "image/png",
                           image_contents: pngBuffer,
@@ -1422,5 +1429,6 @@ module.exports = {
   PrimaryReasonsForLossChartAsync,
   TopCompetitionChartAsync,
   TopCompetitionChartReasonsAsync,
-  BuyXOverviewAsync
+  BuyXOverviewAsync,
+  SalesProcessAsync
 }
