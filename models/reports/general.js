@@ -336,23 +336,25 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     }
 
     // Merge with the master list
-    var existingItem = competitorInfo.find((og) => {
-      return og.label == winningVendor.label;
-    });
-    if (!existingItem) {
-      competitorInfo.push(winningVendor);
-    } else {
-      existingItem.Amount += winningVendor.Amount;
-      // Is it "other"?
-      if (existingItem.label == "__other__") {
-        // Merge the responses
-        for (let g = 0; g < winningVendor.responses.length; g++) {
-          if (!existingItem.responses.find((rp) => {
-            return rp == winningVendor.responses[g];
-          })) {
-            existingItem
-              .responses
-              .push(winningVendor.responses[g]);
+    if (winningVendor) {
+      var existingItem = competitorInfo.find((og) => {
+        return og.label == winningVendor.label;
+      });
+      if (!existingItem) {
+        competitorInfo.push(winningVendor);
+      } else {
+        existingItem.Amount += winningVendor.Amount;
+        // Is it "other"?
+        if (existingItem.label == "__other__") {
+          // Merge the responses
+          for (let g = 0; g < winningVendor.responses.length; g++) {
+            if (!existingItem.responses.find((rp) => {
+              return rp == winningVendor.responses[g];
+            })) {
+              existingItem
+                .responses
+                .push(winningVendor.responses[g]);
+            }
           }
         }
       }
