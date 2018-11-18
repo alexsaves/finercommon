@@ -110,6 +110,10 @@ CRMOpportunityRoles.Create = function (cfg, data, extraFields, cb) {
       name: "Role",
       row_name: "Role"
     },
+    {
+      name: "Id",
+      row_name: "id"
+    }
   ];
   const {query, params} = utils.createInsertOrUpdateStatementGivenData(cfg.db.db,tablename, data, rowDict, extraFields, 'Id');
 
