@@ -93,7 +93,7 @@ Organization.prototype.ComputeAllPreviousMonthlyReportsAsync = async function (c
     });
     if (!existingRep) {
       // We dont have it! Make one
-      var rep = await GeneralReport.GeneralReportAsync(cfg, this.id, monthList[j].startDay, monthList[j].endDay);
+      var rep = await GeneralReport.GeneralReportAsync(cfg, this.id, monthList[j].startDay, monthList[j].endDay, true);
 
       // Save it in the DB
       var finalRep = await OrgReportCache.CreateAsync(cfg, {

@@ -883,7 +883,7 @@ var GeneralReport = function (cfg, orgid, startdate, enddate, cb) {
 /**
  * The general report class ASYNC
  */
-var GeneralReportAsync = function (cfg, orgid, startdate, enddate) {
+var GeneralReportAsync = function (cfg, orgid, startdate, enddate, skipcomputeprevious = false) {
   return new Promise((resolve, reject) => {
     var lessThan15Days = Math.abs(Date.now() - enddate) < (1000 * 60 * 60 * 24 * 15);
 
@@ -897,52 +897,57 @@ var GeneralReportAsync = function (cfg, orgid, startdate, enddate) {
 
           // First get the org
           Organization.GetByIdAsync(cfg, orgid).then((org) => {
-            // Then run and retrieve the reports
-            org.ComputeAllPreviousMonthlyReportsAsync(cfg).then((reports) => {
-              // Convert them all to POJO's
-              for (let i = 0; i < reports.length; i++) {
-                reports[i] = JSON.parse(reports[i].report.toString());
-              }
+            if (skipcomputeprevious) {
+              resolve(focusRep);
+            } else {
+              // Then run and retrieve the reports
+              org.ComputeAllPreviousMonthlyReportsAsync(cfg).then((reports) => {
+                // Convert them all to POJO's
+                for (let i = 0; i < reports.length; i++) {
+                  let reportstr = reports[i].report.toString();
+                  reports[i] = JSON.parse(reportstr);
+                }
 
-              // Build the histograms for past BuyX scores and past Likelihood to Recommend
-              // Scores
-              var previousBuyX = [];
-              var previousRecommend = [];
+                // Build the histograms for past BuyX scores and past Likelihood to Recommend
+                // Scores
+                var previousBuyX = [];
+                var previousRecommend = [];
 
-              for (let i = 0; i < reports.length; i++) {
-                var previousBuyXScore = reports[i].buyX || -9999;
-                var previousConnectorScore = reports[i].recommend ?
-                  reports[i].recommend.netConnector :
-                  0;
-                previousBuyX.push(previousBuyXScore);
-                previousRecommend.push(previousConnectorScore);
-              }
+                for (let i = 0; i < reports.length; i++) {
+                  var previousBuyXScore = reports[i].buyX || -9999;
+                  var previousConnectorScore = reports[i].recommend ?
+                    reports[i].recommend.netConnector :
+                    0;
+                  previousBuyX.push(previousBuyXScore);
+                  previousRecommend.push(previousConnectorScore);
+                }
 
-              var changeDesc = "";
-              if (focusRep.buyX < -1000) {
-                changeDesc = "Not enough data this period to make a comparison.";
-              } else {
-                if (previousBuyX[0] < -1000) {
-                  changeDesc = "There isn't enough data in your prior period to make a comparison. Stick with it!";
+                var changeDesc = "";
+                if (focusRep.buyX < -1000) {
+                  changeDesc = "Not enough data this period to make a comparison.";
                 } else {
-                  var mdif = Math.round((focusRep.buyX - previousBuyX[0]) * 10) / 10;
-                  if (previousBuyX[0] < focusRep.buyX) {
-                    changeDesc = "Your buyer journey has improved by +" + mdif + " compared to prior period.  Keep up the good work!";
+                  if (previousBuyX[0] < -1000) {
+                    changeDesc = "There isn't enough data in your prior period to make a comparison. Stick with it!";
                   } else {
-                    changeDesc = "Your buyer journey has decreased by -" + -mdif + " compared to prior period.";
+                    var mdif = Math.round((focusRep.buyX - previousBuyX[0]) * 10) / 10;
+                    if (previousBuyX[0] < focusRep.buyX) {
+                      changeDesc = "Your buyer journey has improved by +" + mdif + " compared to prior period.  Keep up the good work!";
+                    } else {
+                      changeDesc = "Your buyer journey has decreased by -" + -mdif + " compared to prior period.";
+                    }
                   }
                 }
-              }
 
-              // Assign
-              focusRep.changeDesc = changeDesc;
+                // Assign
+                focusRep.changeDesc = changeDesc;
 
-              // Assign
-              focusRep.previousBuyX = previousBuyX.reverse();
-              focusRep.previousRecommend = previousRecommend.reverse();
-              focusRep.previousReports = reports.reverse();
-              resolve(focusRep);
-            });
+                // Assign
+                focusRep.previousBuyX = previousBuyX.reverse();
+                focusRep.previousRecommend = previousRecommend.reverse();
+                focusRep.previousReports = reports.reverse();
+                resolve(focusRep);
+              });
+            }
           });
 
         } else {

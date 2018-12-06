@@ -1,6 +1,6 @@
 {
   "name": "finercommon",
-  "version": "0.2.35",
+  "version": "0.2.36",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -28,6 +28,7 @@
     "javascript-time-ago": "^1.0.31",
     "md5": "^2.2.1",
     "moment": "^2.22.1",
+    "ms": "^2.1.1",
     "mysql": "^2.15.0",
     "node-ses": "^2.1.0",
     "node-time-ago": "^1.0.0",
