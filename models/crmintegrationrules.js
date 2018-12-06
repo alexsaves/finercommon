@@ -83,7 +83,7 @@ CRMIntegrationRules.prototype.canUserApprove = function (cfg, userId, cb) {
     if (err) {
       cb(err);
     } else {
-      if (users === `"*"`) {
+      if (users === `"*"` || (users && users.value == "all")) {
         cb(null, true);
       } else if (users.filter(u => u.value === userId).length > 0) {
         cb(null, true);
