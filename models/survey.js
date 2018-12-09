@@ -46,7 +46,7 @@ Survey.SURVEY_THEMES = {
 Survey.prototype.commit = function (cfg, cb) {
     cb = cb || function () { };
     if (check.string(this.survey_model)) {
-        this.survey_model = new Buffer(this.survey_model);
+        this.survey_model = Buffer.from(this.survey_model);
     }
     var update = dbcmd.constructUpdate(this, tablename, cfg.db.db, "guid", this.guid);
     dbcmd.cmd(cfg.pool, update.query, update.params, function (result) {
@@ -351,7 +351,7 @@ Survey.EnforceSurveyExistsForOpportunityAndType = function (cfg, opportunity_id,
                             survey_type: survey_type,
                             theme: org.default_survey_template,
                             name: org.name + " Feedback",
-                            survey_model: new Buffer(JSON.stringify(Survey.getSurveyFixture(survey_type)))
+                            survey_model: Buffer.from(JSON.stringify(Survey.getSurveyFixture(survey_type)))
                         }, (err, sv) => {
                             if (err) {
                                 cb(err);
@@ -436,7 +436,6 @@ Survey.Create = function (cfg, details, cb) {
             cb(err);
         });
 };
-
 
 /**
  * Create a prospect (ASYNC)

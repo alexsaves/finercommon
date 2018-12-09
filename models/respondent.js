@@ -277,7 +277,7 @@ Respondent.prototype.commit = function (cfg, cb) {
             }
             query += valKeys[elm] + ' = ?';
             if (typeof this[valKeys[elm]] == "object" && !(this[valKeys[elm]]instanceof Date)) {
-                params.push(new Buffer(JSON.stringify(this[valKeys[elm]])));
+                params.push(Buffer.from(JSON.stringify(this[valKeys[elm]])));
             } else {
                 params.push(this[valKeys[elm]]);
             }
@@ -318,10 +318,10 @@ Respondent.Create = function (cfg, details, cb) {
     }
     extend(_Defaults, details);
     if (typeof _Defaults.variables == "object") {
-        _Defaults.variables = new Buffer(JSON.stringify(_Defaults.variables));
+        _Defaults.variables = Buffer.from(JSON.stringify(_Defaults.variables));
     }
     if (typeof _Defaults.answers == "object") {
-        _Defaults.answers = new Buffer(JSON.stringify(_Defaults.answers));
+        _Defaults.answers = Buffer.from(JSON.stringify(_Defaults.answers));
     }
     var valKeys = Object.keys(_Defaults),
         query = 'INSERT INTO ' + cfg.db.db + '.' + tablename + ' SET ',
@@ -348,6 +348,21 @@ Respondent.Create = function (cfg, details, cb) {
         }, function (err) {
             cb(err);
         });
+};
+
+/**
+ * Create a respondent (ASYNC)
+ */
+Respondent.CreateAsync = function (cfg, details) {
+    return new Promise((resolve, reject) => {
+        Respondent.Create(cfg, details, (err, sv) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(null, sv);
+            }
+        });
+    });
 };
 
 // Expose it
