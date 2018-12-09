@@ -26,8 +26,11 @@ var utils = {
 
     /**
      * Create insert query given an array of data to be inserted
-     * ArrObj
-     * InsertDescription
+     * @param {*} dbName 
+     * @param {*} tableName 
+     * @param {*} dataArr 
+     * @param {*} rowDict 
+     * @param {*} extraFields 
      */
     createInsertStatementGivenData: function (dbName, tableName, dataArr, rowDict, extraFields) {
         let query = `INSERT INTO ${dbName}.${tableName} (`;
@@ -53,18 +56,23 @@ var utils = {
             query = query + '(' + valueSet.join(', ') + (extraFields.length > 0
                 ? ', ' + extraValues.join(', ') + ')'
                 : ')') + (index === dataArr.length - 1
-                ? ';'
-                : ',');
+                    ? ';'
+                    : ',');
         });
         return query;
     },
 
     /**
      * Create insert query given an array of data to be inserted
-     * ArrObj
-     * InsertDescription
+     * @param {*} dbName 
+     * @param {*} tableName 
+     * @param {*} dataArr 
+     * @param {*} rowDict 
+     * @param {*} extraFields 
+     * @param {*} uniqueKeyName 
      */
     createInsertOrUpdateStatementGivenData: function (dbName, tableName, dataArr, rowDict, extraFields, uniqueKeyName) {
+        //console.log("createInsertOrUpdateStatementGivenData", arguments);
         let query = `INSERT INTO ${dbName}.${tableName} (`;
         let rowNames = rowDict.map((d) => d.row_name);
         let extraValues = [];
@@ -95,10 +103,10 @@ var utils = {
             query = query + '(' + valueSet
                 .map(v => '?')
                 .join(', ') + (extraFields.length > 0
-                ? ', ' + extraValues.map(e => '?').join(', ') + ')'
-                : ')') + (index === dataArr.length - 1
-                ? ``
-                : ',');
+                    ? ', ' + extraValues.map(e => '?').join(', ') + ')'
+                    : ')') + (index === dataArr.length - 1
+                        ? ``
+                        : ',');
         });
 
         const valueSets = [];
@@ -110,7 +118,7 @@ var utils = {
 
         query += `${dupQuery} ${valueSets.join(', ')}`;
 
-        return {query, params};
+        return { query, params };
     }
 };
 
