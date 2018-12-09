@@ -28,6 +28,21 @@ Organization.prototype.getIntegrations = function (cfg, cb) {
 };
 
 /**
+ * Get the list of integrations for an organization
+ */
+Organization.prototype.getIntegrationsAsync = function(cfg) {
+  return new Promise((resolve, reject) => {
+    this.getIntegrations(cfg, (err, ints) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(ints);
+      }
+    });
+  });
+};
+
+/**
  * Delete all
  */
 Organization.DeleteAll = function (cfg, cb) {

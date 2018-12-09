@@ -15,10 +15,10 @@ var CRMIntegrations = function (details) {
  * Save any changes to the DB row
  */
 CRMIntegrations.prototype.commit = function (cfg, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   var excludes = [
-      'uid', 'created_at'
-    ],
+    'uid', 'created_at'
+  ],
     valKeys = Object.keys(this),
     query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET ',
     params = [],
@@ -41,6 +41,55 @@ CRMIntegrations.prototype.commit = function (cfg, cb) {
     cb(null, this);
   }, function (err) {
     cb(err);
+  });
+};
+
+/**
+ * Remove all opportunity data for the integration
+ */
+CRMIntegrations.prototype.clearOpportunityData = function (cfg, cb) {
+  cb = cb || function () { };
+  dbcmd
+    .cmd(cfg.pool, `DELETE FROM ${cfg.db.db}.crm_accounts WHERE integration_id = ?`, this.uid, (result) => {
+      dbcmd
+        .cmd(cfg.pool, `DELETE FROM ${cfg.db.db}.crm_contacts WHERE integration_id = ?`, this.uid, (result) => {
+          dbcmd
+            .cmd(cfg.pool, `DELETE FROM ${cfg.db.db}.crm_opportunities WHERE integration_id = ?`, this.uid, (result) => {
+              dbcmd
+                .cmd(cfg.pool, `DELETE FROM ${cfg.db.db}.crm_users WHERE integration_id = ?`, this.uid, (result) => {
+                  dbcmd
+                    .cmd(cfg.pool, `DELETE FROM ${cfg.db.db}.crm_roles WHERE integration_id = ?`, this.uid, (result) => {
+                      cb();
+                    }, function (err) {
+                      cb(err);
+                    });
+                }, function (err) {
+                  cb(err);
+                });
+            }, function (err) {
+              cb(err);
+            });
+        }, function (err) {
+          cb(err);
+        });
+    }, function (err) {
+      cb(err);
+    });
+};
+
+
+/**
+ * Remove all opportunity data for the integration (ASYNC)
+ */
+CRMIntegrations.prototype.clearOpportunityDataAsync = function (cfg) {
+  return new Promise((resolve, reject) => {
+    this.clearOpportunityData(cfg, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
   });
 };
 
@@ -85,7 +134,7 @@ CRMIntegrations.GetForOrgsAsync = function (cfg, organizations) {
 * Get the integrations for a list of org ids
 */
 CRMIntegrations.GetForOrgIds = function (cfg, organization_ids, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   if (!Array.isArray(organization_ids)) {
     organization_ids = [organization_ids];
   }
@@ -109,7 +158,7 @@ CRMIntegrations.GetForOrgIds = function (cfg, organization_ids, cb) {
 * Delete a specific CRM integration by its UQ
 */
 CRMIntegrations.DeleteForUQ = function (cfg, orgid, uq, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND uq = ?', [
     orgid, uq
   ], function (result) {
@@ -123,7 +172,7 @@ CRMIntegrations.DeleteForUQ = function (cfg, orgid, uq, cb) {
 * Get the integrations for a particular organization
 */
 CRMIntegrations.GetForOrg = function (cfg, organization_id, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ?', [organization_id], function (result) {
     let ints = [];
     for (let i = 0; i < result.length; i++) {
@@ -134,8 +183,8 @@ CRMIntegrations.GetForOrg = function (cfg, organization_id, cb) {
         message: "No CRM integration found."
       }
       : null, result.length > 0
-      ? ints
-      : null);
+        ? ints
+        : null);
   }, function (err) {
     cb(err);
   });
@@ -160,7 +209,7 @@ CRMIntegrations.GetForOrgAsync = function (cfg, organization_id) {
 * Get an org by its UQ (unique id that connects it to the 3rd party system)
 */
 CRMIntegrations.GetByUQ = function (cfg, orgid, uq, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND uq = ? LIMIT 1', [
     orgid, uq
   ], function (result) {
@@ -176,7 +225,7 @@ CRMIntegrations.GetByUQ = function (cfg, orgid, uq, cb) {
 * Get an org by its id
 */
 CRMIntegrations.GetByUId = function (cfg, id, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid = ? LIMIT 1', [id], function (result) {
     cb(null, result.length > 0
       ? new CRMIntegrations(result[0])
@@ -190,7 +239,7 @@ CRMIntegrations.GetByUId = function (cfg, id, cb) {
  * Delete all
  */
 CRMIntegrations.DeleteAll = function (cfg, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid != NULL', function () {
     cb();
   }, function (err) {
@@ -202,7 +251,7 @@ CRMIntegrations.DeleteAll = function (cfg, cb) {
 * Create an integration
 */
 CRMIntegrations.Create = function (cfg, details, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   details = details || {};
   var _Defaults = {
     uid: uuidV4().toString(),

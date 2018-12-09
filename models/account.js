@@ -147,6 +147,21 @@ Account.prototype.commit = function (cfg, cb) {
 };
 
 /**
+ * Commit to db
+ */
+Account.prototype.commitAsync = function(cfg) {
+    return new Promise((resolve, reject) => {
+        this.commit(cfg, (err, act) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(act);
+            }
+        });
+    });
+}
+
+/**
  * Get the level of access for this oreg
  * 0 = owner, 1 = admin, 2 = user, -1 = none
  */
@@ -197,6 +212,21 @@ Account.prototype.hasAccessToSurvey = function (cfg, guid, cb) {
  */
 Account.prototype.getOrganizations = function (cfg, cb) {
     Organization.GetForAccount(cfg, this.id, cb);
+};
+
+/**
+ * Get a list of the organizations for this user (ASYNC)
+ */
+Account.prototype.getOrganizationsAsync = function(cfg) {
+    return new Promise((resolve, reject) => {
+        this.getOrganizations(cfg, (err, orgs) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(orgs);
+            }
+        });
+    });
 };
 
 /**
