@@ -118,9 +118,24 @@ CRMOpportunityRoles.Create = function (cfg, data, extraFields, cb) {
   const {query, params} = utils.createInsertOrUpdateStatementGivenData(cfg.db.db,tablename, data, rowDict, extraFields, 'Id');
 
   dbcmd.cmd(cfg.pool, query, params, function (result) {
-    console.log(result);
+    cb();
   }, function (err) {
     cb(err);
+  });
+};
+
+/**
+* Create a CRM contact (ASYNC)
+*/
+CRMOpportunityRoles.CreateAsync = function (cfg, data, extraFields) {
+  return new Promise((resolve, reject) => {
+    CRMOpportunityRoles.Create(cfg, data, extraFields, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
   });
 };
 

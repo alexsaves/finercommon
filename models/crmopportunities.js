@@ -397,6 +397,21 @@ CRMOpportunities.setApprovalStatusOnIdsAsync = function (cfg, ids) {
   });
 };
 
+
+/**
+ * Mark CRM Opportunity as cancelled
+ */
+CRMOpportunities.setApprovalStatusOnIdAsync = function (cfg, isApproved, id) {
+  return new Promise((resolve, reject) => {
+    let query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET approval_status = ? WHERE id = ?';
+    dbcmd.cmd(cfg.pool, query, [isApproved ? 1 : 0, id], () => {
+      resolve(id);
+    }, function (err) {
+      reject(err);
+    });
+  });
+};
+
 /**
  * Get a collection of opportunities
  * @param {*} cfg
@@ -475,9 +490,25 @@ CRMOpportunities.Create = function (cfg, data, extraFields, cb) {
   const {query, params} = utils.createInsertOrUpdateStatementGivenData(cfg.db.db, 'crm_opportunities', data, rowDict, extraFields, 'Id');
 
   dbcmd.cmd(cfg.pool, query, params, function (result) {
-    //console.log(result);
+    cb();
   }, function (err) {
     cb(err);
+  });
+};
+
+
+/**
+* Create an opportunity (ASYNC)
+*/
+CRMOpportunities.CreateAsync = function (cfg, data, extraFields) {
+  return new Promise((resolve, reject) => {
+    CRMOpportunities.Create(cfg, data, extraFields, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
   });
 };
 

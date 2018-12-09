@@ -59,7 +59,12 @@ CRMIntegrations.prototype.clearOpportunityData = function (cfg, cb) {
                 .cmd(cfg.pool, `DELETE FROM ${cfg.db.db}.crm_users WHERE integration_id = ?`, this.uid, (result) => {
                   dbcmd
                     .cmd(cfg.pool, `DELETE FROM ${cfg.db.db}.crm_roles WHERE integration_id = ?`, this.uid, (result) => {
-                      cb();
+                      dbcmd
+                        .cmd(cfg.pool, `DELETE FROM ${cfg.db.db}.crm_opportunity_roles WHERE integration_id = ?`, this.uid, (result) => {
+                          cb();
+                        }, function (err) {
+                          cb(err);
+                        });
                     }, function (err) {
                       cb(err);
                     });
