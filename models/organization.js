@@ -28,6 +28,21 @@ Organization.prototype.getIntegrations = function (cfg, cb) {
 };
 
 /**
+ * Get the list of integrations for an organization
+ */
+Organization.prototype.getIntegrationsAsync = function(cfg) {
+  return new Promise((resolve, reject) => {
+    this.getIntegrations(cfg, (err, ints) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(ints);
+      }
+    });
+  });
+};
+
+/**
  * Delete all
  */
 Organization.DeleteAll = function (cfg, cb) {
@@ -97,7 +112,7 @@ Organization.prototype.ComputeAllPreviousMonthlyReportsAsync = async function (c
 
       // Save it in the DB
       var finalRep = await OrgReportCache.CreateAsync(cfg, {
-        report: new Buffer(JSON.stringify(rep)),
+        report: Buffer.from(JSON.stringify(rep)),
         report_type: OrgReportCache.REPORT_TYPE.MONTHLY_SUMMARY,
         organization_id: this.id,
         created_for_year: monthList[j].year,
@@ -357,8 +372,8 @@ Organization.Create = function (cfg, details, cb) {
     default_survey_template: 'bokehlight'
   };
   extend(_Defaults, details);
-  _Defaults.feature_list = new Buffer(JSON.stringify(_Defaults.feature_list));
-  _Defaults.competitor_list = new Buffer(JSON.stringify(_Defaults.competitor_list));
+  _Defaults.feature_list = Buffer.from(JSON.stringify(_Defaults.feature_list));
+  _Defaults.competitor_list = Buffer.from(JSON.stringify(_Defaults.competitor_list));
   var valKeys = Object.keys(_Defaults),
     query = 'INSERT INTO ' + cfg.db.db + '.' + tablename + ' SET ',
     params = [],
@@ -415,7 +430,7 @@ Organization.prototype.commit = function (cfg, cb) {
       }
       query += valKeys[elm] + ' = ?';
       if (this[valKeys[elm]]instanceof Array) {
-        params.push(new Buffer(JSON.stringify(this[valKeys[elm]])));
+        params.push(Buffer.from(JSON.stringify(this[valKeys[elm]])));
       } else {
         params.push(this[valKeys[elm]]);
       }

@@ -124,9 +124,24 @@ CRMAccounts.Create = function (cfg, data, extraFields, cb) {
   const {query, params} = utils.createInsertOrUpdateStatementGivenData(cfg.db.db, 'crm_accounts', data, rowDict, extraFields, 'Id');
 
   dbcmd.cmd(cfg.pool, query, params, function (result) {
-    //console.log(result);
+    cb();
   }, function (err) {
     cb(err);
+  });
+};
+
+/**
+ * Create an integration (ASYNC)
+ */
+CRMAccounts.CreateAsync = function(cfg, data, extraFields) {
+  return new Promise((resolve, reject) => {
+    CRMAccounts.Create(cfg, data, extraFields, (err, act) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(act);
+      }
+    });
   });
 };
 

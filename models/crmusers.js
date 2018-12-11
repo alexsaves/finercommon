@@ -121,8 +121,25 @@ CRMUsers.Create = function (cfg, data, extraFields, cb) {
     }
   ];
   const { query, params } = utils.createInsertOrUpdateStatementGivenData(cfg.db.db, 'crm_users', data, rowDict, extraFields);
-  dbcmd.cmd(cfg.pool, query, params, function (result) { }, function (err) {
+  dbcmd.cmd(cfg.pool, query, params, function (result) { 
+    cb();
+  }, function (err) {
     cb(err);
+  });
+};
+
+/**
+* Create an integration (ASYNC)
+*/
+CRMUsers.CreateAsync = function (cfg, data, extraFields) {
+  return new Promise((resolve, reject) => {
+    CRMUsers.Create(cfg, data, extraFields, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
   });
 };
 

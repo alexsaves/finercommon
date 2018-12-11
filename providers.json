@@ -1,0 +1,7 @@
+{
+    "salesforce": {
+        "authUrl": "https://login.salesforce.com/services/oauth2/authorize",
+        "accessUrl": "https://login.salesforce.com/services/oauth2/token",
+        "revokeUrl": "https://login.salesforce.com/services/oauth2/revoke"
+    }
+}

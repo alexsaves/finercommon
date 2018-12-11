@@ -44,9 +44,9 @@ Survey.SURVEY_THEMES = {
  * Save this instance of a survey to the DB
  */
 Survey.prototype.commit = function (cfg, cb) {
-    cb = cb || function () {};
+    cb = cb || function () { };
     if (check.string(this.survey_model)) {
-        this.survey_model = new Buffer(this.survey_model);
+        this.survey_model = Buffer.from(this.survey_model);
     }
     var update = dbcmd.constructUpdate(this, tablename, cfg.db.db, "guid", this.guid);
     dbcmd.cmd(cfg.pool, update.query, update.params, function (result) {
@@ -83,7 +83,7 @@ Survey.prototype.getQuestionByName = function (name) {
  * Get a fully piped survey
  * @param {*} respondent 
  */
-Survey.prototype.getPipedModel = function(respondent) {
+Survey.prototype.getPipedModel = function (respondent) {
     var finalModel = JSON.parse(JSON.stringify(this.survey_model));
     let respVars = respondent.variables;
     let exter = new SurveyValueExtractor();
@@ -145,15 +145,15 @@ Survey.getSurveyFixture = function (SURVEY_TYPE) {
  * Get a survey by its guid
  */
 Survey.GetByGuid = function (cfg, guid, cb) {
-    cb = cb || function () {};
+    cb = cb || function () { };
     dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE guid = ?', [guid], function (result) {
         cb(result.length === 0
             ? {
                 message: "No survey found."
             }
             : null, result.length > 0
-            ? new Survey(result[0])
-            : null);
+                ? new Survey(result[0])
+                : null);
     }, function (err) {
         cb(err);
     });
@@ -163,7 +163,7 @@ Survey.GetByGuid = function (cfg, guid, cb) {
  * Get surveys by the organization
  */
 Survey.GetForOrganization = function (cfg, organization_id, cb) {
-    cb = cb || function () {};
+    cb = cb || function () { };
     dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ?', [organization_id], function (result) {
         var res = [];
         for (var i = 0; i < result.length; i++) {
@@ -197,7 +197,7 @@ Survey.GetForOrganizationAsync = function (cfg, organization_id) {
  * Get surveys by the organization
  */
 Survey.GetForOrganizationAndType = function (cfg, organization_id, SURVEY_TYPE, cb) {
-    cb = cb || function () {};
+    cb = cb || function () { };
     dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND survey_type = ?', [organization_id, SURVEY_TYPE], function (result) {
         var res = [];
         for (var i = 0; i < result.length; i++) {
@@ -215,7 +215,7 @@ Survey.GetForOrganizationAndType = function (cfg, organization_id, SURVEY_TYPE, 
  * @param {*} organization_id 
  * @param {*} SURVEY_TYPE 
  */
-Survey.GetForOrganizationAndTypeAsync = function(cfg, organization_id, SURVEY_TYPE) {
+Survey.GetForOrganizationAndTypeAsync = function (cfg, organization_id, SURVEY_TYPE) {
     return new Promise((resolve, reject) => {
         Survey.GetForOrganizationAndType(cfg, organization_id, SURVEY_TYPE, (err, svs) => {
             if (err) {
@@ -231,7 +231,7 @@ Survey.GetForOrganizationAndTypeAsync = function(cfg, organization_id, SURVEY_TY
  * Get surveys by the organizations
  */
 Survey.GetForOrganizations = function (cfg, orgs, cb) {
-    cb = cb || function () {};
+    cb = cb || function () { };
     if (!orgs || orgs.length == 0) {
         cb(null, []);
     } else {
@@ -259,7 +259,7 @@ Survey.GetForOrganizations = function (cfg, orgs, cb) {
  * Get surveys by an array of ids
  */
 Survey.GetByGuids = function (cfg, svuids, cb) {
-    cb = cb || function () {};
+    cb = cb || function () { };
     if (svuids && svuids.length > 0) {
         var finalStr = "(";
         for (var k = 0; k < svuids.length; k++) {
@@ -287,7 +287,7 @@ Survey.GetByGuids = function (cfg, svuids, cb) {
  * Get a survey by its opportunity ID and type
  */
 Survey.GetForOpportunityAndType = function (cfg, opportunity_id, survey_type, cb) {
-    cb = cb || function () {};
+    cb = cb || function () { };
     dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE opportunity_id = ? AND survey_type = ?', [
         opportunity_id, survey_type
     ], function (result) {
@@ -323,7 +323,7 @@ Survey.GetForOpportunityAndTypeAsync = function (cfg, opportunity_id, survey_typ
  * Delete all
  */
 Survey.DeleteAll = function (cfg, cb) {
-    cb = cb || function () {};
+    cb = cb || function () { };
     dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE guid != NULL', function () {
         cb();
     }, function (err) {
@@ -351,7 +351,7 @@ Survey.EnforceSurveyExistsForOpportunityAndType = function (cfg, opportunity_id,
                             survey_type: survey_type,
                             theme: org.default_survey_template,
                             name: org.name + " Feedback",
-                            survey_model: new Buffer(JSON.stringify(Survey.getSurveyFixture(survey_type)))
+                            survey_model: Buffer.from(JSON.stringify(Survey.getSurveyFixture(survey_type)))
                         }, (err, sv) => {
                             if (err) {
                                 cb(err);
@@ -391,7 +391,7 @@ Survey.EnforceSurveyExistsForOpportunityAndTypeAsync = function (cfg, opportunit
  * Create a prospect
  */
 Survey.Create = function (cfg, details, cb) {
-    cb = cb || function () {};
+    cb = cb || function () { };
     details = details || {};
     if (!details.opportunity_id) {
         throw new Error("Missing opportunity ID on Survey");
@@ -404,10 +404,10 @@ Survey.Create = function (cfg, details, cb) {
         created_at: new Date(),
         updated_at: new Date(),
         survey_type: Survey.SURVEY_TYPES.PROSPECT,
-        survey_model: new Buffer(JSON.stringify(Survey.getSurveyFixture(Survey.SURVEY_TYPES.PROSPECT)))
+        survey_model: Buffer.from(JSON.stringify(Survey.getSurveyFixture(Survey.SURVEY_TYPES.PROSPECT)))
     };
     if (!(_Defaults.survey_model instanceof Buffer)) {
-        _Defaults.survey_model = new Buffer(JSON.stringify(_Defaults.survey_model));
+        _Defaults.survey_model = Buffer.from(JSON.stringify(_Defaults.survey_model));
     }
     extend(_Defaults, details);
     var valKeys = Object.keys(_Defaults),
@@ -435,6 +435,21 @@ Survey.Create = function (cfg, details, cb) {
         }, function (err) {
             cb(err);
         });
+};
+
+/**
+ * Create a prospect (ASYNC)
+ */
+Survey.CreateAsync = function (cfg, details) {
+    return new Promise((resolve, reject) => {
+        Survey.Create(cfg, details, (err, sv) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(sv);
+            }
+        });
+    });
 };
 
 /**
