@@ -446,7 +446,7 @@ Survey.CreateAsync = function (cfg, details) {
             if (err) {
                 reject(err);
             } else {
-                resolve(null, sv);
+                resolve(sv);
             }
         });
     });

@@ -70,6 +70,21 @@ Respondent.prototype.applyAnswersForSurvey = function (cfg, survey, data, cb) {
 };
 
 /**
+ * Apply and save to the DB the answers for a survey (ASYNC)
+ */
+Respondent.prototype.applyAnswersForSurveyAsync = function (cfg, survey, data) {
+    return new Promise((resolve, reject) => {
+        this.applyAnswersForSurvey(cfg, survey, data, (err, res) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(res);
+            }
+        });
+    });
+};
+
+/**
  * Get a list of respondents for a survey guid
  */
 Respondent.GetBySurvey = function (cfg, guid, cb) {
@@ -355,11 +370,11 @@ Respondent.Create = function (cfg, details, cb) {
  */
 Respondent.CreateAsync = function (cfg, details) {
     return new Promise((resolve, reject) => {
-        Respondent.Create(cfg, details, (err, sv) => {
+        Respondent.Create(cfg, details, (err, resp) => {
             if (err) {
                 reject(err);
             } else {
-                resolve(null, sv);
+                resolve(resp);
             }
         });
     });
