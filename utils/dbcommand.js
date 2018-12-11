@@ -47,13 +47,13 @@ var cmd = function (pool, dbcmd, args, callback, errorcallback) {
     }
 
     // Is it taking a while to get a connection?
-    if (connectionAcquisitionTime > 500) {
+    if (connectionAcquisitionTime > 2000) {
       console.log("LONG CONNECTION ACQUISITION TIME: ", connectionAcquisitionTime);
     }
 
     dbLongTimer = setTimeout(function () {
       console.log("Taking a long time to perform a DB query @" + (new Date()).toString() + ".", dbcmd);
-    }, 5000);
+    }, 10000);
 
     // Use the connection
     try {
