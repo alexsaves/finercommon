@@ -9,6 +9,7 @@ const utf8 = require('utf8');
 const fs = require('fs');
 const SurveyValueExtractor = require('../models/surveyvalueextractor');
 const Piper = require('../models/piper');
+const Respondent = require('../models/respondent');
 
 // Fixtures
 const prospect_survey_fixture = JSON.parse(fs.readFileSync(__dirname + '/../fixtures/surveys/questionnaire.json').toString('utf-8'));
@@ -77,6 +78,13 @@ Survey.prototype.getQuestionByName = function (name) {
         }
     }
     return;
+};
+
+/**
+ * Get all the respondents for this survey (ASYNC)
+ */
+Survey.prototype.getRespondentsAsync = async function(cfg) {
+    return await Respondent.GetBySurveyAsync(cfg, this.guid);
 };
 
 /**

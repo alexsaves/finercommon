@@ -304,7 +304,7 @@ OrganizationInvitation.prototype.DeclineInvite = function (cfg, defaultFrom, ema
 };
 
 /**
- * Delete all
+ * Delete all invitations
  */
 OrganizationInvitation.DeleteAll = function (cfg, cb) {
   cb = cb || function () {};
@@ -312,6 +312,21 @@ OrganizationInvitation.DeleteAll = function (cfg, cb) {
     cb();
   }, function (err) {
     cb(err);
+  });
+};
+
+/**
+ * Delete all invitations (ASYNC)
+ */
+OrganizationInvitation.DeleteAllAsync = function (cfg) {
+  return new Promise((resolve, reject) => {
+    OrganizationInvitation.DeleteAll(cfg, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
   });
 };
 
