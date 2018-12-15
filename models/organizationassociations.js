@@ -14,8 +14,8 @@ var OrganizationAssociations = function (details) {
 /**
  * Delete an association
  */
-OrganizationAssociations.prototype.Delete = function(cfg, cb) {
-  cb = cb || function () {};
+OrganizationAssociations.prototype.Delete = function (cfg, cb) {
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [this.id], function (result) {
     cb(null);
   }, function (err) {
@@ -27,15 +27,15 @@ OrganizationAssociations.prototype.Delete = function(cfg, cb) {
 * Get an org by its id
 */
 OrganizationAssociations.GetById = function (cfg, id, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [id], function (result) {
     cb(result.length === 0
       ? {
         message: "No org associations found."
       }
       : null, result.length > 0
-      ? new OrganizationAssociations(result[0])
-      : null);
+        ? new OrganizationAssociations(result[0])
+        : null);
   }, function (err) {
     cb(err);
   });
@@ -45,7 +45,7 @@ OrganizationAssociations.GetById = function (cfg, id, cb) {
 * Get all associations by email
 */
 OrganizationAssociations.GetAllByEmail = function (cfg, email, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   require('../models/account').GetByEmail(cfg, email, (err, act) => {
     if (err) {
       cb(err);
@@ -66,7 +66,7 @@ OrganizationAssociations.GetAllByEmail = function (cfg, email, cb) {
  * Remove an association by user and org
  */
 OrganizationAssociations.DeleteForAccountAndOrganization = function (cfg, actid, orgid, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? && account_id = ?', [
     orgid, actid
   ], function (result) {
@@ -80,7 +80,7 @@ OrganizationAssociations.DeleteForAccountAndOrganization = function (cfg, actid,
 * Delete for an org
 */
 OrganizationAssociations.DeleteForOrganization = function (cfg, orgid, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ?', [orgid], function (result) {
     cb(null);
   }, function (err) {
@@ -92,7 +92,7 @@ OrganizationAssociations.DeleteForOrganization = function (cfg, orgid, cb) {
 * Get associations by org id and account
 */
 OrganizationAssociations.GetForOrgAndAccount = function (cfg, orgid, accountid, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND account_id = ?', [
     orgid, accountid
   ], function (result) {
@@ -108,19 +108,19 @@ OrganizationAssociations.GetForOrgAndAccount = function (cfg, orgid, accountid, 
  * Delete all
  */
 OrganizationAssociations.DeleteAll = function (cfg, cb) {
-    cb = cb || function () {};
-    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id > 0', function () {
-        cb();
-    }, function (err) {
-        cb(err);
-    });
+  cb = cb || function () { };
+  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id > 0', function () {
+    cb();
+  }, function (err) {
+    cb(err);
+  });
 };
 
 /**
 * Get all associations for an org
 */
 OrganizationAssociations.GetAllForOrg = function (cfg, id, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ?', [id], function (results) {
     var res = [];
     results.forEach((assoc) => {
@@ -167,7 +167,7 @@ OrganizationAssociations.GetAllForOrgAsync = function (cfg, id) {
 * Create an association
 */
 OrganizationAssociations.Create = function (cfg, details, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   details = details || {};
   var _Defaults = {
     created_at: new Date(),
@@ -192,16 +192,31 @@ OrganizationAssociations.Create = function (cfg, details, cb) {
   dbcmd
     .cmd(cfg.pool, query, params, function (result) {
       OrganizationAssociations
-        .GetById(cfg, result.insertId, function (err, org) {
+        .GetById(cfg, result.insertId, function (err, assoc) {
           if (err) {
             cb(err);
           } else {
-            cb(null, org);
+            cb(null, assoc);
           }
         });
     }, function (err) {
       cb(err);
     });
+};
+
+/**
+* Create an association (ASYNC)
+*/
+OrganizationAssociations.CreateAsync = function (cfg, details) {
+  return new Promise((resolve, reject) => {
+    OrganizationAssociations.Create(cfg, details, (err, assoc) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(assoc);
+      }
+    });
+  });
 };
 
 // Expose it

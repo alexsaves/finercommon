@@ -431,5 +431,20 @@ Account.Create = function (cfg, details, cb) {
         });
 };
 
+/**
+ * Create a user (ASYNC)
+ */
+Account.CreateAsync = function (cfg, details) {
+    return new Promise((resolve, reject) => {
+        Account.Create(cfg, details, (err, user) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(user);
+            }
+        });
+    });
+};
+
 // Expose it
 module.exports = Account;
