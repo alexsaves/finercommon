@@ -16,6 +16,8 @@ const md5 = require('md5');
  */
 const MakeFakeAccount = async function (cfg, email, fName, lName, orgName, when, pw, logger) {
   logger("\Creating account (" + email + ")...");
+  finercommon = require('../index.js');
+  models = finercommon.models;
   // Start with the account record itself
   var act = await models.Account.CreateAsync(cfg, {
     name: fName + ' ' + lName,
@@ -35,7 +37,7 @@ const MakeFakeAccount = async function (cfg, email, fName, lName, orgName, when,
   });
 
   // Make an org association from this user to this account
-  var oasc = await models.OrganizationAssociations.CreateAsync(cfg, {
+  var oasc = await models.OrganizationAssociation.CreateAsync(cfg, {
     created_at: when,
     updated_at: when,
     account_id: act.id,
@@ -51,6 +53,7 @@ const MakeFakeAccount = async function (cfg, email, fName, lName, orgName, when,
     crm_type: 'SALESFORCE',
     info: '{}',
     is_active: 1,
+    uq: shortid.generate().toUpperCase(),
     connection_name: 'FinerInk',
     owner_names: Buffer.from(JSON.stringify({
       "label": "All Owners",

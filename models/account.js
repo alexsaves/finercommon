@@ -253,11 +253,7 @@ Account.GetByEmailAndPassword = function (cfg, e, p, cb) {
     dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email = ? AND pw_md5 = ?', [
         e, p
     ], function (result) {
-        cb(result.length === 0
-            ? {
-                message: "No user found."
-            }
-            : null, result.length > 0
+        cb(null, result.length > 0
             ? new Account(result[0])
             : null);
     }, function (err) {
@@ -275,11 +271,7 @@ Account.GetAccountByFbid = (cfg, fbId, cb) => {
     cb = cb || function () {};
 
     dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE fbid = ? LIMIT 1', [fbId], function (result) {
-        cb(result.length === 0
-            ? {
-                message: "No user found."
-            }
-            : null, result.length > 0
+        cb(null, result.length > 0
             ? new Account(result[0])
             : null);
     }, function (err) {
@@ -301,12 +293,7 @@ Account.GetByEmail = function (cfg, e, cb) {
     cb = cb || function () {};
 
     dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email = ? LIMIT 1', [e], function (result) {
-        cb(result.length === 0
-            ? {
-                userMissing: true,
-                message: "No user found."
-            }
-            : null, result.length > 0
+        cb(null, result.length > 0
             ? new Account(result[0])
             : null);
     }, function (err) {
@@ -337,11 +324,7 @@ Account.GetByEmailAsync = function (cfg, e) {
 Account.GetById = function (cfg, id, cb) {
     cb = cb || function () {};
     dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [id], function (result) {
-        cb(result.length === 0
-            ? {
-                message: "No user found."
-            }
-            : null, result.length > 0
+        cb(null, result.length > 0
             ? new Account(result[0])
             : null);
     }, function (err) {
@@ -375,6 +358,21 @@ Account.DeleteAll = function (cfg, cb) {
         cb();
     }, function (err) {
         cb(err);
+    });
+};
+
+/**
+ * Delete all (ASYNC)
+ */
+Account.DeleteAllAsync = function (cfg) {
+    return new Promise((resolve, reject) => {
+        Account.DeleteAll(cfg, (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
     });
 };
 

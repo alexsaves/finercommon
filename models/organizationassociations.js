@@ -105,7 +105,7 @@ OrganizationAssociations.GetForOrgAndAccount = function (cfg, orgid, accountid, 
 };
 
 /**
- * Delete all
+ * Delete all assocs
  */
 OrganizationAssociations.DeleteAll = function (cfg, cb) {
   cb = cb || function () { };
@@ -113,6 +113,21 @@ OrganizationAssociations.DeleteAll = function (cfg, cb) {
     cb();
   }, function (err) {
     cb(err);
+  });
+};
+
+/**
+ * Delete all assocs (ASYNC)
+ */
+OrganizationAssociations.DeleteAllAsync = function (cfg) {
+  return new Promise((resolve, reject) => {
+    OrganizationAssociations.DeleteAll(cfg, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
   });
 };
 

@@ -12,11 +12,7 @@ var Accounts = function () {
 Account.GetByEmail = function (cfg, e, cb) {
     cb = cb || function () {};
     dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email = ? LIMIT 1', [e], function (result) {
-        cb(result.length === 0
-            ? {
-                message: "No user found."
-            }
-            : null, result.length > 0
+        cb(null, result.length > 0
             ? new Account(result[0])
             : null);
     }, function (err) {

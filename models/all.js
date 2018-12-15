@@ -28,109 +28,28 @@ var All = {
     Daemon: require('../models/daemon'),
     Charts: require('../models/charts'),
     EmailChart: require('../models/emailchart'),
-    // TODO: update delete to include CRM entities
-    DeleteAll: function (cfg, cb) {
-        console.log("Deleting all...");
-        this
+    // Clear out all the data. Foreign cascade should take care of the rest
+    DeleteAllAsync: async function (cfg, logger) {
+        logger("Deleting all...");
+        await this
             .Account
-            .DeleteAll(cfg, (err) => {
-                if (err) {
-                    cb(err);
-                } else {
-                    console.log("Deleted accounts.");
-                    this
-                        .Organization
-                        .DeleteAll(cfg, (err) => {
-                            if (err) {
-                                cb(err);
-                            } else {
-                                console.log("Deleted organizations.");
-                                this
-                                    .OrganizationAssociation
-                                    .DeleteAll(cfg, (err) => {
-                                        if (err) {
-                                            cb(err);
-                                        } else {
-                                            console.log("Deleted org assocs.");
-                                            this
-                                                .OrganizationInvitation
-                                                .DeleteAll(cfg, (err) => {
-                                                    if (err) {
-                                                        cb(err);
-                                                    } else {
-                                                        console.log("Deleted org invites.");
-                                                        this
-                                                            .Prospect
-                                                            .DeleteAll(cfg, (err) => {
-                                                                if (err) {
-                                                                    cb(err);
-                                                                } else {
-                                                                    console.log("Deleted prospects.");
-                                                                    this
-                                                                        .Survey
-                                                                        .DeleteAll(cfg, (err) => {
-                                                                            if (err) {
-                                                                                cb(err);
-                                                                            } else {
-                                                                                console.log("Deleted surveys.");
-                                                                                this
-                                                                                    .Respondent
-                                                                                    .DeleteAll(cfg, (err) => {
-                                                                                        if (err) {
-                                                                                            cb(err);
-                                                                                        } else {
-                                                                                            console.log("Deleted respondents.");
-                                                                                            this
-                                                                                                .Response
-                                                                                                .DeleteAll(cfg, (err) => {
-                                                                                                    if (err) {
-                                                                                                        cb(err);
-                                                                                                    } else {
-                                                                                                        console.log("Deleted responses.");
-                                                                                                        this
-                                                                                                            .FileUploads
-                                                                                                            .DeleteAll(cfg, (err) => {
-                                                                                                                if (err) {
-                                                                                                                    cb(err);
-                                                                                                                } else {
-                                                                                                                    console.log("Deleted file uploads.");
-                                                                                                                    this
-                                                                                                                        .ResetPWInvitations
-                                                                                                                        .DeleteAll(cfg, (err) => {
-                                                                                                                            if (err) {
-                                                                                                                                cb(err);
-                                                                                                                            } else {
-                                                                                                                                console.log("Deleted reset password invites.");
-                                                                                                                                this
-                                                                                                                                    .CRMIntegrations
-                                                                                                                                    .DeleteAll(cfg, (err) => {
-                                                                                                                                        if (err) {
-                                                                                                                                            cb(err);
-                                                                                                                                        } else {
-                                                                                                                                            console.log("Deleted CRM integrations.");
-                                                                                                                                            cb();
-                                                                                                                                        }
-                                                                                                                                    });
-                                                                                                                            }
-                                                                                                                        });
-                                                                                                                }
-                                                                                                            });
-                                                                                                    }
-                                                                                                });
-                                                                                        }
-                                                                                    })
-                                                                            }
-                                                                        });
-                                                                }
-                                                            })
-                                                    }
-                                                })
-                                        }
-                                    })
-                            }
-                        });
-                }
-            })
+            .DeleteAllAsync(cfg);
+        logger("Deleted accounts.");
+
+        await this
+            .Organization
+            .DeleteAllAsync(cfg);
+        logger("Deleted organizations.");
+
+        await this
+            .OrganizationAssociation
+            .DeleteAllAsync(cfg);
+        logger("Deleted org assocs.");
+
+        await this
+            .OrganizationInvitation
+            .DeleteAllAsync(cfg);
+        logger("Deleted org invites.");
     },
     reports: {
         general: require('../models/reports/general'),

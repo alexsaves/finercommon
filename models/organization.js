@@ -6,6 +6,7 @@ const moment = require('moment');
 const OrganizationAssociations = require('../models/organizationassociations');
 const OrgReportCache = require('../models/orgreportcache');
 const GeneralReport = require('../models/reports/general');
+const Survey = require('../models/survey');
 
 /**
 * The organizations class
@@ -43,6 +44,26 @@ Organization.prototype.getIntegrationsAsync = function (cfg) {
 };
 
 /**
+ * Get the surveys for this organization (ASYNC)
+ */
+Organization.prototype.getSurveysAsync = async function (cfg) {
+  return await Survey.GetForOrganizationAsync(cfg, this.id);
+};
+
+/**
+ * Get all the respondents for this organization (ASYNC)
+ */
+Organization.prototype.getRespondentsAsync = async function (cfg) {
+  var svs = await Survey.GetForOrganizationAsync(cfg, this.id);
+  var resps = [];
+  for (let i = 0; i < svs.length; i++) {
+    let svresps = await svs[i].getRespondentsAsync(cfg);
+    resps = resps.concat(svresps);
+  }
+  return resps;
+};
+
+/**
  * Delete all
  */
 Organization.DeleteAll = function (cfg, cb) {
@@ -51,6 +72,21 @@ Organization.DeleteAll = function (cfg, cb) {
     cb();
   }, function (err) {
     cb(err);
+  });
+};
+
+/**
+ * Delete all (ASYNC)
+ */
+Organization.DeleteAllAsync = function (cfg) {
+  return new Promise((resolve, reject) => {
+    Organization.DeleteAll(cfg, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
   });
 };
 
@@ -311,11 +347,7 @@ Organization.GetAllAsync = function (cfg) {
 Organization.GetById = function (cfg, id, cb) {
   cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [id], function (result) {
-    cb(result.length === 0
-      ? {
-        message: "No organization found."
-      }
-      : null, result.length > 0
+    cb(null, result.length > 0
         ? new Organization(result[0])
         : null);
   }, function (err) {
@@ -337,6 +369,35 @@ Organization.GetByIdAsync = function (cfg, id) {
         resolve(org);
       }
     });
+  });
+};
+
+/**
+* Get an org by its name
+*/
+Organization.GetByName = function (cfg, name, cb) {
+  cb = cb || function () { };
+  dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE name LIKE ? LIMIT 1', [name], function (result) {
+    cb(null, result.length > 0
+        ? new Organization(result[0])
+        : null);
+  }, function (err) {
+    cb(err);
+  });
+};
+
+/**
+* Get an org by its name (ASYNC)
+*/
+Organization.GetByNameAsync = function (cfg, name) {
+  return new Promise((resolve, reject) => {
+    Organization.GetByName(cfg, name, (err, org) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(org);
+      }
+    })
   });
 };
 
