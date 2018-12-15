@@ -4,6 +4,7 @@ const moment = require('moment');
 const faker = require('faker');
 const shortid = require('shortid');
 const loremIpsum = require('lorem-ipsum');
+const md5 = require('md5');
 
 /**
  * Make a fake account and associated org and integration
@@ -13,8 +14,63 @@ const loremIpsum = require('lorem-ipsum');
  * @param {*} lName 
  * @param {*} orgName 
  */
-const MakeFakeAccount = async function(cfg, email, fName, lName, orgName) {
+const MakeFakeAccount = async function (cfg, email, fName, lName, orgName, when, pw, logger) {
+  logger("\Creating account (" + email + ")...");
+  // Start with the account record itself
+  var act = await models.Account.CreateAsync(cfg, {
+    name: fName + ' ' + lName,
+    created_at: when,
+    updated_at: when,
+    email: email,
+    pw_md5: md5(pw),
+    emailverified: true,
+    is_active: 1
+  });
 
+  // Make an organization for that account
+  var org = await models.Organization.CreateAsync(cfg, {
+    name: orgName,
+    created_at: when,
+    updated_at: when
+  });
+
+  // Make an org association from this user to this account
+  var oasc = await models.OrganizationAssociations.CreateAsync(cfg, {
+    created_at: when,
+    updated_at: when,
+    account_id: act.id,
+    organization_id: org.id,
+    assoc_type: 0
+  });
+
+  // Now make an integration
+  var intr = await models.CRMIntegrations.CreateAsync(cfg, {
+    created_at: when,
+    updated_at: when,
+    organization_id: org.id,
+    crm_type: 'SALESFORCE',
+    info: '{}',
+    is_active: 1,
+    connection_name: 'FinerInk',
+    owner_names: Buffer.from(JSON.stringify({
+      "label": "All Owners",
+      "value": "all"
+    })),
+    owner_roles: Buffer.from("\"*\"")
+  });
+
+  // Now make the 
+  var rlz = await models.CRMIntegrationRules.CreateAsync(cfg, {
+    created_at: when,
+    updated_at: when,
+    id: shortid.generate().toUpperCase(),
+    owner_names: Buffer.from(JSON.stringify({"value":"all","label":"All Owners"})),
+    owner_roles: Buffer.from("\"*\""),
+    approvers: Buffer.from(JSON.stringify({"value":"all","label":"All Users"})),
+    integration_id: intr.uid
+  });
+
+  return act;
 };
 
 /**
@@ -22,7 +78,7 @@ const MakeFakeAccount = async function(cfg, email, fName, lName, orgName) {
  * @param {ConnectionPool} pool 
  * @param {String} email 
  */
-const GenerateDataForAccount = async function (cfg, email, days, oppsperday, resps, salesorgsize, logger) { 
+const GenerateDataForAccount = async function (cfg, email, days, oppsperday, resps, salesorgsize, logger) {
   finercommon = require('../index.js');
   models = finercommon.models;
   logger("\nLocating account (" + email + ")...");
@@ -33,11 +89,17 @@ const GenerateDataForAccount = async function (cfg, email, days, oppsperday, res
   logger("Enforcing account is active...");
   account.is_active = 1;
   await account.commitAsync(cfg);
+  logger("Prebuilding a set of known job titles...");
+  const jobTitleList = [];
+  for (let i = 0; i < 10; i++) {
+    jobTitleList.push(faker.name.jobTitle());
+  }
+
   logger("Getting orgs...");
   const orgs = await account.getOrganizationsAsync(cfg);
   for (let i = 0; i < orgs.length; i++) {
     const org = orgs[i];
-    await GenerateDataForOrg(cfg, account, org, days, oppsperday, resps, salesorgsize, logger);
+    await GenerateDataForOrg(cfg, account, org, days, oppsperday, resps, salesorgsize, jobTitleList, logger);
   }
 };
 
@@ -46,13 +108,13 @@ const GenerateDataForAccount = async function (cfg, email, days, oppsperday, res
  * @param {Config} cfg 
  * @param {Organization} org 
  */
-const GenerateDataForOrg = async function (cfg, account, org, days, oppsperday, resps, salesorgsize, logger) {
+const GenerateDataForOrg = async function (cfg, account, org, days, oppsperday, resps, salesorgsize, jobTitleList, logger) {
   logger("Creating fixtures for (" + org.name + ")...");
   logger("Getting integrations...");
   const intrs = await org.getIntegrationsAsync(cfg);
   for (let i = 0; i < intrs.length; i++) {
     const intr = intrs[i];
-    await GenerateDataForInt(cfg, account, org, intr, days, oppsperday, resps, salesorgsize, logger);
+    await GenerateDataForInt(cfg, account, org, intr, days, oppsperday, resps, salesorgsize, jobTitleList, logger);
   }
 };
 
@@ -61,7 +123,7 @@ const GenerateDataForOrg = async function (cfg, account, org, days, oppsperday, 
  * @param {Config} cfg 
  * @param {Organization} org 
  */
-const GenerateDataForInt = async function (cfg, account, org, intr, days, oppsperday, resps, salesorgsize, logger) {
+const GenerateDataForInt = async function (cfg, account, org, intr, days, oppsperday, resps, salesorgsize, jobTitleList, logger) {
   logger("Creating fixtures for integration (" + intr.crm_type + ")...");
   logger("Clearing data for integration...");
   await intr.clearOpportunityDataAsync(cfg);
@@ -106,7 +168,7 @@ const GenerateDataForInt = async function (cfg, account, org, intr, days, oppspe
       addlHrs = Math.random() * 48 * 2;
     }
     movingDate.add(hourincrements + addlHrs, 'hours');
-    await GenerateOpportunity(cfg, account, org, intr, movingDate.clone(), resps, salesOrgList, logger);
+    await GenerateOpportunity(cfg, account, org, intr, movingDate.clone(), resps, salesOrgList, jobTitleList, logger);
   }
 };
 
@@ -117,7 +179,7 @@ const GenerateDataForInt = async function (cfg, account, org, intr, days, oppspe
  * @param {*} intr 
  * @param {*} when 
  */
-const GenerateOpportunity = async function (cfg, account, org, intr, when, resps, salesOrgUsers, logger) {
+const GenerateOpportunity = async function (cfg, account, org, intr, when, resps, salesOrgUsers, jobTitleList, logger) {
   const salesPerson = salesOrgUsers[Math.floor(Math.random() * salesOrgUsers.length)];
   // Make the company
   const companyAccountInfo = {
@@ -175,7 +237,7 @@ const GenerateOpportunity = async function (cfg, account, org, intr, when, resps
       OwnerId: salesPerson.Id,
       FirstName: fname,
       LastName: lname,
-      Title: faker.name.jobTitle(),
+      Title: jobTitleList[Math.floor(Math.random() * jobTitleList.length)],
       Email: uemail,
       MetaData: Buffer.from(JSON.stringify({})),
       Name: fname + ' ' + lname,
@@ -217,13 +279,13 @@ const GenerateOpportunity = async function (cfg, account, org, intr, when, resps
   });
 
   // Decide the general characteristics of the salesperson's response
-  await GenerateRespondent(cfg, when, opportunityInfo.Id, account, org, companyAccountInfo, salesPerson, null, true, employeeSv, org.feature_list, org.competitor_list, oppContacts, logger);
+  await GenerateRespondent(cfg, when, opportunityInfo.Id, account, org, companyAccountInfo, salesPerson, null, true, employeeSv, org.feature_list, org.competitor_list, oppContacts, jobTitleList, logger);
 };
 
 /**
  * Make a respondent
  */
-const GenerateRespondent = async function(cfg, when, oppid, account, org, companyAccountInfo, salesPerson, contact, isSalesperson, sv, featureList, competitorList, oppContacts, logger) {
+const GenerateRespondent = async function (cfg, when, oppid, account, org, companyAccountInfo, salesPerson, contact, isSalesperson, sv, featureList, competitorList, oppContacts, jobTitleList, logger) {
   // Make the approval entry
   const apr = await models.Approval.CreateAsync(cfg, {
     sendEmail: 1,
@@ -232,22 +294,22 @@ const GenerateRespondent = async function(cfg, when, oppid, account, org, compan
     updated_at: when.toDate(),
     created_by_account_id: account.id,
     organization_id: org.id,
-    crm_contact_id: !isSalesperson ? contact.Id: null,
+    crm_contact_id: !isSalesperson ? contact.Id : null,
     crm_user_id: isSalesperson ? salesPerson.Id : null,
     survey_guid: sv.guid,
     opportunity_id: oppid
   });
 
   // Get the survey response
-  const respModel = GenerateSurveyResponseModel(org.feature_list, org.competitor_list, oppContacts);
+  const respModel = GenerateSurveyResponseModel(org.feature_list, org.competitor_list, oppContacts, jobTitleList);
 
   // Set the variables
   const respVars = {
-    companyName : org.name,
-    prospectName : companyAccountInfo.Name,
-    surveyTheme : org.default_survey_template,
-    surveyTitle : org.name + " Feedback",
-    decisionMakerList : ""
+    companyName: org.name,
+    prospectName: companyAccountInfo.Name,
+    surveyTheme: org.default_survey_template,
+    surveyTitle: org.name + " Feedback",
+    decisionMakerList: ""
   };
 
   for (let i = 0; i < org.competitor_list.length; i++) {
@@ -263,7 +325,7 @@ const GenerateRespondent = async function(cfg, when, oppid, account, org, compan
     if (i > 0) {
       respVars.decisionMakerList += ", ";
     }
-    respVars.decisionMakerList += oppContacts[i].Name;    
+    respVars.decisionMakerList += oppContacts[i].Name;
   }
 
   // Create the respondent
@@ -281,13 +343,13 @@ const GenerateRespondent = async function(cfg, when, oppid, account, org, compan
   });
 
   // Apply the answers
-  await respEntry.applyAnswersForSurveyAsync(cfg, sv, {answers: respModel});
+  await respEntry.applyAnswersForSurveyAsync(cfg, sv, { answers: respModel });
 };
 
 /**
  * Make a response model
  */
-const GenerateSurveyResponseModel = function (featureList, competitorList, oppContacts) {
+const GenerateSurveyResponseModel = function (featureList, competitorList, oppContacts, jobTitleList) {
   const resultModel = {};
   const mainReasonsNotChosen = [
     0,
@@ -298,6 +360,7 @@ const GenerateSurveyResponseModel = function (featureList, competitorList, oppCo
     5,
     9999
   ];
+
   resultModel.answers = {
     buyXRating: Math.floor(Math.random() * 7) + 1,
     whyNotSelected: {
@@ -408,7 +471,7 @@ const GenerateSurveyResponseModel = function (featureList, competitorList, oppCo
     5,
     9999
   ];
-  resultModel.answers.mostImportantVendorCriteria = {order: [], other: ""};
+  resultModel.answers.mostImportantVendorCriteria = { order: [], other: "" };
   while (extVendorCrit.length > 0) {
     resultModel.answers.mostImportantVendorCriteria.order.push(extVendorCrit.splice(Math.floor(Math.random() * extVendorCrit.length), 1)[0]);
   }
@@ -434,7 +497,7 @@ const GenerateSurveyResponseModel = function (featureList, competitorList, oppCo
     competitorQPossibleAnswers.push(i);
   }
   competitorQPossibleAnswers.push(9999);
-  resultModel.answers.vendorRankings = {order: [], other: ""};
+  resultModel.answers.vendorRankings = { order: [], other: "" };
   while (competitorQPossibleAnswers.length > 0) {
     resultModel.answers.vendorRankings.order.push(competitorQPossibleAnswers.splice(Math.floor(Math.random() * competitorQPossibleAnswers.length), 1)[0]);
   }
@@ -474,7 +537,7 @@ const GenerateSurveyResponseModel = function (featureList, competitorList, oppCo
 
   // Add a major player
   resultModel.answers.majorPlayersList = [
-    faker.name.firstName() + " " + faker.name.lastName() + ", " + faker.name.jobTitle(),
+    faker.name.firstName() + " " + faker.name.lastName() + ", " + jobTitleList[Math.floor(Math.random() * jobTitleList.length)],
     "",
     "",
     ""
@@ -492,7 +555,7 @@ const GenerateSurveyResponseModel = function (featureList, competitorList, oppCo
 
   // One piece of advice
   resultModel.answers.onePieceAdvice = loremIpsum({ count: 10, units: 'words' });
-  
+
   // Not anonymous
   resultModel.answers.anonymity = 0;
 
@@ -501,4 +564,4 @@ const GenerateSurveyResponseModel = function (featureList, competitorList, oppCo
 };
 
 // Expose 
-module.exports = {MakeFakeAccount, GenerateDataForAccount};
+module.exports = { MakeFakeAccount, GenerateDataForAccount };

@@ -30,7 +30,7 @@ Organization.prototype.getIntegrations = function (cfg, cb) {
 /**
  * Get the list of integrations for an organization
  */
-Organization.prototype.getIntegrationsAsync = function(cfg) {
+Organization.prototype.getIntegrationsAsync = function (cfg) {
   return new Promise((resolve, reject) => {
     this.getIntegrations(cfg, (err, ints) => {
       if (err) {
@@ -46,7 +46,7 @@ Organization.prototype.getIntegrationsAsync = function(cfg) {
  * Delete all
  */
 Organization.DeleteAll = function (cfg, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id > 0', function () {
     cb();
   }, function (err) {
@@ -225,7 +225,7 @@ Organization.prototype.getSharingSettingsForUser = function (cfg, userid, cb) {
 * Get the organizations for a particular account
 */
 Organization.GetForAccount = function (cfg, id, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.org_account_associations WHERE account_id = ?', [id], function (assocresult) {
     if (assocresult.length == 0) {
       cb(null, []);
@@ -259,7 +259,7 @@ Organization.GetForAccount = function (cfg, id, cb) {
 * Get all organizations
 */
 Organization.GetAll = function (cfg, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.org_account_associations', function (assocresult) {
     if (assocresult.length == 0) {
       cb(null, []);
@@ -309,15 +309,15 @@ Organization.GetAllAsync = function (cfg) {
 * Get an org by its id
 */
 Organization.GetById = function (cfg, id, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [id], function (result) {
     cb(result.length === 0
       ? {
         message: "No organization found."
       }
       : null, result.length > 0
-      ? new Organization(result[0])
-      : null);
+        ? new Organization(result[0])
+        : null);
   }, function (err) {
     cb(err);
   });
@@ -344,7 +344,7 @@ Organization.GetByIdAsync = function (cfg, id) {
 * Delete an org by its id
 */
 Organization.DeleteById = function (cfg, id, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [id], function (result) {
     cb(null);
   }, function (err) {
@@ -357,7 +357,7 @@ Organization.DeleteById = function (cfg, id, cb) {
 * Create a account
 */
 Organization.Create = function (cfg, details, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   details = details || {};
   var _Defaults = {
     name: "",
@@ -402,6 +402,21 @@ Organization.Create = function (cfg, details, cb) {
 };
 
 /**
+* Create a account (ASYNC)
+*/
+Organization.CreateAsync = function (cfg, details) {
+  return new Promise((resolve, reject) => {
+    Organization.Create(cfg, details, (err, org) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(org);
+      }
+    });
+  });
+};
+
+/**
  * Get all the users for this org
  * @param {Object} cfg The DB Configuration
  */
@@ -414,10 +429,10 @@ Organization.prototype.getAllUsersOfOrgAsync = async function (cfg) {
  * Save any changes to the DB row
  */
 Organization.prototype.commit = function (cfg, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   var excludes = [
-      'id', 'created_at'
-    ],
+    'id', 'created_at'
+  ],
     valKeys = Object.keys(this),
     query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET ',
     params = [],
@@ -429,7 +444,7 @@ Organization.prototype.commit = function (cfg, cb) {
         query += ', ';
       }
       query += valKeys[elm] + ' = ?';
-      if (this[valKeys[elm]]instanceof Array) {
+      if (this[valKeys[elm]] instanceof Array) {
         params.push(Buffer.from(JSON.stringify(this[valKeys[elm]])));
       } else {
         params.push(this[valKeys[elm]]);

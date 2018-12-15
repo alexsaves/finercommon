@@ -281,16 +281,31 @@ CRMIntegrations.Create = function (cfg, details, cb) {
   dbcmd
     .cmd(cfg.pool, query, params, function (result) {
       CRMIntegrations
-        .GetByUId(cfg, _Defaults.uid, function (err, org) {
+        .GetByUId(cfg, _Defaults.uid, function (err, intr) {
           if (err) {
             cb(err);
           } else {
-            cb(null, org);
+            cb(null, intr);
           }
         });
     }, function (err) {
       cb(err);
     });
+};
+
+/**
+* Create an integration (ASYNC)
+*/
+CRMIntegrations.CreateAsync = function (cfg, details) {
+  return new Promise((resolve, reject) => {
+    CRMIntegrations.Create(cfg, details, (err, intr) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(intr);
+      }
+    });
+  });
 };
 
 // Expose it

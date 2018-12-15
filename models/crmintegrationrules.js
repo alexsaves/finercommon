@@ -184,7 +184,8 @@ CRMIntegrationRules.Create = function (cfg, details, cb) {
   details = details || {};
   var _Defaults = {
     id: uuidV4().toString(),
-    updated_at: new Date()
+    updated_at: new Date(),
+    created_at: new Date()
   };
   extend(_Defaults, details);
   var valKeys = Object.keys(_Defaults),
@@ -202,16 +203,32 @@ CRMIntegrationRules.Create = function (cfg, details, cb) {
   dbcmd
     .cmd(cfg.pool, query, params, function (result) {
       CRMIntegrationRules
-        .GetByUId(cfg, _Defaults.id, function (err, org) {
+        .GetByUId(cfg, _Defaults.id, function (err, rlz) {
           if (err) {
             cb(err);
           } else {
-            cb(null, org);
+            cb(null, rlz);
           }
         });
     }, function (err) {
       cb(err);
     });
+};
+
+
+/**
+* Create an integration (ASYNC)
+*/
+CRMIntegrationRules.CreateAsync = function (cfg, details) {
+  return new Promise((resolve, reject) => {
+    CRMIntegrationRules.Create(cfg, details, (err, rlz) => {
+        if (err) {
+            reject(err);
+        } else {
+            resolve(rlz);
+        }
+    });
+});
 };
 
 // Expose it
