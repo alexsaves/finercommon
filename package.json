@@ -1,6 +1,6 @@
 {
   "name": "finercommon",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -43,7 +43,8 @@
     "throw-if-missing": "^1.1.0",
     "underscore": "^1.9.0",
     "utf8": "^3.0.0",
-    "uuid": "^3.2.1"
+    "uuid": "^3.2.1",
+    "faker": "^4.1.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -52,7 +53,6 @@
     "eslint": "^4.19.1",
     "jsdoc": "^3.5.5",
     "sinon": "^7.1.1",
-    "faker": "^4.1.0",
     "lorem-ipsum": "^1.0.6"
   }
 }
