@@ -731,6 +731,10 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
   // Now compile a list of top decision makers and their titles
   var decisionMakers = [];
 
+  // Will hold a map of all the titles
+  var titleMap = new Map();
+
+  // Loop over the respondents and index all the titles
   for (let s = 0; s < respondentArr.length; s++) {
     let resp = respondentArr[s];
     let smodel = resp.survey_model.pages;
@@ -770,6 +774,22 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
             if (resp.answers && typeof (resp.answers[srch]) != "undefined") {
               decm.count++;
               decm.score += resp.answers[srch];
+              if (fullPersonNameTitle.indexOf(',') > -1) {
+                var titlePart = fullPersonNameTitle.substr(fullPersonNameTitle.indexOf(',') + 1).trim();
+                if (titlePart.length > 3) {
+                  if (!titleMap.has(titlePart)) {
+                    titleMap.set(titlePart, {
+                      title: titlePart,
+                      count: 1,
+                      score: resp.answers[srch]
+                    });
+                  } else {
+                    var titleObj = titleMap.get(titlePart);
+                    titleObj.count++;
+                    titleObj.score += resp.answers[srch];
+                  }
+                }
+              }
             }
           }
         }
@@ -784,8 +804,15 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     }
   }
 
+  // Do the same for the title map
+  var titleList = [];
+  titleMap.forEach((titleObj, key) => {
+    titleList.push(titleObj);
+    titleObj.score /= titleObj.count;
+  });
+
   // Sort by score
-  decisionMakers = decisionMakers.sort((a, b) => {
+  const sortScoreFn = (a, b) => {
     if (a.score < b.score) {
       return 1;
     } else if (a.score > b.score) {
@@ -793,10 +820,10 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     } else {
       return 0;
     }
-  });
-
+  };
   // Assign it
-  resultObject.decisionMakers = decisionMakers;
+  resultObject.decisionMakers = decisionMakers.sort(sortScoreFn);
+  resultObject.decisionMakerTitles = titleList.sort(sortScoreFn);
 
   // Assign the approvals to the respondents so we can find them easily
   for (let s = 0; s < respondentArr.length; s++) {
