@@ -100,12 +100,12 @@ img(src=imagebase + "chrt?hash=" + images.netConnectorChart, style="width: 100%;
 +spacer
 +heading('Decision Makers')
 +spacer
-+paragraph('The most influential decision maker is ' + decisionMakers[0].name + ' (' + decisionMakers[0].count + '). Overall, the influential job titles were:')
++paragraph('The most influential decision maker is ' + decisionMakerTitles[0].title + ' (' + decisionMakerTitles[0].count + '). Overall, the influential job titles were:')
 +spacer
-each maker, index in decisionMakers
+each maker, index in decisionMakerTitles
   if index > 0
     span , 
-  span(color="#00cc00", style="color:#00cc00; font-size:14px; font-weight: bold;") #{maker.name} 
+  span(color="#00cc00", style="color:#00cc00; font-size:14px; font-weight: bold;") #{maker.title} 
   span(style="font-size:14px;color:#727272;", color="#727272") (#{maker.count}) 
 +spacer
 +reportlink('/', 'View Details')
