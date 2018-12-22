@@ -301,6 +301,8 @@ class Charts {
       throw new Error("Missing arguments");
     }
 
+    //console.log("SCORE ASYNC", data);
+
     const generalScale = w / 500;
     const padding = (generalScale * 24);
     const fontSize = Math.round(generalScale * 14);
@@ -762,7 +764,7 @@ class Charts {
     const squareWidth = (mainColWidth - ((scoreMax - 1) * squarePadding)) / scoreMax
     const squareHeight = squareWidth * 0.9;
     const cornerRadius = generalScale * 7;
-
+    //console.log("Rating", w, scoreMax, data);
     const Canvas = require('canvas');
     var Image = Canvas.Image,
       canvas = new Canvas(w, itemHeight * data.length),
@@ -828,11 +830,11 @@ class Charts {
         let rw = squareWidth;
         let rh = squareHeight;
         let percentSelected = 0;
-        if (c + 1 < row.score) {
-          percentSelected = 1;
-          if (c + 2 > row.score) {
-            percentSelected = 0.5;
-          }
+        //let ratingProg = ratingScore - Math.floor(ratingScore);
+        if (row.score > ((c + 1) - 0.1)) {
+          percentSelected = 1;          
+        } else if (row.score >= ((c + 1) - 0.9)) {
+          percentSelected = 0.5; 
         }
         var labelColor = "#ffffff";
         if (percentSelected == 1) {
