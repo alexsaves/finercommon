@@ -1167,8 +1167,8 @@ async function BuyXOverviewAsync(cfg, chrt, report, org_id, chartWidths) {
     leftScore: report.buyX,
     subTitle: !!report.previousBuyX ? report.previousBuyX[0] > -1000 ? report.buyX > report.previousBuyX[0] ? "+" + (report.buyX - report.previousBuyX[0]) + " in " + report.monthName : "-" + -(report.buyX - report.previousBuyX[0]) + " in " + report.monthName : "" : "",
     rightLabel: "BuyX Score® Trend",
-    startDateLabel: moment(report.startDate).format('MM/DD/YYYY'),
-    endDateLabel: moment(report.endDate).format('MM/DD/YYYY'),
+    startDateLabel: moment(report.endDate).subtract(12, 'months').startOf('month').format('MM/DD/YYYY'),
+    endDateLabel: moment(report.endDate).endOf('month').format('MM/DD/YYYY'),
     monthOverMonthScores: !!report.previousBuyX ? report.previousBuyX : [],
     scoresInLastYear: howManyLastYear
   });
@@ -1185,7 +1185,7 @@ async function SalesProcessAsync(cfg, chrt, report, org_id, chartWidths) {
       score: report.salesProcess[t].ratingScore,
       lowLabel: "Poor",
       highLabel: "Excellent",
-      n: report.respondents
+      n: report.salesProcess[t].topRatedCount
     });
   }
   return await chrt.ratingStackAsync(chartWidths, 7, salesProcessIssues);
@@ -1249,7 +1249,7 @@ async function ReconnectAsync(cfg, chrt, report, org_id, chartWidths) {
   if (totalCount === 0) {
     totalCount = 0.01;
   }
-  var connectDiff = (report.recommend.netConnector - report.previousRecommend[0]);
+  var connectDiff = (report.recommend.netConnector - report.previousRecommend[report.previousRecommend.length - 1]);
   return await chrt.netConnectorChartAsync(chartWidths, Math.round(0.38 * chartWidths), {
     leftLabel: "Net Connector Score®",
     rightLabel: "Future Lead Sentiment",
