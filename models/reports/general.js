@@ -193,17 +193,19 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
           }
         }
       }
-      resultObject.reasonsForLoss = reasonsForLoss.sort((a, b) => {
-        if (a.count < b.count) {
-          return 1;
-        } else if (a.count > b.count) {
-          return -1;
-        } else {
-          return 0;
-        }
-      });
     }
   }
+
+  // Sort the reasons
+  resultObject.reasonsForLoss = reasonsForLoss.sort((a, b) => {
+    if (a.count < b.count) {
+      return 1;
+    } else if (a.count > b.count) {
+      return -1;
+    } else {
+      return 0;
+    }
+  });
 
   // First, get info about the opportunities and approvals referenced by these
   // respondents
@@ -1500,6 +1502,9 @@ module.exports = {
   GetFullReportForOrgAsync,
   SendReportForOrgAsync,
   SendReportForAllOrgsAsync,
+
+  // Misx
+  ShortCleanupOnLabels,
 
   // Charts
   PrimaryReasonsForLossChartAsync,

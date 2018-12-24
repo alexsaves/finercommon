@@ -2,26 +2,32 @@ const dbcmd = require('../utils/dbcommand');
 const md5 = require('md5');
 const extend = require('extend');
 const tablename = 'org_report_cache';
+const zlib = require('zlib');
 
 /**
 * The OrgReportCache class
 */
 var OrgReportCache = function (details) {
   extend(this, details || {});
+  if (this.report && this.report instanceof Buffer) {
+    // Compress it
+    this.report = zlib.inflateRawSync(this.report);
+  }
 };
 
 /**
  * The types of reports
  */
 OrgReportCache.REPORT_TYPE = {
-  MONTHLY_SUMMARY: 0
+  MONTHLY_SUMMARY: 0,
+  MONTHLY_PRIMARYREASONS: 1
 };
 
 /**
 * Delete this report
 */
 OrgReportCache.prototype.Delete = function (cfg, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, "DELETE FROM " + cfg.db.db + "." + tablename + " WHERE id = ?", [this.id], function (result) {
     cb();
   }, function (err) {
@@ -33,15 +39,15 @@ OrgReportCache.prototype.Delete = function (cfg, cb) {
 * Get a report by its id
 */
 OrgReportCache.GetById = function (cfg, id, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [id], function (result) {
     cb(result.length === 0
       ? {
         message: "No invitation found."
       }
       : null, result.length > 0
-      ? new OrgReportCache(result[0])
-      : null);
+        ? new OrgReportCache(result[0])
+        : null);
   }, function (err) {
     cb(err);
   });
@@ -54,8 +60,8 @@ OrgReportCache.GetById = function (cfg, id, cb) {
  * @param {*} reptype 
  * @param {*} cb 
  */
-OrgReportCache.GetReportsForOrgAndType = function(cfg, orgid, reptype, cb) {
-  cb = cb || function () {};
+OrgReportCache.GetReportsForOrgAndType = function (cfg, orgid, reptype, cb) {
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND report_type = ?', [orgid, reptype], function (result) {
     var reps = [];
     for (let i = 0; i < result.length; i++) {
@@ -73,7 +79,7 @@ OrgReportCache.GetReportsForOrgAndType = function(cfg, orgid, reptype, cb) {
  * @param {*} orgid 
  * @param {*} reptype 
  */
-OrgReportCache.GetReportsForOrgAndTypeAsync = function(cfg, orgid, reptype) {
+OrgReportCache.GetReportsForOrgAndTypeAsync = function (cfg, orgid, reptype) {
   return new Promise((resolve, reject) => {
     OrgReportCache.GetReportsForOrgAndType(cfg, orgid, reptype, (err, reps) => {
       if (err) {
@@ -89,25 +95,34 @@ OrgReportCache.GetReportsForOrgAndTypeAsync = function(cfg, orgid, reptype) {
  * Delete all
  */
 OrgReportCache.DeleteAll = function (cfg, cb) {
-    cb = cb || function () {};
-    dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id != NULL', function () {
-        cb();
-    }, function (err) {
-        cb(err);
-    });
+  cb = cb || function () { };
+  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id != NULL', function () {
+    cb();
+  }, function (err) {
+    cb(err);
+  });
 };
 
 /**
 * Create a OrgReportCache
 */
 OrgReportCache.Create = function (cfg, details, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   details = details || {};
   var _Defaults = {
     created_at: new Date(),
     updated_at: new Date()
   };
   extend(_Defaults, details);
+
+  if (_Defaults.report) {
+    if (!_Defaults.report instanceof Buffer) {
+      _Defaults.report = new Buffer(_Defaults.report);
+    }
+    // Compress it
+    _Defaults.report = zlib.deflateRawSync(_Defaults.report);
+  }
+
   var valKeys = Object.keys(_Defaults),
     query = 'INSERT INTO ' + cfg.db.db + '.' + tablename + ' SET ',
     params = [],
@@ -156,14 +171,17 @@ OrgReportCache.CreateAsync = function (cfg, details) {
  * Save any changes to the DB row
  */
 OrgReportCache.prototype.commit = function (cfg, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   var excludes = [
-      'uid', 'created_at'
-    ],
+    'uid', 'created_at'
+  ],
     valKeys = Object.keys(this),
     query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET ',
     params = [],
     count = 0;
+  if (this.report) {
+    this.report = zlib.deflateRawSync(this.report);
+  }
   this.updated_at = new Date();
   for (var elm in valKeys) {
     if (excludes.indexOf(valKeys[elm]) == -1) {

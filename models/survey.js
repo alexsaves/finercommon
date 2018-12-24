@@ -204,9 +204,16 @@ Survey.GetForOrganizationAsync = function (cfg, organization_id) {
 /**
  * Get surveys by the organization
  */
-Survey.GetForOrganizationAndType = function (cfg, organization_id, SURVEY_TYPE, cb) {
+Survey.GetForOrganizationAndType = function (cfg, organization_id, SURVEY_TYPE, cb, startDateExclusive = null, endDateInclusive = null) {
     cb = cb || function () { };
-    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND survey_type = ?', [organization_id, SURVEY_TYPE], function (result) {
+    let dateFilter = "";
+    if (!startDateExclusive) {
+        startDateExclusive = new Date(0);
+    }
+    if (!endDateInclusive) {
+        endDateInclusive = new Date(9999, 1);
+    }
+    dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ? AND survey_type = ? AND created_at >= ? AND created_at < ?', [organization_id, SURVEY_TYPE, startDateExclusive, endDateInclusive], function (result) {
         var res = [];
         for (var i = 0; i < result.length; i++) {
             res.push(new Survey(result[i]));
@@ -223,7 +230,7 @@ Survey.GetForOrganizationAndType = function (cfg, organization_id, SURVEY_TYPE, 
  * @param {*} organization_id 
  * @param {*} SURVEY_TYPE 
  */
-Survey.GetForOrganizationAndTypeAsync = function (cfg, organization_id, SURVEY_TYPE) {
+Survey.GetForOrganizationAndTypeAsync = function (cfg, organization_id, SURVEY_TYPE, startDateExclusive = null, endDateInclusive = null) {
     return new Promise((resolve, reject) => {
         Survey.GetForOrganizationAndType(cfg, organization_id, SURVEY_TYPE, (err, svs) => {
             if (err) {
@@ -231,7 +238,7 @@ Survey.GetForOrganizationAndTypeAsync = function (cfg, organization_id, SURVEY_T
             } else {
                 resolve(svs);
             }
-        });
+        }, startDateExclusive, endDateInclusive);
     });
 };
 
