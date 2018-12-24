@@ -381,6 +381,9 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
       let vendorRankings = resp.answers.vendorRankings;
       // Only proceed if the user answered the question
       if (vendorRankings && vendorRankings.order && vendorRankings.order.length > 0) {
+        if (!resp.survey_model && resp.survey) {
+          resp.survey_model = resp.survey.survey_model;
+        }
         let vendorQuestion = exter._locateQuestionObjectForName("vendorRankings", resp.survey_model.pages);
         let winningVendorId = vendorRankings.order[0];
         if (winningVendorId == 9999) {
@@ -996,10 +999,10 @@ var GetFullReportForOrgAsync = async function (cfg, orgid, lastmonth) {
   const Organization = require('../../models/organization');
 
   // First get the org
-  var org = await Organization.GetByIdAsync(cfg, orgid);
+  const org = await Organization.GetByIdAsync(cfg, orgid);
 
   // Then run and retrieve the reports
-  var reports = await org.ComputeAllPreviousMonthlyReportsAsync(cfg);
+  const reports = await org.ComputeAllPreviousMonthlyReportsAsync(cfg);
 
   // Convert them all to POJO's
   for (let i = 0; i < reports.length; i++) {
@@ -1277,7 +1280,7 @@ async function ReconnectAsync(cfg, chrt, report, org_id, chartWidths) {
  * @param {Object} cfg 
  * @param {Object} report 
  */
-var GetImageSetForReport = function (cfg, report, org_id, chartWidths = 1000) {
+const GetImageSetForReport = function (cfg, report, org_id, chartWidths = 1000) {
   return new Promise((resolve, reject) => {
     //console.log(report);
 
@@ -1396,7 +1399,7 @@ var GetImageSetForReport = function (cfg, report, org_id, chartWidths = 1000) {
  * @param {*} orgid
  * @param {*} lastmonth
  */
-var SendReportForOrgAsync = async function (cfg, orgid, lastmonth) {
+const SendReportForOrgAsync = async function (cfg, orgid, lastmonth) {
   // Get the Org NS
   const Organization = require('../../models/organization');
 
@@ -1453,7 +1456,7 @@ var SendReportForOrgAsync = async function (cfg, orgid, lastmonth) {
  * @param {*} org 
  * @param {*} recipient 
  */
-var SendReportWithDataToRecipient = async function (cfg, data, org, recipient, fakeSend) {
+const SendReportWithDataToRecipient = async function (cfg, data, org, recipient, fakeSend) {
   // Grab the Email namespace
   const Email = require('../../models/email');
   let emailCtrl = new Email(cfg.email.server, cfg.email.port, cfg.email.key, cfg.email.secret);
@@ -1471,7 +1474,7 @@ var SendReportWithDataToRecipient = async function (cfg, data, org, recipient, f
  * @param {*} cfg
  * @param {*} lastmonth
  */
-var SendReportForAllOrgsAsync = async function (cfg, lastmonth) {
+const SendReportForAllOrgsAsync = async function (cfg, lastmonth) {
   // Get the Org NS
   const Organization = require('../../models/organization');
 

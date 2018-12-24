@@ -53,7 +53,8 @@ var All = {
     },
     reports: {
         general: require('../models/reports/general'),
-        openends: require('../models/reports/openends')
+        openends: require('../models/reports/openends'),
+        primaryreasons: require('../models/reports/primaryreasons')
     }
 };
 
