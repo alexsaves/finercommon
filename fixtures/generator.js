@@ -230,6 +230,29 @@ const GenerateOpportunity = async function (cfg, account, org, intr, when, resps
     "Business User",
     "Economic Decision Maker"
   ];
+
+  // Create the survey (one for salesperson and one for contacts)
+  const employeeSv = await models.Survey.CreateAsync(cfg, {
+    organization_id: org.id,
+    survey_type: models.Survey.SURVEY_TYPES.EMPLOYEE,
+    survey_model: Buffer.from(JSON.stringify(models.Survey.getSurveyFixture(models.Survey.SURVEY_TYPES.EMPLOYEE))),
+    name: companyAccountInfo.Name + " Employee Feedback",
+    is_active: 1,
+    opportunity_id: opportunityInfo.Id,
+    created_at: when.toDate(),
+    updated_at: when.toDate()
+  });
+  const contactSv = await models.Survey.CreateAsync(cfg, {
+    organization_id: org.id,
+    survey_type: models.Survey.SURVEY_TYPES.PROSPECT,
+    survey_model: Buffer.from(JSON.stringify(models.Survey.getSurveyFixture(models.Survey.SURVEY_TYPES.PROSPECT))),
+    name: companyAccountInfo.Name + " Prospect Feedback",
+    is_active: 1,
+    opportunity_id: opportunityInfo.Id,
+    created_at: when.toDate(),
+    updated_at: when.toDate()
+  });
+
   const oppContacts = [];
   for (let i = 0; i < resps; i++) {
     const fname = faker.name.firstName();
@@ -247,7 +270,7 @@ const GenerateOpportunity = async function (cfg, account, org, intr, when, resps
       integration_id: intr.uid
     };
     oppContacts.push(oppContact);
-    const contactResult = await models.CRMContacts.CreateAsync(cfg, [oppContact], oppExtraFields);
+    const contactResult = await models.CRMContacts.CreateOneAsync(cfg, oppContact, oppExtraFields);
     const oppRole = {
       ContactId: oppContact.Id,
       Id: shortid.generate().toUpperCase(),
@@ -257,31 +280,12 @@ const GenerateOpportunity = async function (cfg, account, org, intr, when, resps
     };
     oppContact.role = oppRole;
     const roleResult = await models.CRMOpportunityRoles.CreateAsync(cfg, [oppRole], oppExtraFields);
+    
+    // Make the respondent's survey
+    await GenerateRespondent(cfg, when, opportunityInfo.Id, account, org, companyAccountInfo, salesPerson, contactResult, false, contactSv, org.feature_list, org.competitor_list, oppContacts, jobTitleList, logger);
   }
 
-  // Create the survey (one for salesperson and one for contacts)
-  const employeeSv = await models.Survey.CreateAsync(cfg, {
-    organization_id: org.id,
-    survey_type: models.Survey.SURVEY_TYPES.EMPLOYEE,
-    survey_model: Buffer.from(JSON.stringify(models.Survey.getSurveyFixture(models.Survey.SURVEY_TYPES.EMPLOYEE))),
-    name: companyAccountInfo.Name + " Feedback",
-    is_active: 1,
-    opportunity_id: opportunityInfo.Id,
-    created_at: when.toDate(),
-    updated_at: when.toDate()
-  });
-  const contactSv = await models.Survey.CreateAsync(cfg, {
-    organization_id: org.id,
-    survey_type: models.Survey.SURVEY_TYPES.PROSPECT,
-    survey_model: Buffer.from(JSON.stringify(models.Survey.getSurveyFixture(models.Survey.SURVEY_TYPES.PROSPECT))),
-    name: companyAccountInfo.Name + " Feedback",
-    is_active: 1,
-    opportunity_id: opportunityInfo.Id,
-    created_at: when.toDate(),
-    updated_at: when.toDate()
-  });
-
-  // Decide the general characteristics of the salesperson's response
+  // Make the salesperson's survey
   await GenerateRespondent(cfg, when, opportunityInfo.Id, account, org, companyAccountInfo, salesPerson, null, true, employeeSv, org.feature_list, org.competitor_list, oppContacts, jobTitleList, logger);
 };
 
@@ -289,6 +293,8 @@ const GenerateOpportunity = async function (cfg, account, org, intr, when, resps
  * Make a respondent
  */
 const GenerateRespondent = async function (cfg, when, oppid, account, org, companyAccountInfo, salesPerson, contact, isSalesperson, sv, featureList, competitorList, oppContacts, jobTitleList, logger) {
+  // DEBUG
+  //console.log(arguments);
   // Make the approval entry
   const apr = await models.Approval.CreateAsync(cfg, {
     sendEmail: 1,
@@ -302,6 +308,8 @@ const GenerateRespondent = async function (cfg, when, oppid, account, org, compa
     survey_guid: sv.guid,
     opportunity_id: oppid
   });
+
+  //console.log("Generating survey for ", isSalesperson ? "Salesperson" : "Customer", "named", isSalesperson ? salesPerson.Name : contact.Name );
 
   // Get the survey response
   const respModel = GenerateSurveyResponseModel(org.feature_list, org.competitor_list, oppContacts, jobTitleList);
@@ -560,7 +568,7 @@ const GenerateSurveyResponseModel = function (featureList, competitorList, oppCo
   resultModel.answers.onePieceAdvice = loremIpsum({ count: 10, units: 'words' });
 
   // Not anonymous
-  resultModel.answers.anonymity = 0;
+  resultModel.answers.anonymity = (Math.random() > 0.8) ? 0 : 1;
 
   // Spit out the result
   return resultModel.answers;

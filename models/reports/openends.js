@@ -79,7 +79,7 @@ const OpenEndsReportAsync = async function (cfg, orgid, startdate, enddate, deal
     // Tell us which are customers and which are prospects
     resps.forEach(r => {
         let sv = surveys.find(s => s.guid == r.survey_guid);
-        if (sv.survey_type == 0) {
+        if (sv.survey_type === survey.SURVEY_TYPES.PROSPECT) {
             r.isProspect = true;
         } else {
             r.isProspect = false;

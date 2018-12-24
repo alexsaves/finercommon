@@ -156,7 +156,7 @@ CRMContacts.GetByOpportunityId = function (cfg, opportunity_id, cb) {
 };
 
 /**
-* Create a CRM contact
+* Create a set of CRM contacts
 */
 CRMContacts.Create = function (cfg, data, extraFields, cb) {
   cb = cb || function () {};
@@ -193,22 +193,74 @@ CRMContacts.Create = function (cfg, data, extraFields, cb) {
   const {query, params} = utils.createInsertOrUpdateStatementGivenData(cfg.db.db, 'crm_contacts', data, rowDict, extraFields, 'Id');
 
   dbcmd.cmd(cfg.pool, query, params, function (result) {
-    cb();
+    cb(null, result);
   }, function (err) {
     cb(err);
   });
 };
 
+
 /**
-* Create a CRM contact (ASYNC)
+ * Create a single contact
+ */
+CRMContacts.CreateOne = function (cfg, details, cb) {
+  cb = cb || function () {};
+  details = details || {};
+  var _Defaults = {
+  };
+  extend(_Defaults, details);
+  var valKeys = Object.keys(_Defaults),
+      query = 'INSERT INTO ' + cfg.db.db + '.' + tablename + ' SET ',
+      params = [],
+      count = 0;
+  for (var elm in valKeys) {
+      if (count > 0) {
+          query += ', ';
+      }
+      query += valKeys[elm] + ' = ?';
+      params.push(_Defaults[valKeys[elm]]);
+      count++;
+  }
+  dbcmd
+      .cmd(cfg.pool, query, params, function (result) {
+        CRMContacts
+              .GetById(cfg, _Defaults.Id, function (err, cntc) {
+                  if (err) {
+                      cb(err);
+                  } else {
+                      cb(null, cntc);
+                  }
+              });
+      }, function (err) {
+          cb(err);
+      });
+};
+
+/**
+* Create some CRM contacts (ASYNC)
 */
 CRMContacts.CreateAsync = function (cfg, data, extraFields) {
   return new Promise((resolve, reject) => {
-    CRMContacts.Create(cfg, data, extraFields, (err) => {
+    CRMContacts.Create(cfg, data, extraFields, (err, info) => {
       if (err) {
         reject(err);
       } else {
-        resolve();
+        resolve(info);
+      }
+    });
+  });
+};
+
+/**
+* Create a single CRM contact (ASYNC)
+*/
+CRMContacts.CreateOneAsync = function (cfg, data) {
+  return new Promise((resolve, reject) => {
+    CRMContacts.CreateOne(cfg, data, (err, ct) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(ct);
       }
     });
   });
