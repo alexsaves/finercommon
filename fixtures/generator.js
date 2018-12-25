@@ -5,6 +5,7 @@ const faker = require('faker');
 const shortid = require('shortid');
 const loremIpsum = require('lorem-ipsum');
 const md5 = require('md5');
+const rwc = require('random-weighted-choice');
 
 /**
  * Make a fake account and associated org and integration
@@ -67,9 +68,9 @@ const MakeFakeAccount = async function (cfg, email, fName, lName, orgName, when,
     created_at: when,
     updated_at: when,
     id: shortid.generate().toUpperCase(),
-    owner_names: Buffer.from(JSON.stringify({"value":"all","label":"All Owners"})),
+    owner_names: Buffer.from(JSON.stringify({ "value": "all", "label": "All Owners" })),
     owner_roles: Buffer.from("\"*\""),
-    approvers: Buffer.from(JSON.stringify({"value":"all","label":"All Users"})),
+    approvers: Buffer.from(JSON.stringify({ "value": "all", "label": "All Users" })),
     integration_id: intr.uid
   });
 
@@ -95,7 +96,7 @@ const GenerateDataForAccount = async function (cfg, email, days, oppsperday, res
   logger("Prebuilding a set of known job titles...");
   const jobTitleList = [];
   for (let i = 0; i < 10; i++) {
-    jobTitleList.push(faker.name.jobTitle());
+    jobTitleList.push({ id: faker.name.jobTitle(), weight: Math.round(Math.random() * 10) + 1 });
   }
 
   logger("Getting orgs...");
@@ -157,12 +158,84 @@ const GenerateDataForInt = async function (cfg, account, org, intr, days, oppspe
     const cuser = await models.CRMUsers.CreateAsync(cfg, [crmUserInfo], extraFields);
   }
   logger(`Generating opportunities (${days} days with ${oppsperday} per day with ${resps} respondents per opportunity)`);
+
+  // Weight feature & competitor list
+  let employeeFeatures = [];
+  let customerFeatures = [];
+  for (let i = 0; i < org.feature_list.length; i++) {
+    employeeFeatures.push({
+      id: org.feature_list[i] + "::" + i,
+      weight: Math.round(Math.random() * 10) + 1
+    });
+    customerFeatures.push({
+      id: org.feature_list[i] + "::" + i,
+      weight: Math.round(Math.random() * 10) + 1
+    });
+  }
+  employeeFeatures.push({
+    id: "Other::" + 9999,
+    weight: Math.round(Math.random() * 10) + 1
+  });
+  customerFeatures.push({
+    id: "Other::" + 9999,
+    weight: Math.round(Math.random() * 10) + 1
+  });
+  org.customer_feature_list = customerFeatures;
+  org.employee_feature_list = employeeFeatures;
+
+  //competitor_list
+  let employeeCompetitors = [];
+  let customerCompetitors = [];
+  for (let i = 0; i < org.competitor_list.length; i++) {
+    employeeCompetitors.push({
+      id: org.competitor_list[i],
+      weight: Math.round(Math.random() * 10) + 1
+    });
+    customerCompetitors.push({
+      id: org.competitor_list[i],
+      weight: Math.round(Math.random() * 10) + 1
+    });
+  }
+  org.customer_competitor_list = employeeCompetitors;
+  org.employee_competitor_list = customerCompetitors;
+
   const hourincrements = (24 / oppsperday);
   // Start iterating over time
   const endDate = moment();
   const startDate = moment().subtract(days, 'days');
   const movingDate = startDate.clone();
   logger(`Will make opportunities from ${startDate.format('LLLL')} to ${endDate.format('LLLL')}...`);
+
+
+  // Main reasons (customer)
+  const mainReasonsNotChosenCust = [
+    { weight: Math.round(Math.random() * 20) + 1, id: 0 },
+    { weight: Math.round(Math.random() * 20) + 1, id: 1 },
+    { weight: Math.round(Math.random() * 20) + 1, id: 2 },
+    { weight: Math.round(Math.random() * 20) + 1, id: 3 },
+    { weight: Math.round(Math.random() * 20) + 1, id: 4 },
+    { weight: Math.round(Math.random() * 20) + 1, id: 5 },
+    { weight: Math.round(Math.random() * 20) + 1, id: 9999 }
+  ];
+  const mainReasonsNotChosenEmp = [
+    { weight: Math.round(Math.random() * 20) + 1, id: 0 },
+    { weight: Math.round(Math.random() * 20) + 1, id: 1 },
+    { weight: Math.round(Math.random() * 20) + 1, id: 2 },
+    { weight: Math.round(Math.random() * 20) + 1, id: 3 },
+    { weight: Math.round(Math.random() * 20) + 1, id: 4 },
+    { weight: Math.round(Math.random() * 20) + 1, id: 5 },
+    { weight: Math.round(Math.random() * 20) + 1, id: 9999 }
+  ];
+
+
+  // Create the contacts for the opportunity and their opportunity roles
+  const contactRoles = [
+    { weight: 1, id: "Executive Sponsor" },
+    { weight: 3, id: "Economic Buyer" },
+    { weight: 1, id: "Business User" },
+    { weight: 2, id: "Economic Decision Maker" },
+  ];
+
   while (movingDate.isBefore(endDate)) {
     logger("Making opportunity and data for " + movingDate.format('LLLL') + "...");
     const randIncr = Math.random();
@@ -171,7 +244,8 @@ const GenerateDataForInt = async function (cfg, account, org, intr, days, oppspe
       addlHrs = Math.random() * 48 * 2;
     }
     movingDate.add(hourincrements + addlHrs, 'hours');
-    await GenerateOpportunity(cfg, account, org, intr, movingDate.clone(), resps, salesOrgList, jobTitleList, logger);
+
+    await GenerateOpportunity(cfg, account, org, intr, movingDate.clone(), resps, salesOrgList, jobTitleList, logger, mainReasonsNotChosenCust, mainReasonsNotChosenEmp, contactRoles);
   }
 };
 
@@ -182,7 +256,7 @@ const GenerateDataForInt = async function (cfg, account, org, intr, days, oppspe
  * @param {*} intr 
  * @param {*} when 
  */
-const GenerateOpportunity = async function (cfg, account, org, intr, when, resps, salesOrgUsers, jobTitleList, logger) {
+const GenerateOpportunity = async function (cfg, account, org, intr, when, resps, salesOrgUsers, jobTitleList, logger, mainReasonsNotChosenCust, mainReasonsNotChosenEmp, contactRoles) {
   const salesPerson = salesOrgUsers[Math.floor(Math.random() * salesOrgUsers.length)];
   // Make the company
   const companyAccountInfo = {
@@ -223,14 +297,6 @@ const GenerateOpportunity = async function (cfg, account, org, intr, when, resps
   const oppResult = await models.CRMOpportunities.CreateAsync(cfg, [opportunityInfo], oppExtraFields);
   await models.CRMOpportunities.setApprovalStatusOnIdAsync(cfg, true, opportunityInfo.Id);
 
-  // Create the contacts for the opportunity and their opportunity roles
-  const contactRoles = [
-    "Executive Sponsor",
-    "Economic Buyer",
-    "Business User",
-    "Economic Decision Maker"
-  ];
-
   // Create the survey (one for salesperson and one for contacts)
   const employeeSv = await models.Survey.CreateAsync(cfg, {
     organization_id: org.id,
@@ -263,7 +329,7 @@ const GenerateOpportunity = async function (cfg, account, org, intr, when, resps
       OwnerId: salesPerson.Id,
       FirstName: fname,
       LastName: lname,
-      Title: jobTitleList[Math.floor(Math.random() * jobTitleList.length)],
+      Title: rwc(jobTitleList),
       Email: uemail,
       MetaData: Buffer.from(JSON.stringify({})),
       Name: fname + ' ' + lname,
@@ -276,25 +342,23 @@ const GenerateOpportunity = async function (cfg, account, org, intr, when, resps
       Id: shortid.generate().toUpperCase(),
       IsPrimary: (i === 0) ? 1 : 0,
       OpportunityId: opportunityInfo.Id,
-      Role: contactRoles[Math.floor(Math.random() * contactRoles.length)]
+      Role: rwc(contactRoles)
     };
     oppContact.role = oppRole;
     const roleResult = await models.CRMOpportunityRoles.CreateAsync(cfg, [oppRole], oppExtraFields);
-    
+
     // Make the respondent's survey
-    await GenerateRespondent(cfg, when, opportunityInfo.Id, account, org, companyAccountInfo, salesPerson, contactResult, false, contactSv, org.feature_list, org.competitor_list, oppContacts, jobTitleList, logger);
+    await GenerateRespondent(cfg, when, opportunityInfo.Id, account, org, companyAccountInfo, salesPerson, contactResult, false, contactSv, org.customer_feature_list, org.customer_competitor_list, oppContacts, jobTitleList, logger, mainReasonsNotChosenCust);
   }
 
   // Make the salesperson's survey
-  await GenerateRespondent(cfg, when, opportunityInfo.Id, account, org, companyAccountInfo, salesPerson, null, true, employeeSv, org.feature_list, org.competitor_list, oppContacts, jobTitleList, logger);
+  await GenerateRespondent(cfg, when, opportunityInfo.Id, account, org, companyAccountInfo, salesPerson, null, true, employeeSv, org.employee_feature_list, org.employee_competitor_list, oppContacts, jobTitleList, logger, mainReasonsNotChosenEmp);
 };
 
 /**
  * Make a respondent
  */
-const GenerateRespondent = async function (cfg, when, oppid, account, org, companyAccountInfo, salesPerson, contact, isSalesperson, sv, featureList, competitorList, oppContacts, jobTitleList, logger) {
-  // DEBUG
-  //console.log(arguments);
+const GenerateRespondent = async function (cfg, when, oppid, account, org, companyAccountInfo, salesPerson, contact, isSalesperson, sv, featureList, competitorList, oppContacts, jobTitleList, logger, mainReasonsNotChosen) {
   // Make the approval entry
   const apr = await models.Approval.CreateAsync(cfg, {
     sendEmail: 1,
@@ -309,10 +373,8 @@ const GenerateRespondent = async function (cfg, when, oppid, account, org, compa
     opportunity_id: oppid
   });
 
-  //console.log("Generating survey for ", isSalesperson ? "Salesperson" : "Customer", "named", isSalesperson ? salesPerson.Name : contact.Name );
-
   // Get the survey response
-  const respModel = GenerateSurveyResponseModel(org.feature_list, org.competitor_list, oppContacts, jobTitleList);
+  const respModel = GenerateSurveyResponseModel(featureList, competitorList, oppContacts, jobTitleList, mainReasonsNotChosen);
 
   // Set the variables
   const respVars = {
@@ -360,25 +422,23 @@ const GenerateRespondent = async function (cfg, when, oppid, account, org, compa
 /**
  * Make a response model
  */
-const GenerateSurveyResponseModel = function (featureList, competitorList, oppContacts, jobTitleList) {
+const GenerateSurveyResponseModel = function (featureList, competitorList, oppContacts, jobTitleList, mainReasonsNotChosen) {
   const resultModel = {};
-  const mainReasonsNotChosen = [
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    9999
-  ];
-
+  
   resultModel.answers = {
     buyXRating: Math.floor(Math.random() * 7) + 1,
     whyNotSelected: {
-      responses: [mainReasonsNotChosen.splice(Math.floor(Math.random() * mainReasonsNotChosen.length), 1)[0], mainReasonsNotChosen.splice(Math.floor(Math.random() * mainReasonsNotChosen.length), 1)[0]],
+      responses: [],
       other: ""
     }
   };
+  for (let i = 0; i < 2; i++) {
+    let newOne = parseInt(rwc(mainReasonsNotChosen));
+    while (resultModel.answers.whyNotSelected.responses.indexOf(newOne) > -1) {
+      newOne = parseInt(rwc(mainReasonsNotChosen));
+    }
+    resultModel.answers.whyNotSelected.responses.push(newOne);
+  }
 
   // Did they pick "other"
   if (resultModel.answers.whyNotSelected.responses.indexOf(9999) > -1) {
@@ -412,16 +472,9 @@ const GenerateSurveyResponseModel = function (featureList, competitorList, oppCo
 
   // They picked product and service features
   if (resultModel.answers.whyNotSelected.responses.indexOf(1) > -1) {
-    const missingFeatureOpts = [
-      0,
-      1,
-      2,
-      3,
-      4,
-      9999
-    ];
+    let myssingBla = rwc(featureList).split('::')[1];
     resultModel.answers.missingFeature = {
-      response: missingFeatureOpts[Math.floor(Math.random() * missingFeatureOpts.length)],
+      response: parseInt(myssingBla),
       other: ""
     };
     // Fill the other

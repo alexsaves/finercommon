@@ -1,6 +1,6 @@
 {
   "name": "finercommon",
-  "version": "0.4.4",
+  "version": "0.4.6",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -38,6 +38,7 @@
     "nodemailer-ses-transport": "^1.5.1",
     "prop-types": "^15.6.1",
     "pug": "^2.0.3",
+    "random-weighted-choice": "^0.1.3",
     "redis": "^2.8.0",
     "redis-lock": "^0.1.4",
     "shortid": "^2.2.14",
