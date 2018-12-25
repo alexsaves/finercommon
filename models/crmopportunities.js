@@ -20,7 +20,7 @@ var CRMOpportunities = function (details) {
  * @param {*} cfg
  */
 CRMOpportunities.prototype.doesAUserHaveRightstoApproveAsync = function (cfg) {
-  return new Promise((resolve, reject) => {});
+  return new Promise((resolve, reject) => { });
 };
 
 /**
@@ -33,7 +33,7 @@ CRMOpportunities.prototype.doesAUserHaveRightstoApproveAsync = function (cfg) {
  */
 CRMOpportunities.prototype.setApprovalStatus = function (cfg, status, cb) {
   status = parseInt(status);
-  cb = cb || function () {};
+  cb = cb || function () { };
   if (isNaN(status)) {
     cb(new Error("Invalid status"));
     return;
@@ -123,7 +123,7 @@ CRMOpportunities.setApprovalStatus = function (cfg, id, status, cb) {
  * Get opportunities by an array of ids
  */
 CRMOpportunities.GetByIds = function (cfg, oids, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   if (oids && oids.length > 0) {
     var finalStr = "(";
     for (var k = 0; k < oids.length; k++) {
@@ -152,7 +152,7 @@ CRMOpportunities.GetByIds = function (cfg, oids, cb) {
  * @param {Object} cfg 
  * @param {Array} aids 
  */
-CRMOpportunities.GetByIdsAsync = function(cfg, oids) {
+CRMOpportunities.GetByIdsAsync = function (cfg, oids) {
   return new Promise((resolve, reject) => {
     CRMOpportunities.GetByIds(cfg, oids, (err, opps) => {
       if (err) {
@@ -168,7 +168,7 @@ CRMOpportunities.GetByIdsAsync = function(cfg, oids) {
  * Get opportunities by an array of ids
  */
 CRMOpportunities.GetByAccountIds = function (cfg, aids, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   if (aids && aids.length > 0) {
     var finalStr = "(";
     for (var k = 0; k < aids.length; k++) {
@@ -197,7 +197,7 @@ CRMOpportunities.GetByAccountIds = function (cfg, aids, cb) {
  * @param {Object} cfg 
  * @param {Array} aids 
  */
-CRMOpportunities.GetByAccountIdsAsync = function(cfg, aids) {
+CRMOpportunities.GetByAccountIdsAsync = function (cfg, aids) {
   return new Promise((resolve, reject) => {
     CRMOpportunities.GetByAccountIds(cfg, aids, (err, opps) => {
       if (err) {
@@ -213,7 +213,7 @@ CRMOpportunities.GetByAccountIdsAsync = function(cfg, aids) {
  * Get opportunities by an array of ids
  */
 CRMOpportunities.GetByAccountIdsWithDates = function (cfg, aids, startDate, endDate, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   if (aids && aids.length > 0) {
     var finalStr = "(";
     for (var k = 0; k < aids.length; k++) {
@@ -244,7 +244,7 @@ CRMOpportunities.GetByAccountIdsWithDates = function (cfg, aids, startDate, endD
  */
 CRMOpportunities.GetByOwnerIdsWithDates = function (cfg, oids, startDate, endDate, cb) {
   // TODO: end date is not getting applied here, closeDate is not necesarrily accurate to be used as end date
-  cb = cb || function () {};
+  cb = cb || function () { };
   if (oids && oids.length > 0) {
     var finalStr = "(";
     for (var k = 0; k < oids.length; k++) {
@@ -274,15 +274,15 @@ CRMOpportunities.GetByOwnerIdsWithDates = function (cfg, oids, startDate, endDat
 * Get an opportunity by its id
 */
 CRMOpportunities.GetById = function (cfg, guid, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [guid], function (result) {
     cb(result.length === 0
       ? {
         message: "No opportunity found."
       }
       : null, result.length > 0
-      ? new CRMOpportunities(result[0])
-      : null);
+        ? new CRMOpportunities(result[0])
+        : null);
   }, function (err) {
     cb(err);
   });
@@ -307,7 +307,7 @@ CRMOpportunities.GetByIdAsync = function (cfg, guid) {
  * Get the accounts for all these opportunities
  */
 CRMOpportunities.PopulateAccounts = function (cfg, oppslist, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   if (oppslist && oppslist.length > 0) {
     let accountids = [];
     for (var k = 0; k < oppslist.length; k += 1) {
@@ -343,7 +343,7 @@ CRMOpportunities.PopulateAccounts = function (cfg, oppslist, cb) {
  * Get the owners for all these opportunities
  */
 CRMOpportunities.PopulateOwners = function (cfg, oppslist, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   if (oppslist && oppslist.length > 0) {
     let accountids = [];
     for (var k = 0; k < oppslist.length; k += 1) {
@@ -419,7 +419,7 @@ CRMOpportunities.setApprovalStatusOnIdAsync = function (cfg, isApproved, id) {
  * @param {*} cb
  */
 CRMOpportunities.GetList = function (cfg, oppIds, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE id IN (${oppIds.map(c => '?').join(', ')})`, oppIds, function (result) {
     if (result && result.length > 0) {
       var res = [];
@@ -456,7 +456,7 @@ CRMOpportunities.GetListAsync = function (cfg, oppIds) {
 * Create an opportunity
 */
 CRMOpportunities.Create = function (cfg, data, extraFields, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   const rowDict = [
     {
       name: "Id",
@@ -487,7 +487,7 @@ CRMOpportunities.Create = function (cfg, data, extraFields, cb) {
       row_name: "Name"
     }
   ];
-  const {query, params} = utils.createInsertOrUpdateStatementGivenData(cfg.db.db, 'crm_opportunities', data, rowDict, extraFields, 'Id');
+  const { query, params } = utils.createInsertOrUpdateStatementGivenData(cfg.db.db, 'crm_opportunities', data, rowDict, extraFields, 'Id');
 
   dbcmd.cmd(cfg.pool, query, params, function (result) {
     cb();
@@ -507,6 +507,48 @@ CRMOpportunities.CreateAsync = function (cfg, data, extraFields) {
         reject(err);
       } else {
         resolve();
+      }
+    });
+  });
+};
+
+/**
+ * Get the dollar amount for the list of opportunities
+ */
+CRMOpportunities.GetDollarValueForOpIds = function (cfg, idArr, cb) {
+  if (!idArr || idArr.length == 0) {
+    cb(null, 0);
+  } else {
+    var finalStr = "(";
+    for (var k = 0; k < idArr.length; k++) {
+      if (k > 0) {
+        finalStr += ", ";
+      }
+      finalStr += "'" + idArr[k] + "'";
+    }
+    finalStr += ")";
+    dbcmd.cmd(cfg.pool, 'SELECT SUM(Amount) AS TotalAmount FROM ' + cfg.db.db + '.' + tablename + ' WHERE id IN ' + finalStr, function (result) {
+      if (result && result.length == 1) {
+        cb(null, result[0].TotalAmount);
+      } else {
+        cb(null, 0);
+      }
+    }, function (err) {
+      cb(err);
+    });
+  }
+};
+
+/**
+ * Get the dollar amount for the list of opportunities (ASYNC)
+ */
+CRMOpportunities.GetDollarValueForOpIdsAsync = function (cfg, idArr) {
+  return new Promise((resolve, reject) => {
+    CRMOpportunities.GetDollarValueForOpIds(cfg, idArr, (err, res) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(res);
       }
     });
   });

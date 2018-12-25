@@ -26,6 +26,7 @@ const GetPrimaryReasonsBreakdownForPeriod = async function (cfg, org, mStartdate
   };
 
   let ShortCleanupOnLabels = require('./general').ShortCleanupOnLabels;
+  const CRMOpportunities = require('../crmopportunities');
 
   // Set up a survey value extractor
   let exter = new SurveyValueExtractor();
@@ -51,6 +52,15 @@ const GetPrimaryReasonsBreakdownForPeriod = async function (cfg, org, mStartdate
     r.survey = allSvs.find(s => {
       return s.guid == r.survey_guid;
     })
+  });
+  respondentArr = respondentArr.sort(function (a, b) {
+    if (a.created_at > b.created_at) {
+      return -1;
+    } else if (a.created_at < b.created_at) {
+      return 1;
+    } else {
+      return 0;
+    }
   });
   prospectResps = null;
   employeeResps = null;
@@ -88,7 +98,9 @@ const GetPrimaryReasonsBreakdownForPeriod = async function (cfg, org, mStartdate
               label: "__other__",
               shortLabel: ShortCleanupOnLabels("__other__"),
               count: 0,
-              responses: []
+              dollars: 0,
+              responses: [],
+              ops: []
             };
             reasonsForLoss.push(otherval);
           }
@@ -98,9 +110,12 @@ const GetPrimaryReasonsBreakdownForPeriod = async function (cfg, org, mStartdate
             if (!otherval.responses.find((vl) => {
               return vl == otheroo;
             })) {
+              if (otherval.ops.indexOf(resp.survey.opportunity_id) == -1) {
+                otherval.ops.push(resp.survey.opportunity_id);
+              }
               otherval
                 .responses
-                .push({ id: resp.id, p: resp.isProspect, txt: otheroo.trim() });
+                .push({ id: resp.id, p: resp.isProspect, txt: otheroo.trim(), sv: resp.survey.guid });
             }
           }
         } else {
@@ -114,9 +129,14 @@ const GetPrimaryReasonsBreakdownForPeriod = async function (cfg, org, mStartdate
               existingEntry = {
                 label: val,
                 shortLabel: ShortCleanupOnLabels(val),
-                count: 1
+                count: 1,
+                dollars: 0,
+                ops: []
               };
               reasonsForLoss.push(existingEntry);
+            }
+            if (existingEntry.ops.indexOf(resp.survey.opportunity_id) == -1) {
+              existingEntry.ops.push(resp.survey.opportunity_id);
             }
             existingEntry.count++;
           } else {
@@ -159,6 +179,7 @@ const GetPrimaryReasonsBreakdownForPeriod = async function (cfg, org, mStartdate
   resultObject.internalReasons = resultObject.internalReasons.sort(reasonSortFn);
   resultObject.aggregated = resultObject.aggregated.sort(reasonSortFn);
 
+  // Compute the proportions
   var addProportionsToList = function (l) {
     var total = l.reduce((accum, val) => {
       return accum + val.count;
@@ -173,6 +194,16 @@ const GetPrimaryReasonsBreakdownForPeriod = async function (cfg, org, mStartdate
   addProportionsToList(resultObject.prospectReasons);
   addProportionsToList(resultObject.internalReasons);
   addProportionsToList(resultObject.aggregated);
+
+  // Compute the dollar amounts for each reason
+  var computeAmountsForReasons = async function (l) {
+    for (let i = 0; i < l.length; i++) {
+      l[i].dollars = await CRMOpportunities.GetDollarValueForOpIdsAsync(cfg, l[i].ops);
+    }
+  };
+  await computeAmountsForReasons(resultObject.prospectReasons);
+  await computeAmountsForReasons(resultObject.internalReasons);
+  await computeAmountsForReasons(resultObject.aggregated);
 
   // Spit out final object
   return resultObject;

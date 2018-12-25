@@ -83,7 +83,7 @@ Survey.prototype.getQuestionByName = function (name) {
 /**
  * Get all the respondents for this survey (ASYNC)
  */
-Survey.prototype.getRespondentsAsync = async function(cfg) {
+Survey.prototype.getRespondentsAsync = async function (cfg) {
     return await Respondent.GetBySurveyAsync(cfg, this.guid);
 };
 
