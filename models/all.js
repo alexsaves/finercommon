@@ -27,7 +27,7 @@ var All = {
     BuyX: require('../models/buyx'),
     Daemon: require('../models/daemon'),
     Charts: require('../models/charts'),
-    EmailChart: require('../models/emailchart'),
+    EmailChart: require('../models/emailchart'),    
     // Clear out all the data. Foreign cascade should take care of the rest
     DeleteAllAsync: async function (cfg, logger) {
         logger("Deleting all...");

@@ -96,10 +96,25 @@ OrgReportCache.GetReportsForOrgAndTypeAsync = function (cfg, orgid, reptype) {
  */
 OrgReportCache.DeleteAll = function (cfg, cb) {
   cb = cb || function () { };
-  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id != NULL', function () {
+  dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id > 0', function () {
     cb();
   }, function (err) {
     cb(err);
+  });
+};
+
+/**
+ * Delete all (ASYNC)
+ */
+OrgReportCache.DeleteAllAsync = function (cfg) {
+  return new Promise((resolve, reject) => {
+    OrgReportCache.DeleteAll(cfg, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
   });
 };
 
