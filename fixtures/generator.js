@@ -86,6 +86,10 @@ const GenerateDataForAccount = async function (cfg, email, days, oppsperday, res
   finercommon = require('../index.js');
   models = finercommon.models;
   logger("\nLocating account (" + email + ")...");
+  
+  // Delete the report cache
+  await models.OrgReportCache.DeleteAllAsync(cfg);
+  
   const account = await models.Account.GetByEmailAsync(cfg, email);
   if (!account) {
     throw new Error("Account not found!");

@@ -63,6 +63,21 @@ OrganizationAssociations.GetAllByEmail = function (cfg, email, cb) {
 };
 
 /**
+* Get all associations by email (ASYNC)
+*/
+OrganizationAssociations.GetAllByEmailAsync = function (cfg, email) {
+  return new Promise((resolve, reject) => {
+    OrganizationAssociations.GetAllByEmail(cfg, email, (err, assocs) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(assocs);
+      }
+    });
+  });
+};
+
+/**
  * Remove an association by user and org
  */
 OrganizationAssociations.DeleteForAccountAndOrganization = function (cfg, actid, orgid, cb) {

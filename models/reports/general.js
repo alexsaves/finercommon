@@ -38,6 +38,31 @@ var ShortCleanupOnLabels = function (str) {
 };
 
 /**
+ * Provide a simple codified reason for loss
+ * @param {String} str 
+ */
+var CodifyReasonForLoss = function(str) {
+  let tmstr = str.toLowerCase().trim();
+  let code = "unknown";
+  if (tmstr.indexOf('price') === 0) {
+    code = "price";
+  } else if (tmstr.indexOf('external') > -1) {
+    code = "external";
+  } else if (tmstr.indexOf('business needs') > -1) {
+    code = "needs";
+  } else if (tmstr.indexOf('__other__') > -1) {
+    code = "other";
+  } else if (tmstr.indexOf('customer service') > -1) {
+    code = "service";
+  } else if (tmstr.indexOf('features') > -1) {
+    code = "features";
+  } else if (tmstr.indexOf('delivery') > -1) {
+    code = "delivery";
+  }
+  return code;
+};
+
+/**
  * The general report class (ASYNC)
  * @param {*} cfg
  * @param {*} orgid
@@ -205,6 +230,12 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     } else {
       return 0;
     }
+  });
+
+  // Codify the reasons
+  resultObject.reasonsForLoss.forEach(r => {
+    // Make a codifiable reason for the loss based on strings
+    r.code = CodifyReasonForLoss(r.label);
   });
 
   // First, get info about the opportunities and approvals referenced by these
@@ -1505,6 +1536,7 @@ module.exports = {
 
   // Misx
   ShortCleanupOnLabels,
+  CodifyReasonForLoss,
 
   // Charts
   PrimaryReasonsForLossChartAsync,

@@ -20,15 +20,15 @@ var OrganizationInvitation = function (details) {
 * Get an invite by its uid
 */
 OrganizationInvitation.GetByUID = function (cfg, uid, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid = ?', [uid], function (result) {
     cb(result.length === 0
       ? {
         message: "No org invites found."
       }
       : null, result.length > 0
-      ? new OrganizationInvitation(result[0])
-      : null);
+        ? new OrganizationInvitation(result[0])
+        : null);
   }, function (err) {
     cb(err);
   });
@@ -38,7 +38,7 @@ OrganizationInvitation.GetByUID = function (cfg, uid, cb) {
 * Is there an invite for an organization and a specific email?
 */
 OrganizationInvitation.GetForEmailAndOrg = function (cfg, email, orgid, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email = ? AND organization_id = ? LIMIT 1', [
     email, orgid
   ], function (result) {
@@ -56,7 +56,7 @@ OrganizationInvitation.GetForEmailAndOrg = function (cfg, email, orgid, cb) {
  * Add org information to the invite list
  */
 OrganizationInvitation.PopulateOrgInformation = function (cfg, inviteList, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   if (!inviteList || inviteList.length == 0) {
     cb(null, inviteList);
   } else {
@@ -82,7 +82,7 @@ OrganizationInvitation.PopulateOrgInformation = function (cfg, inviteList, cb) {
 * Get all invites by email
 */
 OrganizationInvitation.GetAllByEmail = function (cfg, email, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email = ?', [email], function (results) {
     let list = [];
     for (let i = 0; i < results.length; i++) {
@@ -94,11 +94,27 @@ OrganizationInvitation.GetAllByEmail = function (cfg, email, cb) {
   });
 };
 
+
+/**
+* Get all invites by email (ASYNC)
+*/
+OrganizationInvitation.GetAllByEmailAsync = function (cfg, email) {
+  return new Promise((resolve, reject) => {
+    OrganizationInvitation.GetAllByEmail(cfg, email, (err, assocs) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(assocs);
+      }
+    });
+  });
+};
+
 /**
 * Get all invites by organization id
 */
 OrganizationInvitation.GetAllByOrg = function (cfg, orgid, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE organization_id = ?', [orgid], function (results) {
     let list = [];
     for (let i = 0; i < results.length; i++) {
@@ -114,7 +130,7 @@ OrganizationInvitation.GetAllByOrg = function (cfg, orgid, cb) {
  * Convert an array of UIDS to a list of invites
  */
 OrganizationInvitation.GetInvitesByUIDs = function (cfg, uids, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   var formattedUIDS = uids.map(function (el) {
     return "'" + el + "'";
   });
@@ -133,7 +149,7 @@ OrganizationInvitation.GetInvitesByUIDs = function (cfg, uids, cb) {
  * Delete a list of UIDs
  */
 OrganizationInvitation.DeleteInvitesByUIDs = function (cfg, uids, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   var formattedUIDS = uids.map(function (el) {
     return "'" + el + "'";
   });
@@ -148,7 +164,7 @@ OrganizationInvitation.DeleteInvitesByUIDs = function (cfg, uids, cb) {
  * Convert the array of UIDs into accepted invitations
  */
 OrganizationInvitation.ActivateInvitationsByUID = function (cfg, defaultFrom, emailServer, emailPort, emailKey, emailSecret, uids, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   OrganizationInvitation.GetInvitesByUIDs(cfg, uids, (err, list) => {
     if (err) {
       cb(err);
@@ -182,7 +198,7 @@ OrganizationInvitation.ActivateInvitationsByUID = function (cfg, defaultFrom, em
  * Convert the array of UIDs into declined invitations
  */
 OrganizationInvitation.DeclineInvitationsByUID = function (cfg, defaultFrom, emailServer, emailPort, emailKey, emailSecret, uids, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   OrganizationInvitation.GetInvitesByUIDs(cfg, uids, (err, list) => {
     if (err) {
       cb(err);
@@ -216,7 +232,7 @@ OrganizationInvitation.DeclineInvitationsByUID = function (cfg, defaultFrom, ema
  * Convert an invitation into an accepted invitation
  */
 OrganizationInvitation.prototype.AcceptInvite = function (cfg, defaultFrom, emailServer, emailPort, emailKey, emailSecret, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   Account.GetByEmail(cfg, this.email, (err, act) => {
     if (err) {
       cb(err);
@@ -267,7 +283,7 @@ OrganizationInvitation.prototype.AcceptInvite = function (cfg, defaultFrom, emai
  * Decline an invitation
  */
 OrganizationInvitation.prototype.DeclineInvite = function (cfg, defaultFrom, emailServer, emailPort, emailKey, emailSecret, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   Account.GetById(cfg, this.invited_by_account_id, (err, iact) => {
     if (err) {
       cb(err);
@@ -307,7 +323,7 @@ OrganizationInvitation.prototype.DeclineInvite = function (cfg, defaultFrom, ema
  * Delete all invitations
  */
 OrganizationInvitation.DeleteAll = function (cfg, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid != NULL', function () {
     cb();
   }, function (err) {
@@ -334,7 +350,7 @@ OrganizationInvitation.DeleteAllAsync = function (cfg) {
  * Delete an invitation
  */
 OrganizationInvitation.prototype.Delete = function (cfg, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE uid = ?', this.uid, function (results) {
     cb(null);
   }, function (err) {
@@ -346,10 +362,10 @@ OrganizationInvitation.prototype.Delete = function (cfg, cb) {
  * Save any changes to the DB row
  */
 OrganizationInvitation.prototype.commit = function (cfg, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   var excludes = [
-      'uid', 'created_at', 'org'
-    ],
+    'uid', 'created_at', 'org'
+  ],
     valKeys = Object.keys(this),
     query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET ',
     params = [],
@@ -379,7 +395,7 @@ OrganizationInvitation.prototype.commit = function (cfg, cb) {
 * Create an invitation
 */
 OrganizationInvitation.Create = function (cfg, details, cb) {
-  cb = cb || function () {};
+  cb = cb || function () { };
   details = details || {};
   var _Defaults = {
     uid: uuidV4().toString(),

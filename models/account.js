@@ -107,10 +107,10 @@ Account.prototype.sendNewAccountAlert = function (cfg, cb) {
  * Save any changes to the DB row
  */
 Account.prototype.commit = function (cfg, cb) {
-    cb = cb || function () {};
+    cb = cb || function () { };
     var excludes = [
-            'id', 'created_at'
-        ],
+        'id', 'created_at'
+    ],
         valKeys = Object.keys(this),
         query = 'UPDATE ' + cfg.db.db + '.' + tablename + ' SET ',
         params = [],
@@ -149,7 +149,7 @@ Account.prototype.commit = function (cfg, cb) {
 /**
  * Commit to db
  */
-Account.prototype.commitAsync = function(cfg) {
+Account.prototype.commitAsync = function (cfg) {
     return new Promise((resolve, reject) => {
         this.commit(cfg, (err, act) => {
             if (err) {
@@ -217,7 +217,7 @@ Account.prototype.getOrganizations = function (cfg, cb) {
 /**
  * Get a list of the organizations for this user (ASYNC)
  */
-Account.prototype.getOrganizationsAsync = function(cfg) {
+Account.prototype.getOrganizationsAsync = function (cfg) {
     return new Promise((resolve, reject) => {
         this.getOrganizations(cfg, (err, orgs) => {
             if (err) {
@@ -243,11 +243,27 @@ Account.prototype.getIntegrations = function (cfg, cb) {
         });
 };
 
+
+/**
+* Get the complete list of eligible integrations for this user (ASYNC)
+*/
+Account.prototype.getIntegrationsAsync = function (cfg) {
+    return new Promise((resolve, reject) => {
+        this.getIntegrations(cfg, (err, intrs) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(intrs);
+            }
+        });
+    });
+};
+
 /**
  * Get an account by its email and password
  */
 Account.GetByEmailAndPassword = function (cfg, e, p, cb) {
-    cb = cb || function () {};
+    cb = cb || function () { };
     p = md5(p || '');
 
     dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email = ? AND pw_md5 = ?', [
@@ -268,7 +284,7 @@ Account.GetByEmailAndPassword = function (cfg, e, p, cb) {
  * @param {*} cb
  */
 Account.GetAccountByFbid = (cfg, fbId, cb) => {
-    cb = cb || function () {};
+    cb = cb || function () { };
 
     dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE fbid = ? LIMIT 1', [fbId], function (result) {
         cb(null, result.length > 0
@@ -283,14 +299,14 @@ Account.GetAccountByFbid = (cfg, fbId, cb) => {
  * Either return the account or create one if one does not exist
  */
 Account.FindOrCreate = (cfg, opts) => {
-    if (opts.fbId) {}
+    if (opts.fbId) { }
 }
 
 /**
  * Get an account by its email
  */
 Account.GetByEmail = function (cfg, e, cb) {
-    cb = cb || function () {};
+    cb = cb || function () { };
 
     dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE email = ? LIMIT 1', [e], function (result) {
         cb(null, result.length > 0
@@ -322,7 +338,7 @@ Account.GetByEmailAsync = function (cfg, e) {
  * Get an account by its id
  */
 Account.GetById = function (cfg, id, cb) {
-    cb = cb || function () {};
+    cb = cb || function () { };
     dbcmd.cmd(cfg.pool, 'SELECT * FROM ' + cfg.db.db + '.' + tablename + ' WHERE id = ?', [id], function (result) {
         cb(null, result.length > 0
             ? new Account(result[0])
@@ -353,7 +369,7 @@ Account.GetByIdAsync = function (cfg, id) {
  * Delete all
  */
 Account.DeleteAll = function (cfg, cb) {
-    cb = cb || function () {};
+    cb = cb || function () { };
     dbcmd.cmd(cfg.pool, 'DELETE FROM ' + cfg.db.db + '.' + tablename + ' WHERE id > 0', function () {
         cb();
     }, function (err) {
@@ -380,7 +396,7 @@ Account.DeleteAllAsync = function (cfg) {
  * Create a user
  */
 Account.Create = function (cfg, details, cb) {
-    cb = cb || function () {};
+    cb = cb || function () { };
     details = details || {};
     var _Defaults = {
         name: "",

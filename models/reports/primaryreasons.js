@@ -5,6 +5,7 @@ const survey = require('../survey');
 const respondent = require('../respondent');
 const SurveyValueExtractor = require('../surveyvalueextractor');
 const OrgReportCache = require('../orgreportcache');
+const CodifyReasonForLoss = require('./general').CodifyReasonForLoss;
 
 TimeAgo.locale(TimeAgoEn);
 // Create relative date/time formatter.
@@ -205,6 +206,16 @@ const GetPrimaryReasonsBreakdownForPeriod = async function (cfg, org, mStartdate
   await computeAmountsForReasons(resultObject.internalReasons);
   await computeAmountsForReasons(resultObject.aggregated);
 
+  // Compute the codes for each reason
+  var codifyReasons = async function (l) {
+    for (let i = 0; i < l.length; i++) {
+      l[i].code = CodifyReasonForLoss(l[i].label);
+    }
+  };
+  codifyReasons(resultObject.prospectReasons);
+  codifyReasons(resultObject.internalReasons);
+  codifyReasons(resultObject.aggregated);
+
   // Spit out final object
   return resultObject;
 };
@@ -325,7 +336,7 @@ const PrimaryReasonsOverviewAsync = async function (cfg, orgid, startdate, endda
     if (!legend.find((l) => {
       return l.label == itm.label;
     })) {
-      legend.push({ shortLabel: itm.shortLabel, label: itm.label });
+      legend.push({ shortLabel: itm.shortLabel, label: itm.label, code: CodifyReasonForLoss(itm.label) });
     }
   };
   previous.forEach(p => {
@@ -337,7 +348,9 @@ const PrimaryReasonsOverviewAsync = async function (cfg, orgid, startdate, endda
   // Fix the legend to have OTHER at bottom
   let otherLabel = legend.find((l) => { return l.label == "__other__"; });
   legend.splice(legend.indexOf(otherLabel), 1);
-  legend.push(otherLabel);
+  if (otherLabel != null) {
+    legend.push(otherLabel);
+  }
 
   // Kill the first previous if its empty
   if (previous[0].report.aggregated.length == 0) {
