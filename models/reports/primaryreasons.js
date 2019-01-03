@@ -197,6 +197,10 @@ const TallyAnswersFromRespondent = function (resp, tallyBlock) {
         case 3:
           // Timeliness of delivery 
           ua = ans.desiredTimeline;
+          if (ua != null) {
+            cntr = tb.answers.choices.find(c => c.idx === ua.response);
+            cntr.count++;
+          }
           break;
         case 4:
           // Service 
@@ -218,7 +222,6 @@ const TallyAnswersFromRespondent = function (resp, tallyBlock) {
           }
           break;
       }
-      console.log(tb);
     });
   }
 };
