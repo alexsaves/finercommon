@@ -12,6 +12,221 @@ TimeAgo.locale(TimeAgoEn);
 const timeAgo = new TimeAgo('en-US');
 
 /**
+ * Populate a blank object for answers to tally for a particular response
+ */
+const PopulateAnswersInfoForResponse = function (resp, questionDef, surveyDef) {
+  const res = {};
+  let defIdx = questionDef.choices.indexOf(resp);
+  var pg, q;
+  switch (defIdx) {
+    case -1:
+      // Other
+      // No-op
+      break;
+    case 0:
+      // Price - pricing
+      pg = surveyDef.find(pg => pg.name == "pricing");
+      q = pg.elements.find(q => q.name == "pricingModel");
+      res.choices = [];
+      q.choices.forEach((c, idx) => {
+        res.choices.push({
+          label: c,
+          idx: idx,
+          count: 0,
+          responses: []
+        });
+      });
+      res.choices.push({
+        label: "Other",
+        idx: 9999,
+        count: 0,
+        others: []
+      });
+      break;
+    case 1:
+      // Features - missingFeaturePage
+      pg = surveyDef.find(pg => pg.name == "missingFeaturePage");
+      q = pg.elements.find(q => q.name == "missingFeature");
+      res.choices = [];
+      // This one you do NOT want to prepopulate because they are all variables
+      /*q.choices.forEach((c, idx) => {
+        res.choices.push({
+          label: c,
+          idx: idx,
+          count: 0
+        });
+      });*/
+      res.choices.push({
+        label: "Other",
+        idx: 9999,
+        count: 0,
+        others: []
+      });
+      break;
+    case 2:
+      // Not meet needs - valueReasons
+      //pg = surveyDef.find(pg => pg.name == "valueReasons");
+      // Pure open end
+      res.reasons = [];
+      break;
+    case 3:
+      // Timeliness of delivery - desiredTimeline
+      pg = surveyDef.find(pg => pg.name == "desiredTimeline");
+      q = pg.elements.find(q => q.name == "desiredTimeline");
+      res.choices = [];
+      q.choices.forEach((c, idx) => {
+        res.choices.push({
+          label: c,
+          idx: idx,
+          count: 0
+        });
+      });
+      res.choices.push({
+        label: "Other",
+        idx: 9999,
+        count: 0,
+        others: []
+      });
+      break;
+    case 4:
+      // Service - serviceReasons
+      //pg = surveyDef.find(pg => pg.name == "serviceReasons");
+      // Pure open end
+      res.reasons = [];
+      break;
+    case 5:
+      // Ext Factors - externalReasonsWhyNot      
+      pg = surveyDef.find(pg => pg.name == "externalReasonsWhyNot");
+      q = pg.elements.find(q => q.name == "externalReasonsWhyNot");
+      res.choices = [];
+      q.choices.forEach((c, idx) => {
+        res.choices.push({
+          label: c,
+          idx: idx,
+          count: 0
+        });
+      });
+      res.choices.push({
+        label: "Other",
+        idx: 9999,
+        count: 0,
+        others: []
+      });
+      break;
+  }
+  return res;
+};
+
+/**
+ * Integrate a users ACTUAL responses with the list of tallys, etc
+ */
+const TallyAnswersFromRespondent = function (resp, tallyBlock) {
+  var ans = resp.answers;
+  let whynot = ans.whyNotSelected;
+  if (whynot && whynot.responses.length > 0) {
+    whynot.responses.forEach(w => {
+      let tb = tallyBlock.find(tb => tb.idx === w);
+      var ua, cntr;
+      switch (w) {
+        case 9999:
+          // Other
+          // No-op
+          break;
+        case 0:
+          // Price
+          ua = ans.pricingModel;
+          if (ua != null) {
+            cntr = tb.answers.choices.find(c => c.idx === ua);
+            cntr.count++;
+            if (ua == 0) {
+              // Flat fee - flatFeeAmountDetails
+              if (typeof ans.flatFeeAmountDetails != "undefined" && ans.flatFeeAmountDetails != null && ans.flatFeeAmountDetails.toString().trim().length > 0) {
+                cntr.responses.push({ id: resp.id, p: resp.isProspect, txt: ans.flatFeeAmountDetails.toString().trim(), sv: resp.survey.guid });
+              }
+            } else if (ua == 1) {
+              // annual subscr - annualSubscriptionDetails
+              if (typeof ans.annualSubscriptionDetails != "undefined" && ans.annualSubscriptionDetails != null && ans.annualSubscriptionDetails.toString().trim().length > 0) {
+                cntr.responses.push({ id: resp.id, p: resp.isProspect, txt: ans.annualSubscriptionDetails.toString().trim(), sv: resp.survey.guid });
+              }
+            } else if (ua == 2) {
+              // % rate - percentageRateDetails
+              if (typeof ans.percentageRateDetails != "undefined" && ans.percentageRateDetails != null && ans.percentageRateDetails.toString().trim().length > 0) {
+                cntr.responses.push({ id: resp.id, p: resp.isProspect, txt: ans.percentageRateDetails.toString().trim(), sv: resp.survey.guid });
+              }
+            } else if (ua == 3) {
+              // price per volume - pricePerVolumeDetails
+              if (typeof ans.pricePerVolumeDetails != "undefined" && ans.pricePerVolumeDetails != null && ans.pricePerVolumeDetails.toString().trim().length > 0) {
+                cntr.responses.push({ id: resp.id, p: resp.isProspect, txt: ans.pricePerVolumeDetails.toString().trim(), sv: resp.survey.guid });
+              }
+            }
+          }
+          break;
+        case 1:
+          // Features
+          ua = ans.missingFeature;
+          if (ua != null) {
+            var featureName = "feature" + ua.response;
+            if (ua.response == 9999) {
+              cntr = tb.answers.choices.find(c => c.idx === ua.response);
+            } else {
+              cntr = tb.answers.choices.find(c => c.label === resp.variables[featureName]);
+            }
+            if (!cntr) {
+              // we need to add it!
+              cntr = {
+                label: resp.variables[featureName],
+                idx: ua.response - 1,
+                count: 0
+              };
+              tb.answers.choices.push(cntr);
+            }
+            cntr.count++;
+            if (ua.response == 9999 && ua.other != null && ua.other.toString().trim().length > 0) {
+              // Tally the other
+              cntr.others.push({ id: resp.id, p: resp.isProspect, txt: ua.other.toString().trim(), sv: resp.survey.guid });
+            }
+          }
+          break;
+        case 2:
+          // Not meet needs
+          ua = ans.valueReasons;
+          if (ua != null && ua.toString().trim().length > 0) {
+            tb.answers.reasons.push({ id: resp.id, p: resp.isProspect, txt: ua.toString().trim(), sv: resp.survey.guid });
+          }
+          break;
+        case 3:
+          // Timeliness of delivery 
+          ua = ans.desiredTimeline;
+          if (ua != null) {
+            cntr = tb.answers.choices.find(c => c.idx === ua.response);
+            cntr.count++;
+          }
+          break;
+        case 4:
+          // Service 
+          ua = ans.serviceReasons;
+          if (ua != null && ua.toString().trim().length > 0) {
+            tb.answers.reasons.push({ id: resp.id, p: resp.isProspect, txt: ua.toString().trim(), sv: resp.survey.guid });
+          }
+          break;
+        case 5:
+          // Ext Factors
+          ua = ans.externalReasonsWhyNot;
+          if (ua != null) {
+            cntr = tb.answers.choices.find(c => c.idx === ua.response);
+            cntr.count++;
+            if (ua.response == 9999 && ua.other != null && ua.other.toString().trim().length > 0) {
+              // Tally the other
+              cntr.others.push({ id: resp.id, p: resp.isProspect, txt: ua.other.toString().trim(), sv: resp.survey.guid });
+            }
+          }
+          break;
+      }
+    });
+  }
+};
+
+/**
  * Get the breakdown of primary reasons for the time period
  * @param {*} cfg 
  * @param {Organization} org 
@@ -99,7 +314,9 @@ const GetPrimaryReasonsBreakdownForPeriod = async function (cfg, org, mStartdate
               label: "__other__",
               shortLabel: ShortCleanupOnLabels("__other__"),
               count: 0,
+              idx: 9999,
               dollars: 0,
+              answers: PopulateAnswersInfoForResponse("__other__", questionDef, surveymodel.pages),
               responses: [],
               ops: []
             };
@@ -123,6 +340,7 @@ const GetPrimaryReasonsBreakdownForPeriod = async function (cfg, org, mStartdate
           if (choices.length > resps[j]) {
             // Tally it up
             let val = choices[resps[j]];
+            let validx = resps[j];
             let existingEntry = reasonsForLoss.find((vl) => {
               return vl.label == val;
             });
@@ -131,7 +349,9 @@ const GetPrimaryReasonsBreakdownForPeriod = async function (cfg, org, mStartdate
                 label: val,
                 shortLabel: ShortCleanupOnLabels(val),
                 count: 1,
+                idx: validx,
                 dollars: 0,
+                answers: PopulateAnswersInfoForResponse(val, questionDef, surveymodel.pages),
                 ops: []
               };
               reasonsForLoss.push(existingEntry);
@@ -146,6 +366,9 @@ const GetPrimaryReasonsBreakdownForPeriod = async function (cfg, org, mStartdate
           }
         }
       }
+
+      // Now integrate the respondent into the tally counts, etc
+      TallyAnswersFromRespondent(resp, reasonsForLoss);
     }
   }
 
