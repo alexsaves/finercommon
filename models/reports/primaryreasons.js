@@ -81,15 +81,9 @@ const PopulateAnswersInfoForResponse = function (resp, questionDef, surveyDef) {
           count: 0
         });
       });
-      res.choices.push({
-        label: "Other",
-        idx: 9999,
-        count: 0,
-        others: []
-      });
       break;
     case 4:
-      // Service - serviceReasons
+      // Customer Service - serviceReasons
       //pg = surveyDef.find(pg => pg.name == "serviceReasons");
       // Pure open end
       res.reasons = [];
@@ -165,7 +159,7 @@ const TallyAnswersFromRespondent = function (resp, tallyBlock) {
           // Features
           ua = ans.missingFeature;
           if (ua != null) {
-            var featureName = "feature" + ua.response;
+            var featureName = "feature" + (ua.response + 1);
             if (ua.response == 9999) {
               cntr = tb.answers.choices.find(c => c.idx === ua.response);
             } else {
@@ -175,7 +169,7 @@ const TallyAnswersFromRespondent = function (resp, tallyBlock) {
               // we need to add it!
               cntr = {
                 label: resp.variables[featureName],
-                idx: ua.response - 1,
+                idx: ua.response,
                 count: 0
               };
               tb.answers.choices.push(cntr);
@@ -203,7 +197,7 @@ const TallyAnswersFromRespondent = function (resp, tallyBlock) {
           }
           break;
         case 4:
-          // Service 
+          // Customer Service 
           ua = ans.serviceReasons;
           if (ua != null && ua.toString().trim().length > 0) {
             tb.answers.reasons.push({ id: resp.id, p: resp.isProspect, txt: ua.toString().trim(), sv: resp.survey.guid });
@@ -348,7 +342,7 @@ const GetPrimaryReasonsBreakdownForPeriod = async function (cfg, org, mStartdate
               existingEntry = {
                 label: val,
                 shortLabel: ShortCleanupOnLabels(val),
-                count: 1,
+                count: 0,
                 idx: validx,
                 dollars: 0,
                 answers: PopulateAnswersInfoForResponse(val, questionDef, surveymodel.pages),
@@ -383,6 +377,50 @@ const GetPrimaryReasonsBreakdownForPeriod = async function (cfg, org, mStartdate
     }
   };
 
+  /*
+   * Merge the responses from list B into A
+   * @param {Array} A 
+   * @param {Array} B 
+   */
+  const mergeListBIntoA = function (A, B) {
+    // We have to scan both lists
+    A.forEach((a) => {
+      let bItem = B.find(b => b.label == a.label);
+      if (bItem) {
+        a.count += bItem.count;
+        if (a.others || bItem.others) {
+          a.others = a.others || [];
+          bItem.others = bItem.others || [];
+          a.others = a.others.concat(bItem.others.slice(0));
+        }
+        if (a.responses || bItem.responses) {
+          a.responses = a.responses || [];
+          bItem.responses = bItem.responses || [];
+          a.responses = a.responses.concat(bItem.responses.slice(0));
+        }
+      }
+    });
+  };
+
+  /**
+   * Merge opportunities list
+   * @param {Array} A 
+   * @param {Array} B 
+   */
+  const mergeOpsList = function (A, B) {
+    A.ops = A.ops || [];
+    B.ops = B.ops || [];
+    var mapA = new Map();
+    A.ops.forEach(a => {
+      mapA.set(a, true);
+    });
+    B.ops.forEach(b => {
+      if (!mapA.has(b)) {
+        A.ops.push(b);
+      }
+    });
+  };
+
   // Merge them into a separate aggregated list
   resultObject.aggregated = JSON.parse(JSON.stringify(resultObject.prospectReasons));
   resultObject.aggregated.forEach(r => {
@@ -391,9 +429,15 @@ const GetPrimaryReasonsBreakdownForPeriod = async function (cfg, org, mStartdate
     });
     if (internalVer) {
       r.count += internalVer.count;
-      if (r.label == "__other__") {
-        r.responses = r.responses || [];
-        r.responses = r.responses.concat(internalVer.responses || []);
+      mergeOpsList(r, internalVer);
+      if (r.answers || internalVer.answers) {
+        r.answers = r.answers || [];
+        internalVer.answers = internalVer.answers || [];
+
+        // Loop in both directions
+        if (r.answers.choices || internalVer.answers.choices) {
+          mergeListBIntoA(r.answers.choices, internalVer.answers.choices);
+        }
       }
     }
   });
