@@ -1,5 +1,4 @@
 const dbcmd = require('../utils/dbcommand');
-const md5 = require('md5');
 const extend = require('extend');
 const tablename = 'org_report_cache';
 const zlib = require('zlib');
@@ -131,7 +130,7 @@ OrgReportCache.Create = function (cfg, details, cb) {
   extend(_Defaults, details);
 
   if (_Defaults.report) {
-    if (!_Defaults.report instanceof Buffer) {
+    if (!(_Defaults.report instanceof Buffer)) {
       _Defaults.report = Buffer.from(_Defaults.report);
     }
     // Compress it
@@ -211,7 +210,7 @@ OrgReportCache.prototype.commit = function (cfg, cb) {
   query += ' WHERE id = ?';
   params.push(this.id);
 
-  dbcmd.cmd(cfg.pool, query, params, function (result) {
+  dbcmd.cmd(cfg.pool, query, params, function () {
     cb(null, this);
   }, function (err) {
     cb(err);
