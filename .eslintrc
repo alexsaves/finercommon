@@ -1,0 +1,30 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended"
+  ],
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 7,
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "jquery": true
+  },
+  "settings": {
+    "react": {
+      "pragma": "React",
+      "version": "16.7.0"
+    }
+  },
+  "rules": {
+    "react/prop-types": 0,
+    "react/no-find-dom-node": 0,
+    "no-console": 0
+  }
+}

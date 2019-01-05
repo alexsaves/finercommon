@@ -90,9 +90,10 @@ const GenerateDataForAccount = async function (cfg, email, days, oppsperday, res
   // Delete the report cache
   await models.OrgReportCache.DeleteAllAsync(cfg);
   
-  const account = await models.Account.GetByEmailAsync(cfg, email);
+  var account = await models.Account.GetByEmailAsync(cfg, email);
   if (!account) {
-    throw new Error("Account not found!");
+    logger("Account " + email + " not found, creating it...");
+    account = await MakeFakeAccount(cfg, email, "John", "Smith", "RyanCo", moment().subtract(365*3, 'days').toDate(), "fujitsu9", logger);
   }
   logger("Enforcing account is active...");
   account.is_active = 1;
