@@ -132,7 +132,7 @@ OrgReportCache.Create = function (cfg, details, cb) {
 
   if (_Defaults.report) {
     if (!_Defaults.report instanceof Buffer) {
-      _Defaults.report = new Buffer(_Defaults.report);
+      _Defaults.report = Buffer.from(_Defaults.report);
     }
     // Compress it
     _Defaults.report = zlib.deflateRawSync(_Defaults.report);
