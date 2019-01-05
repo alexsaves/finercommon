@@ -133,7 +133,7 @@ ResponseCollection.prototype.commit = function (cfg, cb) {
         }, () => {
             // fail
             cb({message: "Failed to save responses"});
-        }, 10000);
+        }, 1000000);
         for (let k = 0; k < interestingOnes.length; k++) {
             prom.make("_" + k);
         }
