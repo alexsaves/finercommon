@@ -318,7 +318,6 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
             };
             orgVotes.push(otherval);
           }
-          otherval.count++;
           let otheroo = vendorRankings.other;
           if (typeof (otheroo) != "undefined" && otheroo.trim().length > 0) {
             if (!otherval.responses.find((vl) => {
@@ -343,7 +342,6 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
             };
             orgVotes.push(existingEntry);
           }
-          existingEntry.count++;
         }
       }
     });
@@ -362,7 +360,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
     // Now we have a sorted list
     if (orgVotes.length > 0) {
       var winningVendor = orgVotes[0];
-      winningVendor.Amount = !!theOpp ?
+      winningVendor.Amount = theOpp ?
         theOpp.Amount :
         0;
       theOpp.winningVendor = winningVendor;
@@ -377,6 +375,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
         competitorInfo.push(winningVendor);
       } else {
         existingItem.Amount += winningVendor.Amount;
+        existingItem.count += winningVendor.count;
         // Is it "other"?
         if (existingItem.label == "__other__") {
           // Merge the responses
@@ -842,7 +841,7 @@ var RunReportAsync = async function (cfg, orgid, startdate, enddate) {
 
   // Do the same for the title map
   var titleList = [];
-  titleMap.forEach((titleObj, key) => {
+  titleMap.forEach((titleObj) => {
     titleList.push(titleObj);
     titleObj.score /= titleObj.count;
   });
@@ -1149,7 +1148,7 @@ async function TopCompetitionChartAsync(cfg, chrt, report, org_id, chartWidths) 
     competitionReasons.push(compReasons);
   }
   return await chrt.barChartAsync(chartWidths, 500, competitionInfo);
-};
+}
 
 /**
  * Do the top competition reasons chart
