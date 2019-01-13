@@ -10,6 +10,15 @@ const CodifyReasonForLoss = require('./general').CodifyReasonForLoss;
 const Approval = require('../approval');
 
 /**
+ * Respondent Type Filter
+ */
+const RespondentType = {
+  "PROSPECT": 0,
+  "INTERNAL": 1,
+  "ALL": 2
+};
+
+/**
  * Get the breakdown of competition for the time period
  * @param {*} cfg 
  * @param {Organization} org 
@@ -17,11 +26,33 @@ const Approval = require('../approval');
  * @param {Date} mEnddate Inclusive end date (MOMENT)
  */
 const GetCompetitionBreakdownForPeriod = async function (cfg, org, mStartdate, mEnddate) {
+  var resultObject = {
+    startDate: mStartdate.unix(),
+    endDate: mEnddate.unix(),
+    org: org.id,
+    prospectCompetition: await GetCompetitionBreakdownForPeriodForRespType(cfg, org, mStartdate, mEnddate, RespondentType.PROSPECT),
+    internalCompetition: await GetCompetitionBreakdownForPeriodForRespType(cfg, org, mStartdate, mEnddate, RespondentType.INTERNAL),
+    aggregateCompetition: await GetCompetitionBreakdownForPeriodForRespType(cfg, org, mStartdate, mEnddate, RespondentType.ALL)
+  };
+  return resultObject;
+};
+
+/**
+ * Get the breakdown of competition for the time period
+ * @param {*} cfg 
+ * @param {Organization} org 
+ * @param {Date} mStartdate Exclusive start date (MOMENT)
+ * @param {Date} mEnddate Inclusive end date (MOMENT)
+ * @param {resptype} Number Respondent Type
+ */
+const GetCompetitionBreakdownForPeriodForRespType = async function (cfg, org, mStartdate, mEnddate, resptype = 0) {
   // This will hold the final result
   var resultObject = {
     startDate: mStartdate.unix(),
     endDate: mEnddate.unix(),
-    org: org.id
+    org: org.id,
+    respType: resptype,
+    respTypeStr: Object.keys(RespondentType)[resptype]
   };
 
   let ShortCleanupOnLabels = require('./general').ShortCleanupOnLabels;
@@ -34,6 +65,11 @@ const GetCompetitionBreakdownForPeriod = async function (cfg, org, mStartdate, m
   let svs = await survey.GetForOrganizationAndTypeAsync(cfg, org.id, survey.SURVEY_TYPES.PROSPECT);
   let esvs = await survey.GetForOrganizationAndTypeAsync(cfg, org.id, survey.SURVEY_TYPES.EMPLOYEE);
   let allSvs = svs.concat(esvs);
+  if (resptype == RespondentType.PROSPECT) {
+    allSvs = svs.slice(0);
+  } else if (resptype == RespondentType.INTERNAL) {
+    allSvs = esvs.slice(0);
+  }
 
   let prospectResps = await respondent.GetBySurveysAndTimeRangeAsync(cfg, svs.map(sv => sv.guid), mStartdate.toDate(), mEnddate.toDate());
   let employeeResps = await respondent.GetBySurveysAndTimeRangeAsync(cfg, esvs.map(sv => sv.guid), mStartdate.toDate(), mEnddate.toDate());
@@ -47,6 +83,12 @@ const GetCompetitionBreakdownForPeriod = async function (cfg, org, mStartdate, m
   });
 
   let respondentArr = prospectResps.concat(employeeResps);
+  if (resptype == RespondentType.PROSPECT) {
+    respondentArr = prospectResps.slice(0);
+  } else if (resptype == RespondentType.INTERNAL) {
+    respondentArr = employeeResps.slice(0);
+  }
+
   respondentArr.forEach(r => {
     r.survey = allSvs.find(s => {
       return s.guid == r.survey_guid;
@@ -447,10 +489,34 @@ const CompetitorsOverviewAsync = async function (cfg, orgid, startdate, enddate)
       previous.splice(i--, 1);
     }
   }
+
+  // Find all the unique reasons
+  var legend = [];
+  var indexItems = function (itm) {
+    if (!legend.find((l) => {
+      return l.label == itm.label;
+    })) {
+      legend.push({ shortLabel: itm.shortLabel, label: itm.label });
+    }
+  };
+  previous.forEach(p => {
+    p.report.prospectCompetition.losingDealsTo.forEach(indexItems);
+    p.report.internalCompetition.losingDealsTo.forEach(indexItems);
+    p.report.aggregateCompetition.losingDealsTo.forEach(indexItems);
+  });
+
+  // Fix the legend to have OTHER at bottom
+  let otherLabel = legend.find((l) => { return l.label == "__other__"; });
+  legend.splice(legend.indexOf(otherLabel), 1);
+  if (otherLabel != null) {
+    legend.push(otherLabel);
+  }
+
   // Spit out the final object
   return {
     startdate: startdate.getTime(),
     enddate: enddate.getTime(),
+    legend: legend,
     organization_id: orgid,
     data: report,
     previous: previous
