@@ -52,6 +52,7 @@ var All = {
         logger("Deleted org invites.");
     },
     reports: {
+        competitors: require('../models/reports/competitors'),
         general: require('../models/reports/general'),
         openends: require('../models/reports/openends'),
         primaryreasons: require('../models/reports/primaryreasons')

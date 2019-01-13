@@ -19,7 +19,8 @@ var OrgReportCache = function (details) {
  */
 OrgReportCache.REPORT_TYPE = {
   MONTHLY_SUMMARY: 0,
-  MONTHLY_PRIMARYREASONS: 1
+  MONTHLY_PRIMARYREASONS: 1,
+  MONTHLY_COMPETITION: 2
 };
 
 /**

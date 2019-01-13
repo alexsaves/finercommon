@@ -420,19 +420,23 @@ CRMOpportunities.setApprovalStatusOnIdAsync = function (cfg, isApproved, id) {
  */
 CRMOpportunities.GetList = function (cfg, oppIds, cb) {
   cb = cb || function () { };
-  dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE id IN (${oppIds.map(c => '?').join(', ')})`, oppIds, function (result) {
-    if (result && result.length > 0) {
-      var res = [];
-      for (var i = 0; i < result.length; i++) {
-        res.push(new CRMOpportunities(result[i]));
+  if (oppIds.length === 0) {
+    cb(null, []);
+  } else {
+    dbcmd.cmd(cfg.pool, `SELECT * FROM ${cfg.db.db}.${tablename} WHERE id IN (${oppIds.map(c => '?').join(', ')})`, oppIds, function (result) {
+      if (result && result.length > 0) {
+        var res = [];
+        for (var i = 0; i < result.length; i++) {
+          res.push(new CRMOpportunities(result[i]));
+        }
+        cb(null, res);
+      } else {
+        cb();
       }
-      cb(null, res);
-    } else {
-      cb();
-    }
-  }, function (err) {
-    cb(err);
-  });
+    }, function (err) {
+      cb(err);
+    });
+  }
 };
 
 /**
