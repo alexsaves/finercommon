@@ -369,6 +369,19 @@ const GetCompetitionBreakdownForPeriodForRespType = async function (cfg, org, mS
   // Assign it
   resultObject.losingDealsTo = competitorInfo;
 
+  var dollarTotal = competitorInfo.reduce((accum, val) => {
+    return accum + val.Amount;
+  }, 0) + 0.001;
+
+  var countTotal = competitorInfo.reduce((accum, val) => {
+    return accum + val.count;
+  }, 0) + 0.001;
+
+  resultObject.losingDealsTo.forEach((c) => {
+    c.p = c.count / countTotal;
+    c.dp = c.Amount / dollarTotal;
+  });
+
   // Spit out the rerult
   return resultObject;
 };
