@@ -172,43 +172,45 @@ const GetCompetitionBreakdownForPeriodForRespType = async function (cfg, org, mS
       if (vendorRankings && vendorRankings.order && vendorRankings.order.length > 0) {
         let vendorQuestion = exter._locateQuestionObjectForName("vendorRankings", resp.survey_model.pages);
         let winningVendorId = vendorRankings.order[0];
-        if (winningVendorId == 9999) {
-          // OTHER
-          let otherval = orgVotes.find((vl) => {
-            return vl.label === "__other__";
-          });
-          if (otherval == null) {
-            otherval = {
-              label: "__other__",
-              shortLabel: ShortCleanupOnLabels("__other__"),
-              count: 0,
-              responses: []
-            };
-            orgVotes.push(otherval);
-          }
-          let otheroo = vendorRankings.other;
-          if (typeof (otheroo) != "undefined" && otheroo.trim().length > 0) {
-            if (!otherval.responses.find((vl) => {
-              return vl == otheroo;
-            })) {
-              otherval
-                .responses
-                .push({ id: resp.id, p: resp.isProspect, txt: otheroo.trim(), sv: resp.survey.guid });
+        if (winningVendorId > 0) {
+          if (winningVendorId == 9999) {
+            // OTHER
+            let otherval = orgVotes.find((vl) => {
+              return vl.label === "__other__";
+            });
+            if (otherval == null) {
+              otherval = {
+                label: "__other__",
+                shortLabel: ShortCleanupOnLabels("__other__"),
+                count: 0,
+                responses: []
+              };
+              orgVotes.push(otherval);
             }
-          }
-        } else {
-          // REAL Tally it up
-          let val = vendorQuestion.choices[winningVendorId];
-          let existingEntry = orgVotes.find((vl) => {
-            return vl.label == val;
-          });
-          if (!existingEntry) {
-            existingEntry = {
-              label: val,
-              shortLabel: ShortCleanupOnLabels(val),
-              count: 0
-            };
-            orgVotes.push(existingEntry);
+            let otheroo = vendorRankings.other;
+            if (typeof (otheroo) != "undefined" && otheroo.trim().length > 0) {
+              if (!otherval.responses.find((vl) => {
+                return vl == otheroo;
+              })) {
+                otherval
+                  .responses
+                  .push({ id: resp.id, p: resp.isProspect, txt: otheroo.trim(), sv: resp.survey.guid });
+              }
+            }
+          } else {
+            // REAL Tally it up
+            let val = vendorQuestion.choices[winningVendorId];
+            let existingEntry = orgVotes.find((vl) => {
+              return vl.label == val;
+            });
+            if (!existingEntry) {
+              existingEntry = {
+                label: val,
+                shortLabel: ShortCleanupOnLabels(val),
+                count: 0
+              };
+              orgVotes.push(existingEntry);
+            }
           }
         }
       }
